@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0.0-p001",
+  "generated_at": "2026-11-21T21:03:15+05:30",
+  "host": "DESKTOP-LUIL8F6 (Windows 11 Home SL 10.0.26300 x64; non-elevated shell)",
+  "pins": {
+    "rust": {
+      "requested": "1.100.0",
+      "resolved": "1.100.0",
+      "resolved_detail": "rustc 1.100.0 (0ef1bc386 2026-11-09); cargo 1.100.0 (3acc79c0c 2026-11-05); channel date 2026-11-12",
+      "source": "https://static.rust-lang.org/dist/channel-rust-1.100.0.toml via rustup 1.29.3",
+      "integrity": "managed-by:rustup",
+      "installer_note": "rustup-init.exe (x86_64-pc-windows-msvc) SHA256 38027d51d69a5d05493627a0634dbea52d6cd793c8f072d2373d3f4163eec7db, verified live against https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe.sha256 before execution"
+    },
+    "pnpm": {
+      "requested": "12.22.0",
+      "resolved": "12.22.0",
+      "resolved_detail": "12.22.0 (npm publish 2026-11-17T20:01:11.036Z, confirmed via registry time field)",
+      "source": "https://registry.npmjs.org/pnpm/-/pnpm-12.22.0.tgz via corepack",
+      "integrity": "managed-by:corepack",
+      "note": "activated with `corepack prepare pnpm@12.22.0 --activate` (corepack ships with Node 24.22.3)"
+    },
+    "node": {
+      "requested": "newest 24.x LTS (resolved live from https://nodejs.org/download/release/index.json)",
+      "resolved": "24.22.3",
+      "resolved_detail": "v24.22.3, index date 2026-11-10, LTS codename Krypton; observed via `node --version` after install",
+      "source": "https://nodejs.org/download/release/v24.22.3/node-v24.22.3-win-x64.zip",
+      "integrity": "sha256:e612af99f626ab415ea225af6bce5c971feb448cb5cae250bb1c3fa50c5f7d9f",
+      "integrity_source": "https://nodejs.org/download/release/v24.22.3/SHASUMS256.txt (verified with Get-FileHash before extraction)",
+      "install_mode": "user-local zip (non-elevated shell) under %LOCALAPPDATA%\\Programs\\project-one\\node-v24.22.3-win-x64 + User PATH"
+    },
+    "git": {
+      "requested": "latest stable (unpinned)",
+      "resolved": "2.56.1.windows.1",
+      "resolved_detail": "git version 2.56.1.windows.1; winget lists Git.Git 2.56.1",
+      "source": "https://github.com/git-for-windows/git/releases/tag/v2.56.1.windows.1 asset PortableGit-2.56.1-64-bit.7z.exe",
+      "integrity": "sha256:9dd04a608ceb5f6ab32a73709e0ecb159d211da71b697c45ff81f6dd0c6b49c7",
+      "integrity_source": "release-notes body line `PortableGit-2.56.1-64-bit.7z.exe | 9dd04a60…` via GitHub API; verified with Get-FileHash before extraction",
+      "install_mode": "user-local portable (non-elevated shell) under %LOCALAPPDATA%\\Programs\\project-one\\git-portable + User PATH"
+    }
+  },
+  "deferred_to_P002": {
+    "electron": {
+      "requested": "45.4.1 (Chromium 156)",
+      "resolved": "NOT INSTALLED HERE",
+      "note": "pinned in P002, not installed in P001 per prompt; npm registry confirms 45.4.1 published 2026-11-19T02:04:13Z"
+    }
+  },
+  "build_deps_windows": {
+    "windows_sdk": {
+      "status": "present-reused",
+      "resolved": "10.0.26100.0 (HKLM Installed Roots + signtool ProductVersion 10.0.26100.9457)"
+    },
+    "vs_build_tools": {
+      "status": "BLOCKED (not installed)",
+      "reason": "non-elevated shell; VS Build Tools C++ workload requires elevation",
+      "exact_command": "winget install -e --id Microsoft.VisualStudio.2022.BuildTools --silent --override \"--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended\"",
+      "note": "no downgrade performed; C++ link builds stay blocked until an elevated run. No pin version attached — first install takes newest 2022 BuildTools."
+    }
+  },
+  "bootstrap_log": "artifacts/bootstrap-windows.log"
+}
