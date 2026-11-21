@@ -1,0 +1,8 @@
+[package]
+name = "core-store"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "PROJECT ONE durable local state for the daemon"
+
+[dependencies]

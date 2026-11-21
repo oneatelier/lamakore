@@ -1,0 +1,10 @@
+{
+  "name": "project-one",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PROJECT ONE — open-source unified agent desktop (Electron + Rust)",
+  "packageManager": "pnpm@12.22.0",
+  "engines": {
+    "node": "24"
+  }
+}

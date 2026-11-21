@@ -1,0 +1,20 @@
+# NOTICE — Attribution Ledger
+
+PROJECT ONE is licensed under the Apache License, Version 2.0
+(see `LICENSE`).
+
+## Policy
+
+- Every third-party component vendored into this repository, or linked as
+  a build dependency whose license requires attribution, MUST be recorded
+  below with: name, version, license, upstream URL, and the reason it is
+  included.
+- Entries are added in the same commit that introduces the dependency.
+- Removing a dependency removes its entry in the same commit.
+- The ledger is append-only in spirit: never delete history, only
+  supersede (use the CHANGELOG for the narrative).
+
+## Entries
+
+No third-party components attributed yet. The scaffold (P002) ships with
+zero runtime dependencies by design.
