@@ -1,0 +1,272 @@
+{
+  "schema_version": "1.0.0-p000",
+  "generated_at": "2026-11-21T20:40:26+05:30",
+  "os": {
+    "name": "Microsoft Windows 11 Home Single Language",
+    "version": "10.0.26300",
+    "build": "26300",
+    "revision": "10.0.26300.9974",
+    "architecture": "x64",
+    "os_architecture_label": "64-bit",
+    "system_type": "x64-based PC"
+  },
+  "cpu": {
+    "model": "13th Gen Intel(R) Core(TM) i5-1334U",
+    "manufacturer": "GenuineIntel",
+    "physical_cores": 10,
+    "logical_cores": 12,
+    "architecture": "x64"
+  },
+  "memory": {
+    "total_bytes": 16849256448,
+    "total_mib_reported": 16069,
+    "total_gib_usable": 15.69,
+    "free_bytes": 6523467776,
+    "free_kib": 6370564,
+    "swap_pagefile": "C:\\pagefile.sys",
+    "swap_initial_mb": 24576,
+    "swap_max_mb": 32768,
+    "swap_stored_kib": 25165824,
+    "virtual_max_kib": 41620176
+  },
+  "gpu": {
+    "vendor": "Intel Corporation",
+    "model": "Intel(R) Iris(R) Xe Graphics",
+    "driver_version": "32.0.101.7092",
+    "driver_date": "2026-09-03",
+    "vram_bytes": 2147479552,
+    "vram_note": "integrated GPU: AdapterRAM reports the shared-memory aperture (~2 GiB), not dedicated VRAM",
+    "current_resolution": "1920x1080"
+  },
+  "disk": {
+    "workspace_volume": "D:",
+    "volume_label": "Private",
+    "filesystem": "NTFS",
+    "size_bytes": 108145930240,
+    "free_bytes": 107924402176,
+    "system_volume_note": "C: reports 150.75 GB free (Get-PSDrive)"
+  },
+  "shell": "C:\\WINDOWS\\system32\\cmd.exe",
+  "shell_version": "Windows PowerShell 5.1.26100.9818 (Desktop); cmd.exe Microsoft Windows [Version 10.0.26300.9974]; pwsh 7+ absent",
+  "locale": "en-US",
+  "timezone": "India Standard Time",
+  "timezone_detail": "(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi; offset +05:30; no DST",
+  "tooling": {
+    "cargo": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "Get-Command cargo failed; no %USERPROFILE%\\.cargo; `cargo --version` not runnable"
+    },
+    "c_compiler": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "cl, gcc, clang, cc, tcc, make, ninja all unresolvable via where.exe; VS remnant dir exists (C:\\Program Files (x86)\\Microsoft Visual Studio) but no compiler verified — no linking possible"
+    },
+    "certutil": {
+      "present": true,
+      "path": "C:\\WINDOWS\\system32\\certutil.exe",
+      "version": "UNKNOWN",
+      "note": "present but rejected --version (cert tool, not a version-reporting binary); useful for cert store ops only, not Authenticode signing"
+    },
+    "cmake": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "Get-Command cmake failed; `cmake --version` not runnable"
+    },
+    "corepack": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "Get-Command corepack failed (expected: ships with Node, and Node is absent)"
+    },
+    "docker": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "Get-Command docker failed; no Docker Desktop evidence"
+    },
+    "git": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "where.exe git found nothing; no C:\\Program Files\\Git; commit for this prompt is therefore deferred"
+    },
+    "node": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "where.exe node found nothing; no C:\\Program Files\\nodejs; stale %APPDATA%\\npm remnants only (see pnpm). scripts/inventory.mjs NOT executable on this host yet"
+    },
+    "npm": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "%APPDATA%\\npm exists but holds only pnpm shims (pnpm, pnpm.cmd, pnpm.ps1, pnpx, node_modules\\pnpm); no node/npm runtime behind them"
+    },
+    "podman": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "Get-Command podman failed"
+    },
+    "pnpm": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "not resolvable via PATH (Get-Command/where.exe fail); WinGet stub dir on PATH is empty; %APPDATA%\\npm\\pnpm payload present but unrunnable without node — effectively ABSENT for builds"
+    },
+    "python": {
+      "present": true,
+      "path": "%USERPROFILE%\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "version": "Python 3.13.17",
+      "note": "per-user install; `python --version` succeeds. Prompt asks for python3 — see python3 entry"
+    },
+    "python3": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "`python3` resolves only to the Microsoft Store stub (%USERPROFILE%\\AppData\\Local\\Microsoft\\WindowsApps\\python3.exe) which prints 'Python was not found' — no real interpreter behind that name"
+    },
+    "rustc": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "Get-Command rustc failed; no %USERPROFILE%\\.cargo / .rustup"
+    },
+    "rustup": {
+      "present": false,
+      "path": "UNKNOWN",
+      "version": "UNKNOWN",
+      "note": "Get-Command rustup failed; no %USERPROFILE%\\.rustup"
+    },
+    "signtool": {
+      "present": true,
+      "path": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\signtool.exe",
+      "version": "ProductVersion 10.0.26100.9457 / FileVersion 4.00",
+      "note": "ships with Windows SDK 10.0.26100.0 (also MakeCert/makecat/certmgr present); NOT on PATH — invoke by full path. Bare run prints usage, proving executability"
+    }
+  },
+  "observed_extras": {
+    "dotnet": "8.0.426 (present, `dotnet --version`)",
+    "winget": "v1.29.380 (present)",
+    "vscode": "present (code resolvable)",
+    "windows_sdk": "10.0.26100.0 (Installed Roots registry key present)",
+    "vbs": "running (systeminfo: Virtualization-based security Status: Running)",
+    "hypervisor": "present (Get-ComputerInfo HyperVisorPresent=True; systeminfo: hypervisor detected)",
+    "defender": "AntivirusEnabled=True, RealTimeProtectionEnabled=True",
+    "wsl": "wsl.exe exists but reports 'Windows Subsystem for Linux is not installed' — driver present, no distro",
+    "ollama_path_entry": "stale: %LOCALAPPDATA%\\Programs\\Ollama on PATH but no ollama.exe on disk"
+  },
+  "derived": {
+    "gpu_tier": "A",
+    "gpu_tier_rationale": "Intel Iris Xe (Gen12, Raptor Lake i5-1334U), WDDM driver 32.0.101.7092 dated 2026-09-03, DX12 Ultimate / Vulkan 1.3 class hardware; WebGPU is served via the D3D12 backend in Chromium/Edge and via DirectX in Firefox. Capability-based tier only — NOT a performance claim; shared-memory bandwidth (~2 GiB aperture) constrains heavy GPGPU. To be confirmed by a real WebGPU probe in P007.",
+    "local_model_class": "small_7b",
+    "local_model_class_rationale": "Usable RAM is 15.69 GiB (16849256448 bytes), i.e. strictly below the 16 GiB cut, and only ~6 GiB was free at idle. Nominal 16 GB SKU sits exactly on the 8-16/16-32 boundary, so down-tiered per fail-closed rule: quantized ~7B (Q4/Q5, ~4-6 GB) fits; ~14B (~8-10 GB quantized) would leave no headroom for OS + Electron + daemon.",
+    "sandbox_drivers_available": [
+      "job_objects",
+      "appcontainer_and_integrity_levels",
+      "lpac",
+      "vbs_hvci_running",
+      "defender_realtime_protection"
+    ],
+    "sandbox_drivers_unknown": [
+      "hyperv_feature_state",
+      "wsl2_feature_state",
+      "windows_sandbox_feature_state",
+      "containers_feature_state"
+    ],
+    "sandbox_drivers_absent": [
+      "docker",
+      "podman",
+      "wsl_distro"
+    ],
+    "sandbox_note": "Order for tool sandboxing on this host: Job Objects + AppContainer/IL + LPAC first (always present, no elevation). Hyper-V/WSL2/Sandbox are opt-in only after an elevated check. Job Objects and AppContainer are OS-guaranteed primitives on Windows 11, not elevation-gated queries."
+  },
+  "unknowns": [
+    {
+      "field": "gpu.wmic_crosscheck",
+      "command": "wmic path win32_VideoController get name,DriverVersion",
+      "reason": "'wmic' is not recognized on this build (WMIC removed/deprecated). GPU was still fully determined via Get-CimInstance Win32_VideoController."
+    },
+    {
+      "field": "sandbox.hyperv_feature_state",
+      "command": "Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V",
+      "reason": "requires elevation ('The requested operation requires elevation'). State UNKNOWN to this non-elevated inventory."
+    },
+    {
+      "field": "sandbox.wsl2_feature_state",
+      "command": "Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux",
+      "reason": "requires elevation. wsl.exe itself reports WSL is not installed (no distro); feature state still UNKNOWN."
+    },
+    {
+      "field": "sandbox.windows_sandbox_and_containers_state",
+      "command": "Get-WindowsOptionalFeature -Online -FeatureName Windows-Sandbox / Containers / VirtualMachinePlatform",
+      "reason": "requires elevation. All return the same elevation error."
+    },
+    {
+      "field": "tooling.python3_version",
+      "command": "python3 --version",
+      "reason": "resolves only to the Microsoft Store stub, which prints 'Python was not found'. Real interpreter exists only as `python` 3.13.17."
+    },
+    {
+      "field": "tooling.c_compiler_linked",
+      "command": "where.exe cl / where.exe gcc / where.exe clang / where.exe cc",
+      "reason": "all report 'Could not find files'. A VS remnant dir exists under Program Files (x86) but no compiler was verified, so recorded ABSENT rather than guessed."
+    },
+    {
+      "field": "memory.free_virtual_cim",
+      "command": "(Get-CimInstance Win32_OperatingSystem).FreeVirtualMemorySize",
+      "reason": "returned empty via CIM; substituted systeminfo lines (Virtual Memory Available 27,087 MB, Max 40,645 MB)."
+    },
+    {
+      "field": "gpu.dedicated_vram",
+      "command": "(Get-CimInstance Win32_VideoController).AdapterRAM",
+      "reason": "returns 2147479552 on an integrated GPU — the shared-memory aperture, not dedicated VRAM. Recorded raw with an explicit shared-memory note; never presented as dedicated VRAM."
+    },
+    {
+      "field": "disk.fsutil_crosscheck",
+      "command": "fsutil volume diskfree D:",
+      "reason": "Error 5: Access is denied (non-elevated). Free space taken from Win32_LogicalDisk (107924402176 bytes) + Get-PSDrive instead."
+    },
+    {
+      "field": "determinism_rerun",
+      "command": "node scripts/inventory.mjs --check artifacts/machine-profile.json",
+      "reason": "node is absent on this host, so the script cannot execute here. Determinism is by construction (fixed key order, single timestamp field) and MUST be re-run once node lands (P001). See report Deviations."
+    },
+    {
+      "field": "vcs.commit",
+      "command": "git commit -m \"chore(P000): host inventory and threat boundary ADR-000\"",
+      "reason": "git is absent (where.exe git finds nothing) and installing is forbidden in P000. Commit deferred; message reserved."
+    }
+  ],
+  "provenance": {
+    "inventory_script": "scripts/inventory.mjs",
+    "node_available": false,
+    "produced_via": "node-free PowerShell fallback (commands listed in scripts/inventory.mjs header and docs/reports/report-P000.md)",
+    "commands_run": [
+      "$PSVersionTable | Out-String",
+      "Get-ComputerInfo -Property OsName,OsVersion,OsBuildNumber,OsArchitecture,OsLocale,TimeZone,TotalPhysicalMemory,CsProcessors,HyperV*",
+      "Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,BuildNumber,OSArchitecture,TotalVisibleMemorySize,FreePhysicalMemory,TotalVirtualMemorySize,Locale",
+      "Get-CimInstance Win32_Processor | Select-Object Name,NumberOfCores,NumberOfLogicalProcessors,Architecture,Manufacturer",
+      "Get-CimInstance Win32_ComputerSystem | Select-Object TotalPhysicalMemory",
+      "Get-CimInstance Win32_VideoController | Select-Object Name,AdapterCompatibility,DriverVersion,DriverDate,AdapterRAM,CurrentHorizontalResolution,CurrentVerticalResolution",
+      "wmic path win32_VideoController get name,DriverVersion (FAILED: wmic not recognized)",
+      "Get-CimInstance Win32_PageFileUsage | Format-List *; Get-CimInstance Win32_PageFileSetting | Format-List *",
+      "Get-CimInstance Win32_LogicalDisk -Filter \"DeviceID='D:'\" | Format-List *",
+      "Get-PSDrive -PSProvider FileSystem",
+      "fsutil volume diskfree D: (FAILED: Error 5 Access is denied)",
+      "systeminfo (memory, virtual memory, VBS, hypervisor lines)",
+      "[System.TimeZoneInfo]::Local; Get-Culture; tzutil /g; Get-Date; cmd /c ver",
+      "Get-ExecutionPolicy -List",
+      "Get-WindowsOptionalFeature -Online -FeatureName <each> (FAILED: elevation required)",
+      "wsl --status (reports WSL not installed)",
+      "Get-MpComputerStatus | Select-Object AntivirusEnabled,RealTimeProtectionEnabled",
+      "where.exe <git|node|python|signtool|msbuild|code|just|ollama|cc|tcc|make|ninja|cl|gcc|clang>; Get-Command <tool> + `<tool> --version` per tool",
+      "Test-Path guards for Git/nodejs/VS/Cargo/Rustup/Ollama/WinGet-package paths",
+      "(Get-Item signtool.exe).VersionInfo; dotnet --version; winget --version"
+    ]
+  }
+}
