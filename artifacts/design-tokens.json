@@ -1,0 +1,163 @@
+{
+  "version": "1.0.0-p007",
+  "themes": {
+    "brass-void": {
+      "kind": "dark",
+      "label": "Brass & Void",
+      "colors": {
+        "surface-void": { "hex": "#0B0D10", "oklch": "oklch(0.1582 0.0072 258.37)" },
+        "surface-base": { "hex": "#12151A", "oklch": "oklch(0.1948 0.0112 260.66)" },
+        "surface-raised": { "hex": "#1A1E25", "oklch": "oklch(0.2341 0.0148 261.64)" },
+        "surface-overlay": { "hex": "#22272F", "oklch": "oklch(0.2712 0.0166 259.78)" },
+        "text-primary": { "hex": "#ECEFF4", "oklch": "oklch(0.9513 0.0074 260.73)" },
+        "text-secondary": { "hex": "#A8B0BC", "oklch": "oklch(0.7546 0.0194 258.36)" },
+        "text-disabled": { "hex": "#5C6470", "oklch": "oklch(0.5006 0.0216 258.37)" },
+        "brass-primary": { "hex": "#C8A24A", "oklch": "oklch(0.7298 0.1151 85.76)" },
+        "brass-hover": { "hex": "#D9B463", "oklch": "oklch(0.7860 0.1088 85.29)" },
+        "brass-pressed": { "hex": "#A8873A", "oklch": "oklch(0.6394 0.1031 85.75)" },
+        "signal-success": { "hex": "#3FB950", "oklch": "oklch(0.6951 0.1809 145.62)" },
+        "signal-warning": { "hex": "#D29922", "oklch": "oklch(0.7196 0.1401 79.91)" },
+        "signal-danger": { "hex": "#F0563A", "oklch": "oklch(0.6561 0.1946 32.51)" },
+        "signal-info": { "hex": "#6FA8C7", "oklch": "oklch(0.7038 0.0749 233.09)" },
+        "focus-ring": { "hex": "#D9B463", "oklch": "oklch(0.7860 0.1088 85.29)" }
+      }
+    },
+    "graphite": {
+      "kind": "dark",
+      "label": "Graphite",
+      "colors": {
+        "surface-void": { "hex": "#0E0E10", "oklch": "oklch(0.1647 0.0042 285.94)" },
+        "surface-base": { "hex": "#161617", "oklch": "oklch(0.2006 0.0020 286.22)" },
+        "surface-raised": { "hex": "#1E1E20", "oklch": "oklch(0.2359 0.0038 286.11)" },
+        "surface-overlay": { "hex": "#28282B", "oklch": "oklch(0.2780 0.0055 286.04)" },
+        "text-primary": { "hex": "#EDEDEF", "oklch": "oklch(0.9467 0.0027 286.35)" },
+        "text-secondary": { "hex": "#A9A9B0", "oklch": "oklch(0.7370 0.0100 286.15)" },
+        "text-disabled": { "hex": "#63636B", "oklch": "oklch(0.5025 0.0126 285.94)" },
+        "brass-primary": { "hex": "#B39B5F", "oklch": "oklch(0.6973 0.0838 88.40)" },
+        "brass-hover": { "hex": "#C4AC6C", "oklch": "oklch(0.7509 0.0875 89.64)" },
+        "brass-pressed": { "hex": "#8F7A4A", "oklch": "oklch(0.5878 0.0707 86.63)" },
+        "signal-success": { "hex": "#3FB950", "oklch": "oklch(0.6951 0.1809 145.62)" },
+        "signal-warning": { "hex": "#D29922", "oklch": "oklch(0.7196 0.1401 79.91)" },
+        "signal-danger": { "hex": "#F0563A", "oklch": "oklch(0.6561 0.1946 32.51)" },
+        "signal-info": { "hex": "#6FA8C7", "oklch": "oklch(0.7038 0.0749 233.09)" },
+        "focus-ring": { "hex": "#C4AC6C", "oklch": "oklch(0.7509 0.0875 89.64)" }
+      }
+    },
+    "parchment": {
+      "kind": "light",
+      "label": "Parchment",
+      "colors": {
+        "surface-void": { "hex": "#EFE8D8", "oklch": "oklch(0.9322 0.0226 87.15)" },
+        "surface-base": { "hex": "#E6DDC8", "oklch": "oklch(0.8991 0.0297 87.55)" },
+        "surface-raised": { "hex": "#FAF6EC", "oklch": "oklch(0.9735 0.0139 88.68)" },
+        "surface-overlay": { "hex": "#FFFFFF", "oklch": "oklch(1.0000 0.0000 0.00)" },
+        "text-primary": { "hex": "#1B1D22", "oklch": "oklch(0.2308 0.0101 268.24)" },
+        "text-secondary": { "hex": "#4C525A", "oklch": "oklch(0.4361 0.0153 255.59)" },
+        "text-disabled": { "hex": "#8B9096", "oklch": "oklch(0.6511 0.0107 252.85)" },
+        "brass-primary": { "hex": "#6E5620", "oklch": "oklch(0.4666 0.0777 84.66)" },
+        "brass-hover": { "hex": "#7A5F22", "oklch": "oklch(0.5007 0.0852 84.51)" },
+        "brass-pressed": { "hex": "#5A4719", "oklch": "oklch(0.4081 0.0677 86.29)" },
+        "signal-success": { "hex": "#1A6B2D", "oklch": "oklch(0.4653 0.1224 147.26)" },
+        "signal-warning": { "hex": "#7A4F00", "oklch": "oklch(0.4645 0.0988 73.24)" },
+        "signal-danger": { "hex": "#A93226", "oklch": "oklch(0.4954 0.1572 29.53)" },
+        "signal-info": { "hex": "#1F618F", "oklch": "oklch(0.4743 0.0988 243.57)" },
+        "focus-ring": { "hex": "#6E5620", "oklch": "oklch(0.4666 0.0777 84.66)" }
+      }
+    },
+    "ember": {
+      "kind": "dark",
+      "label": "Ember",
+      "colors": {
+        "surface-void": { "hex": "#100C0A", "oklch": "oklch(0.1587 0.0081 48.16)" },
+        "surface-base": { "hex": "#181210", "oklch": "oklch(0.1890 0.0108 39.27)" },
+        "surface-raised": { "hex": "#211915", "oklch": "oklch(0.2217 0.0149 48.03)" },
+        "surface-overlay": { "hex": "#2B211B", "oklch": "oklch(0.2575 0.0189 52.58)" },
+        "text-primary": { "hex": "#F2E9E2", "oklch": "oklch(0.9392 0.0136 60.57)" },
+        "text-secondary": { "hex": "#B8A89A", "oklch": "oklch(0.7414 0.0271 63.61)" },
+        "text-disabled": { "hex": "#6E6156", "oklch": "oklch(0.5017 0.0239 62.49)" },
+        "brass-primary": { "hex": "#D9A441", "oklch": "oklch(0.7507 0.1295 79.85)" },
+        "brass-hover": { "hex": "#E5B554", "oklch": "oklch(0.7982 0.1268 82.65)" },
+        "brass-pressed": { "hex": "#B0802F", "oklch": "oklch(0.6328 0.1124 76.86)" },
+        "signal-success": { "hex": "#3FB950", "oklch": "oklch(0.6951 0.1809 145.62)" },
+        "signal-warning": { "hex": "#D29922", "oklch": "oklch(0.7196 0.1401 79.91)" },
+        "signal-danger": { "hex": "#F0563A", "oklch": "oklch(0.6561 0.1946 32.51)" },
+        "signal-info": { "hex": "#6FA8C7", "oklch": "oklch(0.7038 0.0749 233.09)" },
+        "focus-ring": { "hex": "#E5B554", "oklch": "oklch(0.7982 0.1268 82.65)" }
+      }
+    },
+    "deep-sea": {
+      "kind": "dark",
+      "label": "Deep Sea",
+      "colors": {
+        "surface-void": { "hex": "#0A0E12", "oklch": "oklch(0.1613 0.0107 248.51)" },
+        "surface-base": { "hex": "#10161C", "oklch": "oklch(0.1969 0.0152 248.61)" },
+        "surface-raised": { "hex": "#172029", "oklch": "oklch(0.2391 0.0217 248.75)" },
+        "surface-overlay": { "hex": "#202B36", "oklch": "oklch(0.2838 0.0254 248.74)" },
+        "text-primary": { "hex": "#E8EFF4", "oklch": "oklch(0.9483 0.0101 238.51)" },
+        "text-secondary": { "hex": "#A3B4C0", "oklch": "oklch(0.7606 0.0256 238.53)" },
+        "text-disabled": { "hex": "#5F6E7A", "oklch": "oklch(0.5301 0.0262 242.24)" },
+        "brass-primary": { "hex": "#C8A24A", "oklch": "oklch(0.7298 0.1151 85.76)" },
+        "brass-hover": { "hex": "#D9B463", "oklch": "oklch(0.7860 0.1088 85.29)" },
+        "brass-pressed": { "hex": "#A8873A", "oklch": "oklch(0.6394 0.1031 85.75)" },
+        "signal-success": { "hex": "#3FB950", "oklch": "oklch(0.6951 0.1809 145.62)" },
+        "signal-warning": { "hex": "#D29922", "oklch": "oklch(0.7196 0.1401 79.91)" },
+        "signal-danger": { "hex": "#F0563A", "oklch": "oklch(0.6561 0.1946 32.51)" },
+        "signal-info": { "hex": "#7FB8DC", "oklch": "oklch(0.7565 0.0788 236.93)" },
+        "focus-ring": { "hex": "#D9B463", "oklch": "oklch(0.7860 0.1088 85.29)" }
+      }
+    },
+    "high-contrast": {
+      "kind": "dark",
+      "label": "High Contrast",
+      "colors": {
+        "surface-void": { "hex": "#000000", "oklch": "oklch(0.0000 0.0000 0.00)" },
+        "surface-base": { "hex": "#000000", "oklch": "oklch(0.0000 0.0000 0.00)" },
+        "surface-raised": { "hex": "#1A1A1A", "oklch": "oklch(0.2178 0.0000 0.00)" },
+        "surface-overlay": { "hex": "#000000", "oklch": "oklch(0.0000 0.0000 0.00)" },
+        "text-primary": { "hex": "#FFFFFF", "oklch": "oklch(1.0000 0.0000 0.00)" },
+        "text-secondary": { "hex": "#F0F0F0", "oklch": "oklch(0.9551 0.0000 0.00)" },
+        "text-disabled": { "hex": "#B0B0B0", "oklch": "oklch(0.7572 0.0000 0.00)" },
+        "brass-primary": { "hex": "#FFD75E", "oklch": "oklch(0.8912 0.1444 90.83)" },
+        "brass-hover": { "hex": "#FFE380", "oklch": "oklch(0.9187 0.1230 94.00)" },
+        "brass-pressed": { "hex": "#E6B800", "oklch": "oklch(0.8008 0.1637 90.52)" },
+        "signal-success": { "hex": "#3DFF88", "oklch": "oklch(0.8815 0.2199 151.02)" },
+        "signal-warning": { "hex": "#FFC400", "oklch": "oklch(0.8498 0.1739 86.55)" },
+        "signal-danger": { "hex": "#FF5C5C", "oklch": "oklch(0.6909 0.1987 23.91)" },
+        "signal-info": { "hex": "#66CCFF", "oklch": "oklch(0.8039 0.1192 232.69)" },
+        "focus-ring": { "hex": "#FFD75E", "oklch": "oklch(0.8912 0.1444 90.83)" }
+      }
+    }
+  },
+  "radii": { "r4": 4, "r8": 8, "r12": 12, "r16": 16, "full": 999 },
+  "spacing": { "s0": 0, "s1": 4, "s2": 8, "s3": 12, "s4": 16, "s5": 20, "s6": 24, "s7": 28, "s8": 32, "s9": 36, "s10": 40, "s11": 44, "s12": 48 },
+  "elevation": {
+    "e0": { "shadow": "none", "inner": "none" },
+    "e1": { "shadow": "0 1px 2px rgba(0,0,0,0.40)", "inner": "inset 0 0 0 1px rgba(255,255,255,0.06)" },
+    "e2": { "shadow": "0 4px 12px rgba(0,0,0,0.45)", "inner": "inset 0 0 0 1px rgba(255,255,255,0.07)" },
+    "e3": { "shadow": "0 8px 24px rgba(0,0,0,0.50)", "inner": "inset 0 0 0 1px rgba(255,255,255,0.08)" },
+    "e4": { "shadow": "0 16px 48px rgba(0,0,0,0.55)", "inner": "inset 0 0 0 1px rgba(255,255,255,0.10)" }
+  },
+  "type": {
+    "families": {
+      "display": { "name": "Fraunces", "variable": true, "license": "OFL-1.1", "files": ["assets/fonts/fraunces/Fraunces-Variable.ttf"] },
+      "ui": { "name": "Inter", "variable": true, "license": "OFL-1.1", "files": ["assets/fonts/inter/Inter-Variable.ttf"] },
+      "mono": { "name": "JetBrains Mono", "variable": true, "license": "OFL-1.1", "files": ["assets/fonts/jetbrainsmono/JetBrainsMono-Variable.ttf"] }
+    },
+    "scale": { "t12": 12, "t13": 13, "t14": 14, "t16": 16, "t20": 20, "t26": 26, "t34": 34, "t46": 46 }
+  },
+  "motion": {
+    "durations": { "d80": 80, "d120": 120, "d180": 180, "d240": 240, "d360": 360, "d450": 450 },
+    "easings": {
+      "standard": "cubic-bezier(0.2,0,0,1)",
+      "entrance": "cubic-bezier(0,0,0.2,1)",
+      "exit": "cubic-bezier(0.4,0,1,1)",
+      "settle": "cubic-bezier(0.34,1.4,0.64,1)"
+    },
+    "settle_max_ms": 120,
+    "springs": {
+      "panel": { "stiffness": 420, "damping": 38 },
+      "micro": { "stiffness": 380, "damping": 24 },
+      "snap": { "stiffness": 180, "damping": 30 }
+    }
+  }
+}

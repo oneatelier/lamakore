@@ -1,0 +1,29 @@
+{
+  "note": "Manifest of every font file bundled with the app. ONLY OFL-1.1 families may be listed (ADR-005). Fontshare/ITF/FFL families are forbidden. Regenerate SHAs with Get-FileHash, never hand-edit.",
+  "families": [
+    {
+      "name": "Fraunces",
+      "dir": "fraunces",
+      "license": "OFL-1.1",
+      "files": [
+        { "path": "fraunces/Fraunces-Variable.ttf", "sha256": "177ff6c0f14e5550a3c624247cd1189611d4eb65d000b14944c63d967958abbb" }
+      ]
+    },
+    {
+      "name": "Inter",
+      "dir": "inter",
+      "license": "OFL-1.1",
+      "files": [
+        { "path": "inter/Inter-Variable.ttf", "sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031" }
+      ]
+    },
+    {
+      "name": "JetBrains Mono",
+      "dir": "jetbrainsmono",
+      "license": "OFL-1.1",
+      "files": [
+        { "path": "jetbrainsmono/JetBrainsMono-Variable.ttf", "sha256": "48715a42ec242c21e9f02692891e147d022299a52e48d5e413e1a942193ffeda" }
+      ]
+    }
+  ]
+}
