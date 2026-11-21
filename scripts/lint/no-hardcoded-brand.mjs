@@ -50,6 +50,10 @@ function isAllowed(rel) {
   if (CONSTITUTIVE.has(posix)) return true;
   if (posix === 'CHANGELOG.md') return true;
   if (posix.startsWith('docs/reports/') || posix.startsWith('docs/adr/')) return true;
+  // Policy guides name the brand constitutively (identity, opsec); they are
+  // versioned policy, not generated output, and rename tracks them as live
+  // files. History stays immutable; guides stay accurate.
+  if (posix.startsWith('docs/guides/')) return true;
   // Package manifests carry hyphenated slugs (such as a scope shaped like
   // "@<slug>/ui") that can embed the code token across a hyphen boundary.
   // Slugs are owned by scripts/rename.mjs (exact-string rewrite + scope

@@ -33,6 +33,7 @@ __pycache__/
 
 # Env / secrets — never commit
 .env*
+.hygiene/blocklist.local.json
 
 # Build outputs
 dist/

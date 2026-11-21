@@ -11,7 +11,7 @@
   "scripts": {
     "branding:codegen": "node scripts/branding-codegen.mjs",
     "lint": "node scripts/lint/no-hardcoded-brand.mjs",
-    "test": "node --test tests/branding/rename.spec.ts",
+    "test": "node --test tests/hygiene/scanners.spec.ts tests/branding/rename.spec.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {

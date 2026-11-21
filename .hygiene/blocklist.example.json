@@ -1,0 +1,11 @@
+{
+  "note": "EXAMPLE ONLY — synthetic values in reserved domains. The Owner copies this shape into .hygiene/blocklist.local.json (gitignored, never committed) with real terms: name, variants, employer, city, personal emails, usernames.",
+  "seeded": true,
+  "terms": [
+    "Ada Example",
+    "ada.example@example.com",
+    "Example Employer Inc",
+    "Exampleton",
+    "ada_example"
+  ]
+}

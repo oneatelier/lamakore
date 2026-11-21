@@ -1,0 +1,6 @@
+#!/bin/sh
+# Identity gate: every commit is checked for leaked identity, home paths,
+# media metadata, secrets, blocklisted names, and dirty fixtures.
+# Bypass is not supported — fix the finding instead.
+# See docs/guides/identity-and-opsec.md.
+exec node scripts/hygiene/run-all.mjs --staged
