@@ -1,0 +1,36 @@
+name: Feature request
+description: Propose a capability, tied to the project vision
+labels: [enhancement]
+body:
+  - type: input
+    id: prompt
+    attributes:
+      label: Prompt ID
+      description: Which prompt should carry this? (e.g. P009)
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why (vision link)
+      description: Which part of the vision or threat boundary motivates this?
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What changes
+      description: Behavior, scope, and explicit non-goals
+    validations:
+      required: true
+  - type: textarea
+    id: gates
+    attributes:
+      label: Acceptance gates
+      description: The [E]/[V] checks that would prove it done
+  - type: checkboxes
+    id: dco
+    attributes:
+      label: DCO
+      options:
+        - label: Any change I submit will carry a Signed-off-by trailer (git commit -s)

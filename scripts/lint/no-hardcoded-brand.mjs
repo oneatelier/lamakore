@@ -28,6 +28,9 @@ const GENERATED = new Set([
   'packages/branding/src/generated.ts',
   'packages/branding/src/index.ts',
   'crates/core-protocol/src/brand.rs',
+  // Nightly-generated evidence (scoreboard.yml). Regenerated mechanically;
+  // the product name inside is data from branding.config.json, not a literal.
+  'artifacts/parity-scoreboard.md',
 ]);
 const CONSTITUTIVE = new Set([
   'LICENSE',

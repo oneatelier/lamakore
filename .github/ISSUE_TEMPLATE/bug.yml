@@ -1,0 +1,35 @@
+name: Bug report
+description: Something in the product or toolchain is broken
+labels: [bug]
+body:
+  - type: input
+    id: prompt
+    attributes:
+      label: Prompt ID
+      description: Which prompt produced or exposed this? (e.g. P005)
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Observed behavior, with exact output where possible
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Commands run, exit codes, log excerpts, links to runs
+  - type: checkboxes
+    id: dco
+    attributes:
+      label: DCO
+      options:
+        - label: Any fix I submit will carry a Signed-off-by trailer (git commit -s)

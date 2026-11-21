@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security policy
+    url: https://github.com/<owner-provided>
+    about: Replace with the org URL on first public push. Suspected vulnerability? Read SECURITY.md first — private disclosure only, never a public issue.
+  - name: Trademark or licensing question
+    url: https://github.com/<owner-provided>
+    about: Replace with the org URL on first public push. Marks, EE boundary, or license questions go through the private channel until a marks address is published.
