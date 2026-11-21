@@ -117,7 +117,7 @@ test('paths rejects a home-directory path with a username', () => {
   assert.match(r.output, /win-home/);
 });
 
-test('paths accepts redacted tokens and angle-bracket placeholders', () => {
+test('paths accepts redacted tokens and angle-bracket examples', () => {
   const dir = fresh('paths-pass');
   writeFileSync(path.join(dir, 'notes.txt'), 'see %USERPROFILE%\\docs and $HOME/docs and C:\\Users\\<you>\\docs\n');
   const r = runCli(path.join(HYG, 'scan-paths.mjs'), ['--root', dir]);

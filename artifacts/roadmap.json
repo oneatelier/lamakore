@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0-p006",
+  "priority_counts": { "P0": 23, "P1": 29, "P2": 13 },
+  "count_note": "Recounted from artifacts/features.csv by scripts/validate-artifacts.mjs. A prior blueprint claimed 28 P0 items while its catalog held 37; this registry rebuilds the catalog at 23/29/13. The discrepancy is flagged for the Owner in report-P006; the recount stands.",
+  "phases": [
+    { "name": "foundation", "prompts": ["P000", "P001", "P002", "P003", "P004", "P005", "P006", "P007", "P008", "P009"], "exit": "public repo with green CI and a measured blueprint" },
+    { "name": "daemon", "prompts": ["P010", "P011", "P012", "P013", "P014", "P015", "P016", "P017", "P018", "P034", "P035", "P036", "P037", "P038", "P039", "P040", "P041", "P042"], "exit": "sandboxed tool dispatch with approvals" },
+    { "name": "memory-models", "prompts": ["P043", "P044", "P045", "P046", "P047", "P048", "P049", "P050", "P051", "P052", "P053", "P054", "P055", "P056", "P057"], "exit": "local and remote inference inside the RAM gate" },
+    { "name": "shell", "prompts": ["P019", "P020", "P021", "P022", "P023", "P024", "P025", "P026", "P027", "P028", "P029", "P030", "P031", "P032", "P033", "P058", "P059", "P060"], "exit": "usable desktop on three OS images" },
+    { "name": "enterprise", "prompts": ["P061", "P062", "P063", "P064", "P065", "P066"], "exit": "paid pilot with audit export" },
+    { "name": "hardening-launch", "prompts": ["P067", "P068", "P069", "P070", "P071", "P072", "P073", "P074", "P075", "P076", "P077", "P078", "P079", "P080", "P081", "P082", "P083", "P084", "P085", "P086", "P087", "P088", "P089", "P090", "P091", "P092", "P093", "P094", "P095", "P096", "P097", "P098", "P099", "P100", "P101", "P102", "P103", "P104", "P105", "P106", "P107", "P108", "P109", "P110", "P111", "P112", "P113", "P114", "P115", "P116", "P117", "P118", "P119", "P120", "P121", "P122", "P123", "P124", "P125", "P126", "P127", "P128", "P129"], "exit": "cleared name with public launch" }
+  ],
+  "milestones": [
+    { "name": "public-repo", "after": "P005", "gate": "green CI plus hygiene on first push" },
+    { "name": "blueprint", "after": "P006", "gate": "validators green; counts recounted" },
+    { "name": "agent-loop", "after": "P042", "gate": "plan-execute with approvals end to end" },
+    { "name": "shell-v1", "after": "P060", "gate": "RAM gate green on the reference host" },
+    { "name": "pilot", "after": "P066", "gate": "enterprise pilot signed off" },
+    { "name": "launch", "after": "P129", "gate": "cleared name with second audit clean" }
+  ]
+}

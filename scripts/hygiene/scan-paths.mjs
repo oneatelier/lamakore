@@ -2,7 +2,7 @@
 /*
  * Path-hygiene scanner: rejects absolute home-directory paths with a real
  * username component (win/mac/linux) in tracked text. Redacted tokens
- * (%USERPROFILE%, $HOME, ~) and angle-bracket placeholders such as
+ * (%USERPROFILE%, $HOME, ~) and angle-bracket examples such as
  * C:\Users\<you> are ignored by design — the username class admits only
  * alphanumerics, dot, underscore, and hyphen.
  * Usage: scan-paths.mjs [--root DIR] [--staged]

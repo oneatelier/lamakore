@@ -1,0 +1,11 @@
+candidate,verdict,reason,evidence
+Forge,rejected,Dictionary word with heavy collision across dev tools,Pre-clearance structural screen; formal USPTO and EUIPO search pending per ADR-003 step 2
+Relay,rejected,Live product name in adjacent automation space,Pre-clearance market screen; formal product search pending per ADR-003 step 1
+Hearth,rejected,Phonetic overlap with an existing assistant mark,Pre-clearance phonetic screen; formal screen pending per ADR-003 step 3
+Anvil,rejected,Used by multiple build and security products,Pre-clearance market screen; formal product search pending per ADR-003 step 1
+Northstar,rejected,Crowded in navigation and analytics products,Pre-clearance market screen; crowded-field rejection logged before registry spend
+Porthole,rejected,Maritime marks cluster plus weak CLI ergonomics,Pre-clearance structural screen; overlong token for a binary name
+Workbench,rejected,Strong association with a dominant editor feature,Pre-clearance market screen; confusion risk under trademark policy
+Console,rejected,Generic term; unregistrable and undiscoverable,Pre-clearance structural screen; genericide risk
+Pilot,rejected,Aviation-adjacent marks plus existing AI products,Pre-clearance market screen; formal searches pending per ADR-003 steps 1 and 2
+Sidekick,rejected,Existing marks in assistant and companion apps,Pre-clearance market screen; formal searches pending per ADR-003 steps 1 and 2

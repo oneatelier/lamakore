@@ -1,0 +1,66 @@
+id,domain,capability,priority,effort,phase,native_or_adapter,owner_prompt,acceptance_ref,evidence_status
+F-COD-01,code,Edit files with apply-model diffs,P0,M,build,native,P010,report-P010,none
+F-COD-02,code,Run tests and report failures,P0,M,build,native,P011,report-P011,none
+F-COD-03,code,Shell commands inside the sandbox,P0,L,build,native,P012,report-P012,none
+F-COD-04,code,Multi-file refactor plans,P1,L,build,native,P013,report-P013,none
+F-COD-05,code,Lint and format on save,P1,S,polish,adapter,P014,report-P014,none
+F-COD-06,code,Dependency install inside the sandbox,P1,M,build,native,P015,report-P015,none
+F-COD-07,code,Build and package tasks,P1,M,build,adapter,P016,report-P016,none
+F-COD-08,code,Code search across the workspace,P0,M,build,native,P017,report-P017,none
+F-COD-09,code,Diff review before apply,P0,S,build,native,P018,report-P018,none
+F-BRW-01,browse,Fetch pages as hostile markdown,P0,M,build,native,P019,report-P019,none
+F-BRW-02,browse,Click and form-fill in the isolated view,P1,L,build,native,P020,report-P020,none
+F-BRW-03,browse,Screenshot grounding for actions,P1,L,build,native,P021,report-P021,none
+F-BRW-04,browse,Download files into the sandbox,P0,S,build,native,P022,report-P022,none
+F-BRW-05,browse,Search engine adapters,P1,M,build,adapter,P023,report-P023,none
+F-BRW-06,browse,Cookie jar per session,P2,S,polish,native,P024,report-P024,none
+F-BRW-07,browse,Readability extraction,P1,S,build,adapter,P025,report-P025,none
+F-BRW-08,browse,Blocked-domain policy,P0,S,build,native,P026,report-P026,none
+F-BRW-09,browse,Browse history for the agent,P2,S,polish,native,P027,report-P027,none
+F-OSS-01,os,List and read files in the workspace,P0,S,build,native,P028,report-P028,none
+F-OSS-02,os,Notifications via the daemon,P1,S,build,native,P029,report-P029,none
+F-OSS-03,os,Global hotkey to summon,P1,S,polish,native,P030,report-P030,none
+F-OSS-04,os,Gated clipboard read and write,P1,S,build,native,P031,report-P031,none
+F-OSS-05,os,Open files in system apps,P2,S,polish,adapter,P032,report-P032,none
+F-OSS-06,os,Tray menu and background mode,P2,M,polish,native,P033,report-P033,none
+F-ORC-01,orchestration,Tool dispatch with capability tokens,P0,L,build,native,P034,report-P034,none
+F-ORC-02,orchestration,Plan-then-execute loop,P0,L,build,native,P035,report-P035,none
+F-ORC-03,orchestration,Parallel subagent fan-out,P1,L,build,native,P036,report-P036,none
+F-ORC-04,orchestration,Human approval gates,P0,M,build,native,P037,report-P037,none
+F-ORC-05,orchestration,Retry with backoff budgets,P1,M,build,native,P038,report-P038,none
+F-ORC-06,orchestration,Session persistence and resume,P1,M,build,native,P039,report-P039,none
+F-ORC-07,orchestration,Skill and plugin loading,P1,M,build,native,P040,report-P040,none
+F-ORC-08,orchestration,Scheduled tasks,P2,M,polish,native,P041,report-P041,none
+F-ORC-09,orchestration,Multi-model fallback routing,P2,L,polish,adapter,P042,report-P042,none
+F-MEM-01,memory,Working-memory scratchpad,P0,M,build,native,P043,report-P043,none
+F-MEM-02,memory,Long-term fact store on SQLite,P1,L,build,native,P044,report-P044,none
+F-MEM-03,memory,Embeddings for recall,P1,L,build,adapter,P045,report-P045,none
+F-MEM-04,memory,Session compaction,P1,M,build,native,P046,report-P046,none
+F-MEM-05,memory,Forget and redaction commands,P0,S,build,native,P047,report-P047,none
+F-MEM-06,memory,Memory export and import,P2,M,polish,adapter,P048,report-P048,none
+F-MEM-07,memory,Cross-session identity boundary,P1,S,build,native,P049,report-P049,none
+F-MOD-01,models,Local 7B inference tier,P0,L,build,adapter,P050,report-P050,none
+F-MOD-02,models,Remote inference path,P0,M,build,adapter,P051,report-P051,none
+F-MOD-03,models,Model router by budget,P1,M,build,native,P052,report-P052,none
+F-MOD-04,models,Streaming tokens to the UI,P0,M,build,native,P053,report-P053,none
+F-MOD-05,models,Vision input for grounding,P1,L,build,adapter,P054,report-P054,none
+F-MOD-06,models,Offline mode with local models,P1,M,build,native,P055,report-P055,none
+F-MOD-07,models,Usage metering,P1,S,build,native,P056,report-P056,none
+F-MOD-08,models,14B tier when RAM allows,P2,M,polish,adapter,P057,report-P057,none
+F-PLA-01,platform,Pinned reproducible toolchain,P0,S,foundation,native,P001,report-P001,verified
+F-PLA-02,platform,Monorepo scaffold and governance,P0,S,foundation,native,P002,report-P002,verified
+F-PLA-03,platform,One-command brand rename,P1,M,foundation,native,P003,report-P003,verified
+F-PLA-04,platform,Anonymity hygiene enforcement,P0,M,foundation,native,P004,report-P004,verified
+F-PLA-05,platform,Green CI on three OS images,P0,M,foundation,native,P005,report-P005,verified
+F-PLA-06,platform,Spec registry with validators,P0,M,foundation,native,P006,report-P006,pending
+F-PLA-07,platform,Token sheet reading live branding,P1,S,build,native,P007,report-P007,none
+F-PLA-08,platform,RAM gate for the shell and models,P0,M,build,native,P008,report-P008,none
+F-PLA-09,platform,Auto-update channel,P1,M,polish,adapter,P058,report-P058,none
+F-PLA-10,platform,Crash reporting without PII,P1,S,polish,native,P059,report-P059,none
+F-PLA-11,platform,Settings sync across machines,P2,M,polish,adapter,P060,report-P060,none
+F-ENT-01,enterprise,SSO and SCIM provisioning,P2,XL,polish,adapter,P061,report-P061,none
+F-ENT-02,enterprise,Audit export for compliance,P1,M,build,native,P062,report-P062,none
+F-ENT-03,enterprise,Air-gap packaging,P2,XL,polish,native,P063,report-P063,none
+F-ENT-04,enterprise,Fleet management console,P2,L,polish,adapter,P064,report-P064,none
+F-ENT-05,enterprise,License metering,P2,M,polish,native,P065,report-P065,none
+F-ENT-06,enterprise,Admin policy packs,P1,M,polish,native,P066,report-P066,none

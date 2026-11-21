@@ -22,30 +22,7 @@ jobs:
         with:
           node-version: "24"
       - name: regenerate parity scoreboard
-        run: |
-          node --input-type=module -e "
-          import { readdirSync, writeFileSync, readFileSync } from 'node:fs';
-          import { execSync } from 'node:child_process';
-          const cfg = JSON.parse(readFileSync('branding.config.json', 'utf8'));
-          const sha = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-          const today = new Date().toISOString().slice(0, 10);
-          let rows = [];
-          try {
-            const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => {
-              const p = d + '/' + e.name;
-              return e.isDirectory() ? walk(p) : [p];
-            });
-            rows = walk('eval').filter((p) => !p.endsWith('.gitkeep'));
-          } catch { rows = []; }
-          const body = rows.length === 0
-            ? 'No eval evidence yet. No pass is claimed; no gate is marked green on the basis of this file.'
-            : rows.map((r) => '- ' + r).join('\n');
-          const md = '# Parity Scoreboard — ' + cfg.productName + '\n\n'
-            + 'Generated: ' + today + ' (nightly, commit ' + sha + ')\n\n'
-            + '## Evidence\n\n' + body + '\n';
-          writeFileSync('artifacts/parity-scoreboard.md', md);
-          console.log('scoreboard: ' + (rows.length === 0 ? 'no evidence yet (honest empty)' : rows.length + ' artifact(s)'));
-          "
+        run: node scripts/gen-scoreboard.mjs
       - name: commit scoreboard if changed
         run: |
           git config user.name "github-actions[bot]"

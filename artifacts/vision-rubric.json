@@ -1,0 +1,73 @@
+{
+  "version": "1.0.0-p006",
+  "pillars": {
+    "capability_superset": {
+      "weight": 25,
+      "anchors": {
+        "0": { "label": "No agent capability beyond a chat box", "evidence": "artifacts/features.csv with zero P0 rows delivered" },
+        "50": { "label": "Core code and browse tools work end to end", "evidence": "docs/reports/report-P0XX per tool with green drills" },
+        "75": { "label": "Orchestration memory and models all land", "evidence": "eval/golden full-suite pass recorded in artifacts/parity-scoreboard.md" },
+        "100": { "label": "Superset demonstrated against every canonical competitor", "evidence": "artifacts/competitors.json matrix with per-rival evidence links" }
+      }
+    },
+    "visual_excellence": {
+      "weight": 15,
+      "anchors": {
+        "0": { "label": "Unstyled default components", "evidence": "scripts/detect-placeholders.mjs failing on tsx" },
+        "50": { "label": "Token sheet renders live branding", "evidence": "docs/reports/report-P007 with screenshots" },
+        "75": { "label": "Themed accessible views across the shell", "evidence": "contrast and tab-order measurements in the P007x reports" },
+        "100": { "label": "Best-in-class look on all three OS images", "evidence": "P007 token-sheet gate plus independent design review note" }
+      }
+    },
+    "engineering_integrity": {
+      "weight": 15,
+      "anchors": {
+        "0": { "label": "Red CI or unpinned toolchain", "evidence": ".github/workflows runs with failures" },
+        "50": { "label": "Green matrix with pinned SHAs", "evidence": "docs/reports/report-P005 with run conclusions" },
+        "75": { "label": "Validators enforce registry and hygiene", "evidence": "docs/reports/report-P006 with validate-artifacts exit 0" },
+        "100": { "label": "Reproducible bit-identical builds", "evidence": "eval/runners/repro.mjs matching hashes from two builders" }
+      }
+    },
+    "security_posture": {
+      "weight": 15,
+      "anchors": {
+        "0": { "label": "Known sandbox escape or leaked secret", "evidence": "open L3 incident in docs/reports" },
+        "50": { "label": "Threat boundary implemented and scanned", "evidence": "docs/reports/report-P004 plus green hygiene runs" },
+        "75": { "label": "Adversarial suite green", "evidence": "eval/fixtures/adversarial.json results in a P094 report" },
+        "100": { "label": "Independent review published with responses", "evidence": "docs/guides/independent-review.md plus remediations" }
+      }
+    },
+    "performance": {
+      "weight": 10,
+      "anchors": {
+        "0": { "label": "Misses the RAM gate on the reference host", "evidence": "artifacts/ram-gate.json over budget" },
+        "50": { "label": "RAM gate green idle plus local model", "evidence": "docs/reports/report-P008 with resident numbers" },
+        "75": { "label": "Budgets enforced in CI", "evidence": ".github/workflows/perf.yml failing on regression" },
+        "100": { "label": "Headroom for the 14B tier where hardware allows", "evidence": "tier unlock log with gate evidence" }
+      }
+    },
+    "openness_trust": {
+      "weight": 10,
+      "anchors": {
+        "0": { "label": "Closed code or missing license", "evidence": "LICENSE absent or non-Apache terms" },
+        "50": { "label": "Apache-2.0 with governance and DCO", "evidence": "docs/reports/report-P002 acceptance rows" },
+        "75": { "label": "Public repo with green checks and audit agent", "evidence": "audit/ findings published per cycle" },
+        "100": { "label": "Reproducible open-core with published audits", "evidence": "two consecutive audit cycles with zero unresolved findings" }
+      }
+    },
+    "anonymity_hygiene": {
+      "weight": 10,
+      "anchors": {
+        "0": { "label": "Real identity in the tree", "evidence": "scripts/hygiene/scan-names.mjs violation" },
+        "50": { "label": "Org voice plus six scanners green", "evidence": "docs/reports/report-P004 acceptance rows" },
+        "75": { "label": "Owner seed enforced with zero violations", "evidence": "scan-names enforcing with N terms and clean runs" },
+        "100": { "label": "Independent opsec review passes", "evidence": "external review note with no findings" }
+      }
+    }
+  },
+  "hard_rules": [
+    "A pillar score with no linked evidence artifact is capped at 1 regardless of claimed completeness.",
+    "security_posture cannot exceed 2 until adversarial tests run, or 3 without independent review.",
+    "Weights sum to exactly 100; validate-artifacts.mjs asserts the sum in code."
+  ]
+}

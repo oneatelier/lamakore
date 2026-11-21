@@ -1,0 +1,14 @@
+{
+  "model": "open-core",
+  "open": {
+    "license": "Apache-2.0",
+    "price": "free forever",
+    "includes": ["daemon", "shell", "sandbox", "policy", "audit", "plugin SDK"]
+  },
+  "commercial": [
+    { "module": "SSO and SCIM", "model": "per-seat", "notes": "ee/sso; directory sync included" },
+    { "module": "Air-gap packaging", "model": "per-deployment", "notes": "sealed bundles plus offline activation" },
+    { "module": "Fleet management", "model": "per-device", "notes": "policy push plus inventory" }
+  ],
+  "notes": "Safety audit policy and sandbox are never commercial. Prices are set at pilot review (P124), not here."
+}

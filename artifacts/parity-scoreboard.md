@@ -1,6 +1,6 @@
 # Parity Scoreboard — PROJECT ONE
 
-Generated: 2026-11-21 (nightly, commit 61d8757)
+Generated: 2026-11-21 (nightly, commit a2be811)
 
 ## Evidence
 

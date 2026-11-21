@@ -21,7 +21,7 @@ GitHub session, no personal cloud drives. The project checkout lives
 under that account's home so a stray absolute path leaks nothing
 identifying. `scan-paths.mjs` rejects `C:\Users\<you>`, `/Users/<you>`,
 and `/home/<you>` with a real username component; angle-bracket
-placeholders like these are ignored by design, so use them in examples.
+Angle-bracket stand-ins like these are ignored by design, so use them in examples.
 
 ## 3. Media capture in a fixture VM
 

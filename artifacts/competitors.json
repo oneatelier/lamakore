@@ -1,0 +1,12 @@
+[
+  { "name": "Cursor", "category": "AI-native IDE", "strengths": ["fast tab completion", "codebase chat"], "our_edge": "local-first daemon with sandbox-first tools instead of editor lock-in" },
+  { "name": "Windsurf", "category": "AI-native IDE", "strengths": ["agentic flows", "cascade model"], "our_edge": "open protocol and auditable tool boundary" },
+  { "name": "VS Code plus Copilot", "category": "Editor plus assistant", "strengths": ["extension ecosystem", "enterprise reach"], "our_edge": "unified agent desktop not an editor plugin" },
+  { "name": "Zed", "category": "Fast editor", "strengths": ["speed", "collaboration"], "our_edge": "agent orchestration as the core not an add-on" },
+  { "name": "JetBrains AI", "category": "IDE assistant", "strengths": ["deep language support", "refactoring"], "our_edge": "cross-IDE daemon usable from any shell" },
+  { "name": "Aider", "category": "Terminal agent", "strengths": ["diff workflow", "git integration"], "our_edge": "sandboxed execution with approval gates by default" },
+  { "name": "Claude Code", "category": "Terminal agent", "strengths": ["long-horizon tasks", "tool use"], "our_edge": "local model tier plus offline mode" },
+  { "name": "Codex CLI", "category": "Terminal agent", "strengths": ["reasoning models", "cloud scale"], "our_edge": "memory and policy that survive across sessions" },
+  { "name": "Gemini CLI", "category": "Terminal agent", "strengths": ["free tier", "Google integration"], "our_edge": "enterprise air-gap and audit export story" },
+  { "name": "OpenHands", "category": "Open-source agent", "strengths": ["open code", "docker sandboxes"], "our_edge": "desktop UX with OS integration instead of containers-only" }
+]

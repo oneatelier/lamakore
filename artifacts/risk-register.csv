@@ -1,0 +1,43 @@
+id,category,risk,likelihood,impact,severity,early_warning,mitigation,contingency,owner
+R-01,security,Sandbox escape via tool bug,4,5,20,fuzz crash spike,Least-privilege drivers plus fuzz corpus,Disable the tool class and ship,Maintainer of Record
+R-02,security,Prompt injection crosses the daemon boundary,5,5,25,red-team bypass rate,Tool output never privileged plus adversarial suite,Quarantine the connector and disclose,Security contact
+R-03,security,Credential leak in logs,3,5,15,log-scan hits,Redaction at capture plus logscan runner,Rotate credentials and purge history,Security contact
+R-04,security,Malicious plugin in marketplace,3,4,12,unsigned install attempts,Signed by default plus sandboxed plugins,Revoke the signing key and takedown,Maintainer of Record
+R-05,security,Supply-chain compromise of a dependency,2,5,10,advisory feed alerts,Pinned hashes plus vendor audit,Roll back the pin and rebuild,Release captain
+R-06,security,Insider threat from a contributor,2,4,8,unusual access patterns,Least-privilege review rights,Revoke access and review the audit trail,Maintainer of Record
+R-07,security,Update channel hijack,2,5,10,signature verification failures,Offline signing plus transparency log,Pause the channel and rotate keys,Release captain
+R-08,technical,Local model exceeds the RAM budget,4,4,16,ram-gate drift,Quantized tiers plus gate in CI,Force the remote tier and warn,Maintainer of Record
+R-09,technical,Electron major breaks native modules,3,4,12,beta channel crashes,Pinned Electron plus rebuild drill,Hold the upgrade and patch,Release captain
+R-10,technical,SQLite corruption on crash,2,4,8,integrity-check failures,WAL mode plus backups,Restore from backup and repair,Maintainer of Record
+R-11,technical,Windows sandbox API change,3,3,9,Insider SDK notes,Abstraction layer over drivers,Fall back to Job Objects,Maintainer of Record
+R-12,technical,macOS permission model change,3,3,9,beta OS reports,Entitlement review each release,Degrade gracefully,Release captain
+R-13,technical,Linux distro fragmentation,4,2,8,distro bug reports,Flatpak plus deb plus AppImage,Drop the worst offender,Release captain
+R-14,technical,Flaky CI blocks merges,4,2,8,rerun rate,Quarantine policy plus hermetic runners,Allow merge with waiver,Maintainer of Record
+R-15,schedule,Scope creep delays launch,4,3,12,prompt-count growth,Prompt-sized scope plus renegotiation,Cut P2 items to the next train,Maintainer of Record
+R-16,schedule,Key hire unavailable,3,3,9,hiring pipeline stalls,No-hero staffing plus docs-first,Descope and extend the timeline,Maintainer of Record
+R-17,schedule,Review bottleneck on the maintainer,4,3,12,PR age growth,Delegated reviewers plus ladder,Batch review days,Maintainer of Record
+R-18,schedule,Pen-test findings arrive late,2,4,8,test window slips,Scope early plus fix buffer,Delay launch and disclose,Security contact
+R-19,legal,Trademark conflict on the launch name,3,4,12,clearance search hits,Provisional name plus rename machinery,Execute the rename and delay filing,Maintainer of Record
+R-20,legal,GPL contamination via a dependency,2,5,10,license scan alerts,License allowlist plus CI gate,Replace the dependency and disclose,Security contact
+R-21,legal,Font license violation,2,3,6,font audit gaps,Licensed fonts only plus review,Swap the font and reissue,Release captain
+R-22,legal,Privacy regulation breach,2,5,10,data-flow review gaps,Consent gates plus minimization,Freeze collection and notify,Security contact
+R-23,supply-chain,Registry outage blocks installs,3,2,6,status page incidents,Mirror critical tarballs,Serve from the mirror,Release captain
+R-24,supply-chain,Single maintainer bus factor,3,4,12,succession drill gaps,Escrow plus contributor ladder,Activate the successor,Maintainer of Record
+R-25,supply-chain,Signing key loss,1,5,5,ceremony checklist gaps,Two hardware keys plus offline backup,Use the backup key and rotate,Maintainer of Record
+R-26,supply-chain,Domain hijack,1,4,4,registrar alerts,Registry lock plus monitoring,Recover via the registrar,Security contact
+R-27,operational,Status page silent during outage,3,3,9,drill misses,Automated page on CI red,Manual page runbook,Release captain
+R-28,operational,Support load exceeds capacity,4,2,8,issue inflow rate,Templates plus discussion triage,Pause the feature train,Maintainer of Record
+R-29,operational,Telemetry privacy complaint,2,4,8,opt-out rate spike,Opt-in only plus public schema,Ship a telemetry-free release,Security contact
+R-30,technical,Model provider price shock,3,3,9,invoice trend alerts,Multi-provider router plus budgets,Shift to the local tier,Maintainer of Record
+R-31,technical,Context overflow on long sessions,4,3,12,compaction failures,Compaction plus scratchpad bounds,Compact aggressively and warn,Maintainer of Record
+R-32,security,Phishing via agent-crafted messages,3,4,12,approval-gate skips,Approval gates plus provenance labels,Block the pattern and warn users,Security contact
+R-33,schedule,Enterprise pilot demands a fork,3,3,9,pilot asks diverge,Policy packs instead of forks,Offer a pack and decline the fork,Maintainer of Record
+R-34,legal,Patent claim on the agent loop,1,5,5,counsel watch notes,Apache-2.0 grant plus prior-art file,Contest or redesign,Maintainer of Record
+R-35,operational,Release rollback fails,2,4,8,rollback drill gaps,One-step rollback tested,Practice restores,Release captain
+R-36,technical,SmartScreen blocks the installer,3,3,9,beta install reports,Authenticode signing plus reputation,Guide manual allow and appeal,Release captain
+R-37,supply-chain,Core contributor burnout,3,3,9,velocity drop plus silence,Sustainable pace plus no-hero rule,Redistribute and pause the train,Maintainer of Record
+R-38,security,Secrets committed by a contributor,4,3,12,pre-commit blocks,Hook plus CI secret scan,Rotate and purge and coach,Security contact
+R-39,operational,Docs drift from the product,4,2,8,link-check failures,Link check in CI plus per-prompt reports,Run a docs sprint,Maintainer of Record
+R-40,technical,Accessibility lawsuit risk,1,4,4,a11y audit gaps,A11y pass plus contrast budgets,Remediate fast and disclose,Maintainer of Record
+R-41,schedule,App-store review rejection,3,3,9,guideline changes,Follow the rules plus sideload path,Appeal and ship direct,Release captain
+R-42,legal,Trademark watch misses a conflict,2,3,6,watch feed gaps,Quarterly watch review,Oppose or rename,Maintainer of Record
