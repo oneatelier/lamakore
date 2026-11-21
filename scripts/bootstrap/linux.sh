@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PROJECT ONE P001 — Linux toolchain bootstrap (idempotent, Debian/Ubuntu-first).
+# P001 — Linux toolchain bootstrap (idempotent, Debian/Ubuntu-first).
 # Installs: git -> Node 24 LTS (tarball, SHA-verified) -> corepack pnpm@12.22.0
 # -> rustup + Rust 1.100.0 -> build deps (build-essential, pkg-config,
 # libssl-dev, libsqlite3-dev, libayatana-appindicator3-dev, librsvg2-dev,

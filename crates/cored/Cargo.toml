@@ -3,6 +3,6 @@ name = "cored"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "PROJECT ONE trusted daemon: policy, secrets, and sandboxed tool dispatch"
+description = "Trusted daemon: policy, secrets, and sandboxed tool dispatch"
 
 [dependencies]

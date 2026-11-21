@@ -1,0 +1,8 @@
+{
+  "name": "@project-one/branding",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Typed brand accessors (generated; do not edit outputs directly)",
+  "type": "module",
+  "main": "src/index.ts"
+}

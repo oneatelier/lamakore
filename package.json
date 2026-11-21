@@ -2,9 +2,20 @@
   "name": "project-one",
   "version": "0.0.0",
   "private": true,
-  "description": "PROJECT ONE — open-source unified agent desktop (Electron + Rust)",
+  "type": "module",
+  "description": "Open-source unified agent desktop (Electron + Rust)",
   "packageManager": "pnpm@12.22.0",
   "engines": {
     "node": "24"
+  },
+  "scripts": {
+    "branding:codegen": "node scripts/branding-codegen.mjs",
+    "lint": "node scripts/lint/no-hardcoded-brand.mjs",
+    "test": "node --test tests/branding/rename.spec.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
   }
 }

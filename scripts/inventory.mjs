@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * PROJECT ONE · P000 — clean-machine inventory
+ * P000 — clean-machine inventory
  * -------------------------------------------
  * Cross-platform host profiler. Uses ONLY Node.js builtins (node:os,
  * node:child_process, node:fs, node:path, node:url) — no dependencies.

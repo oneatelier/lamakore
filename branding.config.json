@@ -1,0 +1,18 @@
+{
+  "status": "provisional",
+  "codename": "PROJECT ONE",
+  "productName": "PROJECT ONE",
+  "codeToken": "pone",
+  "cliBinary": "pone",
+  "orgHandle": "<owner-provided>",
+  "repoName": "<owner-provided>",
+  "daemonBinary": "poned",
+  "configDirName": ".pone",
+  "copyrightHolder": "The PROJECT ONE Authors",
+  "domains": [],
+  "packages": [],
+  "clearance": {
+    "trademark": "NOT_CLEARED",
+    "publishBlocked": true
+  }
+}

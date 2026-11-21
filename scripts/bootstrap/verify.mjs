@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * PROJECT ONE P001 — toolchain pin verifier.
+ * P001 — toolchain pin verifier.
  * Reads artifacts/toolchain.lock.json, checks the live toolchain, prints a
  * table, and exits non-zero if ANY pin mismatches (or a pinned tool is
  * missing). No dependencies — node:child_process + node:fs only.

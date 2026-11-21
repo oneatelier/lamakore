@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PROJECT ONE P001 — macOS toolchain bootstrap (idempotent).
+# P001 — macOS toolchain bootstrap (idempotent).
 # Installs: Git (via Xcode CLT) -> Node 24 LTS (pkg, SHA-verified) ->
 # corepack pnpm@12.22.0 -> rustup + Rust 1.100.0 -> Xcode Command Line Tools.
 # Re-running skips every satisfied pin. No Homebrew dependency by design

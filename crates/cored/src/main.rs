@@ -1,4 +1,4 @@
-//! cored — the PROJECT ONE trusted daemon.
+//! cored — the trusted daemon for the unified agent desktop.
 //!
 //! The daemon is the only component that holds credentials, enforces policy,
 //! and dispatches sandboxed tool calls. The renderer is untrusted by design;

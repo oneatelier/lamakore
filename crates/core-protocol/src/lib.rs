@@ -1,7 +1,11 @@
-//! core-protocol — wire types shared by the daemon and tool hosts.
+//! Wire types and the generated brand constants.
+//!
+//! `brand` is code-generated from branding.config.json — see ADR-003.
 //!
 //! Versioned explicitly so renderer, daemon, and tools can negotiate
 //! compatibility at session start instead of assuming it.
+
+pub mod brand;
 
 /// Wire-protocol version negotiated at session start.
 pub const PROTOCOL_VERSION: u32 = 0;

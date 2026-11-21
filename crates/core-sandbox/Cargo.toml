@@ -3,6 +3,6 @@ name = "core-sandbox"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "PROJECT ONE OS sandbox drivers for tool execution"
+description = "OS sandbox drivers for tool execution"
 
 [dependencies]

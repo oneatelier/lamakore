@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  PROJECT ONE P001 — Windows toolchain bootstrap (idempotent).
+  P001 — Windows toolchain bootstrap (idempotent).
 .DESCRIPTION
   Installs, in order: Git -> Node 24 LTS -> corepack pnpm@12.22.0 ->
   rustup + Rust 1.100.0 -> platform build deps (VS Build Tools C++ workload
