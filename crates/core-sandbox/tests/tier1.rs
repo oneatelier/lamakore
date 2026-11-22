@@ -718,11 +718,18 @@ fn macos_tcp_connect_fails() {
                 != "CONNECTED",
         "child must NOT report a successful connect"
     );
-    // A denied connect leaves a non-zero exit and/or stderr; the listener
-    // having accepted nothing is the primary enforcement signal (above).
+    // Seatbelt `deny network*` makes bash's `/dev/tcp` connect fail with
+    // EPERM/EACCES; the listener having accepted nothing is the primary
+    // enforcement signal (above), the shell's stderr is the verbatim proof.
+    // Require a connect-related denial (not just any non-zero exit) so a
+    // missing `/dev/tcp` (syntax error) fails instead of faking green.
     assert!(
-        !stderr_text.trim().is_empty() || exit_text.trim() != "0" || code != 0,
-        "expected some connect-failure signal, got stderr={stderr_text:?} exit.txt={exit_text:?} wait={code}"
+        stderr_text.contains("connect:")
+            || stderr_text.contains("Operation not permitted")
+            || stderr_text.contains("Permission denied")
+            || stderr_text.contains("Denied")
+            || stderr_text.contains("denied"),
+        "expected a network-denial signal, got stderr={stderr_text:?} exit.txt={exit_text:?} wait={code}"
     );
     scrub(&dir);
 }
