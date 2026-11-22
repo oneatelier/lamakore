@@ -51,11 +51,32 @@ here. All SHAs changed because the root blob changed — expected.)
 - Remote added (no fetch, no merge, no rebase — per instruction).
 - Pre-push verification: working tree clean, hook green, full gate chain
   green on the exact bytes being pushed.
-- Push: `git push -u origin main --force` — replaces `2d1b9dd`
+- Push command: `git push -u origin main --force` — replaces `2d1b9dd`
   (junk README-only root) with the scrubbed 10-commit history.
 - Commit identity on the wire: org voice + numeric noreply (new commits
   only; history authors untouched — pre-publish automation identities,
   disclosed, not persons).
+
+### Phase 3 outcome: BLOCKED on remote authorization (no repo changes made)
+
+The push authenticates (Git Credential Manager engages a stored
+`github.com` credential) but GitHub answers **HTTP 403: the
+authenticated account lacks write access** to `oneatelier/project-one`.
+This is an authorization problem, not an authentication or history
+problem: the local history is verified-clean and push-ready.
+
+Owner action required (any one):
+1. Grant the authenticated account write access to the repo (collaborator
+   with Write, or org membership with repository access), or
+2. Re-authenticate GCM with an account/token that has `contents:write`
+   (fine-grained PAT needs Contents: read+write on this repo; classic
+   PAT needs the `repo` scope), then tell me to retry the identical
+   command above.
+3. If SSO enforcement applies to `oneatelier`, authorize the token/SSO
+   session for the org.
+
+On retry I will re-run the pre-push gate chain first (nothing ships
+without a green tree), then push `--force` as instructed.
 
 ## Phase 4 — CI watch (filled after the push)
 
