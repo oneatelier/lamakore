@@ -49,6 +49,9 @@ const CONSTITUTIVE = new Set([
 function isAllowed(rel) {
   const posix = rel.split(path.sep).join('/');
   if (posix === 'branding.config.json') return true;
+  // The pinned commit identity is constitutive like the brand itself: it must
+  // name the org voice, and it is verified byte-for-byte by scan-author.
+  if (posix === '.hygiene/identity.json') return true;
   if (GENERATED.has(posix)) return true;
   if (CONSTITUTIVE.has(posix)) return true;
   if (posix === 'CHANGELOG.md') return true;

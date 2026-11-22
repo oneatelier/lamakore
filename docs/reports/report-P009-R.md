@@ -43,8 +43,8 @@ pinned-identity tests; full suite re-run pre-commit).
 | 9 | `d1763866b32e9203079f82bbcb42cb1dc44c4519` | `d6dd1f8feeb3d51743e5f5f96c03d9917d4f05d8` | feat(P008) |
 | 10 | `5ca4b8ba1d6a02aa74516dc3394000671d5f6a75` | `f5a902867b14efd9e2714c7687842f153ba77384` | feat(P009) |
 
-(Full 40-char SHAs recorded in the push transcript below; abbreviated
-here. All SHAs changed because the root blob changed — expected.)
+(All SHAs full-length above. Every SHA changed because the root blob
+changed — expected. Paired by commit message order.)
 
 ## Phase 3 — Publish (junk root replaced, never merged)
 
