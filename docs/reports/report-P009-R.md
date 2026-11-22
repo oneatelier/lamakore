@@ -65,7 +65,7 @@ changed — expected. Paired by commit message order.)
 
 ## Phase 4 — CI watch (observed, not asserted)
 
-Push `d3515f1` (`fix(P009-R): CI adopts pinned identity`):
+Push `d3515f7` (`fix(P009-R): CI adopts pinned identity`):
 - `ci` run `45006644024` — **SUCCESS**: `verify (ubuntu-latest)` ✓ 42s,
   `verify (macos-latest)` ✓ 30s, `verify (windows-latest)` ✓ 1m20s.
   All 15 steps green on all three, including `cargo test --workspace`
@@ -81,6 +81,33 @@ Push `d3515f1` (`fix(P009-R): CI adopts pinned identity`):
   follow-up policy decision, not a P009-R blocker (those PRs are not ours).
 - Rule honored throughout: fix forward (`d3515f7`), re-watch to green,
   never claim unobserved runs.
+- Scoreboard manual dispatch `45007127032` **failed as designed**: the bot's
+  direct push was refused by branch protection ("4 of 4 required status
+  checks are expected" — chicken-and-egg, since checks only run on push).
+  Resolution (`9213018`): the workflow no longer commits; it uploads the
+  scoreboard as a run artifact (`actions/upload-artifact` pinned
+  `cf430e03…`), keeping `contents: read`. Re-dispatched as run
+  `45007525795` — **SUCCESS**. The committed
+  `artifacts/parity-scoreboard.md` stays the human-reviewed honest-empty
+  baseline; nightly runs carry fresh evidence as artifacts.
+  https://github.com/oneatelier/project-one/actions/runs/45007525795
+- Branch protection applied via `gh api` (response verified): required
+  checks `ci / verify (ubuntu-latest)`, `ci / verify (macos-latest)`,
+  `ci / verify (windows-latest)`, `hygiene / hygiene` (strict, must pass);
+  linear history required; force pushes and deletions blocked; no required
+  reviews (would deadlock a solo maintainer — documented, not deferred
+  lightly); no required signatures (key ceremony pending, per plan);
+  `enforce_admins: false` so the owner can still push directly.
+- README badges now point at the live workflow runs
+  (`actions/workflows/ci.yml/badge.svg`,
+  `actions/workflows/hygiene.yml/badge.svg`) instead of the local
+  evidence files.
+- Post-mapping commits (same org-voice identity, DCO-signed, TZ=UTC):
+  `6161eb8` feat(P009-R: owner identity), `3d83f87` docs(P009-R:
+  phase 1-3 outcome), `52a3285` fix(P009-R: brand-lint exemption),
+  `d3515f7` fix(P009-R: CI identity adoption), `086590d`
+  docs(P009-R: badges + green phase 4), `9213018` fix(P009-R:
+  scoreboard uploads artifact). Final public root: 16 commits.
 
 ## Standing rules restated
 
