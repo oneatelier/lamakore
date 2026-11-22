@@ -5,8 +5,12 @@ on:
     - cron: "0 3 * * *"
   workflow_dispatch:
 
+# Nightly scoreboard: regenerates artifacts/parity-scoreboard.md and attaches
+# it as a run artifact. It never commits (branch protection would reject a
+# bot push without green checks, correctly) — the committed file stays the
+# human-reviewed baseline; nightly runs carry fresh evidence as artifacts.
 permissions:
-  contents: write
+  contents: read
 
 defaults:
   run:
@@ -23,9 +27,8 @@ jobs:
           node-version: "24"
       - name: regenerate parity scoreboard
         run: node scripts/gen-scoreboard.mjs
-      - name: commit scoreboard if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add artifacts/parity-scoreboard.md
-          git diff --cached --quiet || git commit -m "chore(scoreboard): nightly parity scoreboard" && git push
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: parity-scoreboard
+          path: artifacts/parity-scoreboard.md
+          if-no-files-found: error
