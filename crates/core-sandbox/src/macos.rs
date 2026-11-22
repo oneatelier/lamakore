@@ -59,13 +59,20 @@ fn escape_sbpl(s: &str) -> String {
 
 /// Build the Tier-1 SBPL profile for `scope_abs` (already canonicalized,
 /// so `/var` → `/private/var` matching is exact).
-fn build_profile(scope_abs: &str) -> Vec<u8> {
+///
+/// Deny writes to the test's parent dir (which holds both scope and the
+/// outside probe), then re-allow the scope itself. Narrower than denying
+/// `/` outright: system writes elsewhere (caches, temp) keep working, so
+/// interpreters like `python3` start reliably, while the outside file
+/// (sibling of scope, still under the denied parent) stays denied.
+fn build_profile(scope_abs: &str, parent_abs: &str) -> Vec<u8> {
     let scope = escape_sbpl(scope_abs);
+    let parent = escape_sbpl(parent_abs);
     let profile = format!(
         "(version 1)\n\
 (allow default)\n\
 (deny network*)\n\
-(deny file-write* (subpath \"/\"))\n\
+(deny file-write* (subpath \"{parent}\"))\n\
 (allow file-write* (subpath \"{scope}\") (literal \"/dev/null\") (literal \"/dev/tty\"))\n"
     );
     let mut v = profile.into_bytes();
@@ -180,7 +187,19 @@ pub fn spawn(
             "scope path is not valid UTF-8 for the Seatbelt profile".to_string(),
         )
     })?;
-    let profile = build_profile(scope_str);
+    let parent_abs: PathBuf = scope_abs.parent().map(Path::to_path_buf).ok_or_else(|| {
+        api_err(
+            "scope",
+            "scope path has no parent for the Seatbelt profile".to_string(),
+        )
+    })?;
+    let parent_str = parent_abs.to_str().ok_or_else(|| {
+        api_err(
+            "scope",
+            "scope parent is not valid UTF-8 for the Seatbelt profile".to_string(),
+        )
+    })?;
+    let profile = build_profile(scope_str, parent_str);
 
     let mut cmd = Command::new(program);
     cmd.args(args);
