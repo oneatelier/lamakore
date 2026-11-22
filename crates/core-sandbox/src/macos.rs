@@ -73,7 +73,7 @@ fn build_profile(scope_abs: &str, parent_abs: &str) -> Vec<u8> {
 (allow default)\n\
 (deny network*)\n\
 (deny file-write* (subpath \"{parent}\"))\n\
-(allow file-write* (subpath \"{scope}\") (literal \"/dev/null\") (literal \"/dev/tty\"))\n"
+(allow file-write* (subpath \"{scope}\") (subpath \"/dev\"))\n"
     );
     let mut v = profile.into_bytes();
     v.push(0);
