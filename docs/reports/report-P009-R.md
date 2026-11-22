@@ -98,10 +98,16 @@ Push `d3515f7` (`fix(P009-R): CI adopts pinned identity`):
   reviews (would deadlock a solo maintainer — documented, not deferred
   lightly); no required signatures (key ceremony pending, per plan);
   `enforce_admins: false` so the owner can still push directly.
-- README badges now point at the live workflow runs
+- README badges point at the live workflow runs
   (`actions/workflows/ci.yml/badge.svg`,
-  `actions/workflows/hygiene.yml/badge.svg`) instead of the local
-  evidence files.
+  `actions/workflows/hygiene.yml/badge.svg`).
+Final verification pass (report commit `4188e8c`): `ci` run
+[45007799144](https://github.com/oneatelier/project-one/actions/runs/45007799144)
+— ubuntu ✓ 29s, macos ✓ 53s, windows ✓ 1m27s, all 15 steps green;
+`hygiene` run
+[45007799072](https://github.com/oneatelier/project-one/actions/runs/45007799072)
+— SUCCESS. No red anywhere.
+
 - Post-mapping commits (same org-voice identity, DCO-signed, TZ=UTC):
   `6161eb8` feat(P009-R: owner identity), `3d83f87` docs(P009-R:
   phase 1-3 outcome), `52a3285` fix(P009-R: brand-lint exemption),
