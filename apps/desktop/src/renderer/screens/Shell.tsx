@@ -1,9 +1,10 @@
 // Shell: the designed application shell — title bar, left rail, main canvas,
-// status strip with the daemon connection state. Four real states:
-// connecting, connected, unreachable (with recovery), degraded (with retry).
+// status strip with the daemon connection state. All four states are built
+// from the shared state components; every state is fully designed.
 import React from 'react';
 import type { ThemeName } from '../../../../../packages/ui/src/theme/themes.js';
 import type { ConnState } from '../../main/daemon.js';
+import { DegradedState, EmptyState, ErrorState, LoadingState } from '../components/states.js';
 
 export interface ShellProps {
   conn: ConnState;
@@ -47,7 +48,7 @@ function Bar({ children }: { children?: React.ReactNode }): React.JSX.Element {
   );
 }
 
-export function Shell(props: ShellProps) {
+export function Shell(props: ShellProps): React.JSX.Element {
   const { conn } = props;
   return React.createElement(
     'main',
@@ -79,8 +80,8 @@ export function Shell(props: ShellProps) {
             {
               key: t,
               type: 'button',
-              'aria-pressed': t === props.theme,
               onClick: () => props.setTheme(t),
+              'aria-pressed': t === props.theme,
               style: {
                 WebkitAppRegion: 'no-drag',
                 backgroundColor: t === props.theme ? 'var(--brass-primary)' : 'transparent',
@@ -139,11 +140,7 @@ export function Shell(props: ShellProps) {
         'section',
         { style: { flex: 1, padding: 'var(--space-s6)', overflow: 'auto' } },
         conn === 'connecting' &&
-          React.createElement(
-            'div',
-            { role: 'status', style: { color: 'var(--text-secondary)', fontSize: 'var(--text-t16)' } },
-            'Connecting to the daemon — hang tight.',
-          ),
+          React.createElement(LoadingState, { label: 'Connecting to the daemon — hang tight.' }),
         conn === 'connected' &&
           React.createElement(
             'div',
@@ -158,74 +155,33 @@ export function Shell(props: ShellProps) {
               { style: { color: 'var(--text-secondary)', fontSize: 'var(--text-t14)' } },
               `Daemon ${props.daemon} · build ${props.build} · wire/1 handshake verified.`,
             ),
+            React.createElement(EmptyState, {
+              title: 'The canvas starts empty.',
+              body: 'Ask anything. Tools run sandboxed; every mutation asks first.',
+            }),
           ),
         conn === 'unreachable' &&
-          React.createElement(
-            'div',
-            { role: 'alert', style: { backgroundColor: 'var(--surface-raised)', borderRadius: 'var(--radius-r12)', padding: 'var(--space-s6)' } },
-            React.createElement(
-              'h1',
-              { style: { fontFamily: 'var(--font-display)', fontSize: 'var(--text-t26)', margin: '0 0 var(--space-s2)' } },
-              'Daemon unreachable',
-            ),
-            React.createElement(
-              'p',
-              { style: { color: 'var(--text-secondary)', fontSize: 'var(--text-t14)' } },
-              'The trusted core stopped answering. Your work is safe — reconnect to resume.',
-            ),
-            React.createElement(
-              'button',
-              {
-                type: 'button',
-                onClick: props.onRetry,
-                style: {
-                  marginTop: 'var(--space-s4)',
-                  backgroundColor: 'var(--brass-primary)',
-                  color: 'var(--surface-void)',
-                  border: 'none',
-                  borderRadius: 'var(--radius-r8)',
-                  padding: 'var(--space-s2) var(--space-s4)',
-                  cursor: 'pointer',
-                  fontSize: 'var(--text-t14)',
-                },
-              },
-              'Retry connection',
-            ),
-          ),
+          React.createElement(ErrorState, {
+            title: 'Daemon unreachable',
+            cause: 'The trusted core stopped answering.',
+            fix: 'Your work is safe — reconnect to resume.',
+            actionLabel: 'Retry connection',
+            onAction: props.onRetry,
+          }),
         conn === 'degraded' &&
           React.createElement(
             'div',
-            { role: 'alert', style: { backgroundColor: 'var(--surface-raised)', borderRadius: 'var(--radius-r12)', padding: 'var(--space-s4)', marginBottom: 'var(--space-s4)' } },
+            null,
+            React.createElement(DegradedState, {
+              body: 'Daemon is slow or spilling events — answers may lag.',
+              actionLabel: 'Retry now',
+              onAction: props.onRetry,
+            }),
             React.createElement(
               'p',
-              { style: { color: 'var(--text-primary)', fontSize: 'var(--text-t14)', margin: 0 } },
-              'Daemon is slow or spilling events — answers may lag. ',
-              React.createElement(
-                'button',
-                {
-                  type: 'button',
-                  onClick: props.onRetry,
-                  style: {
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    color: 'var(--brass-primary)',
-                    cursor: 'pointer',
-                    fontSize: 'var(--text-t14)',
-                    textDecoration: 'underline',
-                  },
-                },
-                'Retry now',
-              ),
+              { style: { color: 'var(--text-secondary)', fontSize: 'var(--text-t14)' } },
+              'Working degraded — new tasks are queued behind health recovery.',
             ),
-          ),
-        (conn === 'connected' || conn === 'degraded') &&
-          React.createElement(
-            'div',
-            { style: { color: 'var(--text-secondary)', fontSize: 'var(--text-t14)' } },
-            conn === 'degraded'
-              ? 'Working degraded — new tasks are queued behind health recovery.'
-              : 'Ask anything. Tools run sandboxed; every mutation asks first.',
           ),
       ),
     ),

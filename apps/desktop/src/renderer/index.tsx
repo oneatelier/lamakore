@@ -7,7 +7,8 @@ import { App } from './App.js';
 const params = new URLSearchParams(location.search);
 const theme = params.get('theme') as ThemeName | null;
 const conn = params.get('conn') as ConnState | null;
+const screen = params.get('screen');
 
 createRoot(document.getElementById('root') as HTMLElement).render(
-  React.createElement(App, { forcedConn: conn, initialTheme: theme ?? undefined }),
+  React.createElement(App, { forcedConn: conn, initialTheme: theme ?? undefined, forcedScreen: screen }),
 );

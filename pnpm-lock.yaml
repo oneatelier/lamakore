@@ -190,6 +190,12 @@ importers:
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
+      gifenc:
+        specifier: ^1.0.3
+        version: 1.0.3
+      pngjs:
+        specifier: ^7.0.0
+        version: 7.0.0
       puppeteer:
         specifier: ^25.18.1
         version: 25.18.1
@@ -586,6 +592,9 @@ packages:
     resolution: {integrity: sha512-XjH1AECxf0giL2V1aU8vKyRR2ppRUb5c0EvT7zuJTokQ74bNo52zOtghqdWIqrhUD79fo3x0WfKZdOqxF6LG1Q==}
     engines: {node: '>=18'}
 
+  gifenc@1.0.3:
+    resolution: {integrity: sha512-xdr6AdrfGBcfzncONUOlXMBuc5wJDtOueE3c5rdG0oNgtINLD+f2iFZltrBRZYzACRbKr+mSVU/x98zv2u3jmw==}
+
   graceful-fs@4.2.12:
     resolution: {integrity: sha512-iuyGF2E4oafQfPsRrG2wtY2ILupMhvtdrhzrxB+0VcjsPpSPttpfYdjnGFGsTi5MaJFjI1jOKHPQ6UTbTj9TAw==}
 
@@ -602,6 +611,10 @@ packages:
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
+
+  pngjs@7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
 
   progress@2.0.3:
     resolution: {integrity: sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==}
@@ -948,6 +961,8 @@ snapshots:
 
   get-east-asian-width@1.7.0: {}
 
+  gifenc@1.0.3: {}
+
   graceful-fs@4.2.12: {}
 
   lilconfig@3.1.5: {}
@@ -957,6 +972,8 @@ snapshots:
   modern-tar@0.8.6: {}
 
   ms@2.1.3: {}
+
+  pngjs@7.0.0: {}
 
   progress@2.0.3: {}
 
