@@ -8,6 +8,7 @@
  * closed with a remediation hint.
  * Usage: scan-author.mjs [--root DIR] [--staged]
  *   [--author-name N --author-email E --committer-name N --committer-email E]
+ *   [--author-only] [--allow-bot-author]
  */
 import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -64,10 +65,24 @@ function main() {
   const authorMail = get('--author-email') ?? gitIdent(root, 'GIT_AUTHOR_IDENT')?.email ?? null;
   const committer = get('--committer-name') ?? gitIdent(root, 'GIT_COMMITTER_IDENT')?.name ?? null;
   const committerMail = get('--committer-email') ?? gitIdent(root, 'GIT_COMMITTER_IDENT')?.email ?? null;
-  const pairs = [
-    ['author', author, authorMail],
-    ['committer', committer, committerMail],
-  ];
+  // --author-only: verify the author alone (used for push events on main).
+  // GitHub's rebase-merge preserves the commit author but rewrites the
+  // committer to the merger, so the committer cannot be pinned there; the
+  // PR-event check (full author+committer on the head SHA) is the strict
+  // gate, and this push-event check confirms what landed.
+  // --allow-bot-author: additionally accept the exact dependabot identity as
+  // author (future grouped patch/minor merges land with a dependabot author;
+  // spoofs cannot reach main because the PR-event gate rejects them first).
+  const authorOnly = args.includes('--author-only');
+  const allowBot = args.includes('--allow-bot-author');
+  const BOT_NAME = 'dependabot[bot]';
+  const BOT_MAIL = '49699333+dependabot[bot]@users.noreply.github.com';
+  const pairs = authorOnly
+    ? [['author', author, authorMail]]
+    : [
+        ['author', author, authorMail],
+        ['committer', committer, committerMail],
+      ];
   let bad = 0;
   for (const [role, name, mail] of pairs) {
     const tag = role === 'author' ? 'GIT_AUTHOR' : 'GIT_COMMITTER';
@@ -77,6 +92,9 @@ function main() {
       continue;
     }
     if (pinned) {
+      if (role === 'author' && allowBot && name === BOT_NAME && mail === BOT_MAIL) {
+        continue;
+      }
       // GitHub-mediated merges (rebase-merge via the web UI/API) preserve the
       // author but record the committer as GitHub itself. Allow exactly that
       // pair so the PR-only flow stays green; anything else must be pinned.

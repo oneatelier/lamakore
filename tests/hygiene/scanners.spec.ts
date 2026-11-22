@@ -152,8 +152,54 @@ test('author rejects a spoofed dependabot[bot] git identity (actor-gating only)'
 
 test('hygiene workflow gates the author skip on github.actor, not the commit string', () => {
   const yml = readFileSync(join(ROOT, '.github', 'workflows', 'hygiene.yml'), 'utf8');
-  assert.match(yml, /if:\s*github\.actor\s*!=\s*'dependabot\[bot\]'/);
+  assert.match(yml, /if:\s*github\.event_name\s*==\s*'pull_request'\s*&&\s*github\.actor\s*!=\s*'dependabot\[bot\]'/);
+  assert.match(yml, /if:\s*github\.event_name\s*==\s*'push'/);
+  assert.match(yml, /--author-only\s+--allow-bot-author/);
   assert.doesNotMatch(yml, /HEAD_NAME.*dependabot|author-name.*dependabot/i);
+});
+
+test('author-only accepts a pinned author regardless of committer (post-merge main)', () => {
+  const dir = fresh('author-only-pass');
+  mkdirSync(join(dir, '.hygiene'), { recursive: true });
+  writeFileSync(join(dir, 'branding.config.json'), readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  const pinned = JSON.parse(readFileSync(join(ROOT, '.hygiene', 'identity.json'), 'utf8'));
+  writeFileSync(join(dir, '.hygiene', 'identity.json'), JSON.stringify(pinned));
+  const ok = runCli(join(HYG, 'scan-author.mjs'), [
+    '--root', dir, '--author-only',
+    '--author-name', pinned.name, '--author-email', pinned.email,
+  ]);
+  assert.equal(ok.exit, 0, ok.output);
+});
+
+test('author-only still rejects a spoofed dependabot[bot] author without the bot flag', () => {
+  const dir = fresh('author-only-spoof-fail');
+  mkdirSync(join(dir, '.hygiene'), { recursive: true });
+  writeFileSync(join(dir, 'branding.config.json'), readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  writeFileSync(join(dir, '.hygiene', 'identity.json'), readFileSync(join(ROOT, '.hygiene', 'identity.json'), 'utf8'));
+  const spoofMail = ['49699333+dependabot[bot]', '@users.noreply.github.com'].join('');
+  const bad = runCli(join(HYG, 'scan-author.mjs'), [
+    '--root', dir, '--author-only',
+    '--author-name', 'dependabot[bot]', '--author-email', spoofMail,
+  ]);
+  assert.notEqual(bad.exit, 0, 'spoofed author must fail even in author-only mode');
+});
+
+test('author-only with bot flag accepts the exact dependabot identity, rejects near-misses', () => {
+  const dir = fresh('author-only-bot');
+  mkdirSync(join(dir, '.hygiene'), { recursive: true });
+  writeFileSync(join(dir, 'branding.config.json'), readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  writeFileSync(join(dir, '.hygiene', 'identity.json'), readFileSync(join(ROOT, '.hygiene', 'identity.json'), 'utf8'));
+  const spoofMail = ['49699333+dependabot[bot]', '@users.noreply.github.com'].join('');
+  const ok = runCli(join(HYG, 'scan-author.mjs'), [
+    '--root', dir, '--author-only', '--allow-bot-author',
+    '--author-name', 'dependabot[bot]', '--author-email', spoofMail,
+  ]);
+  assert.equal(ok.exit, 0, ok.output);
+  const near = runCli(join(HYG, 'scan-author.mjs'), [
+    '--root', dir, '--author-only', '--allow-bot-author',
+    '--author-name', 'dependabot[bot]', '--author-email', 'dependabot@example.com',
+  ]);
+  assert.notEqual(near.exit, 0, 'near-miss bot email must fail');
 });
 
 test('author accepts a pinned author with a GitHub-mediated committer (rebase-merge)', () => {
