@@ -9,8 +9,10 @@
 #![deny(clippy::expect_used)]
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 
+mod capability;
 mod server;
 
+use capability::KeyProvider as _;
 use core_protocol::wire::WireError;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -48,6 +50,23 @@ async fn main() -> Result<(), WireError> {
         std::process::exit(2);
     });
     let spill_path = socket_path.with_extension("spill.log");
+
+    // Device root key for capability minting/verification. Fail closed:
+    // without it no dispatch path can be gated, so there is no safe mode.
+    let root_key = match capability::KeychainProvider::device_root().load_or_create_key() {
+        Ok(k) => k,
+        Err(e) => {
+            eprintln!("device root key unavailable ({e}); refusing to start");
+            std::process::exit(2);
+        }
+    };
+    let db_path = match core_store::Store::default_db_path() {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("cannot resolve store path ({e}); refusing to start");
+            std::process::exit(2);
+        }
+    };
 
     let (shutdown_tx, _shutdown_rx) = tokio::sync::watch::channel(false);
 
@@ -95,6 +114,9 @@ async fn main() -> Result<(), WireError> {
         token,
         build: build_string(),
         started: Instant::now(),
+        root_key,
+        db_path,
+        pending_requests: std::sync::Mutex::new(std::collections::HashMap::new()),
     };
     println!("ready socket={} build={}", socket_path.display(), cfg.build);
     match server::run(cfg, shutdown_tx.subscribe()).await {

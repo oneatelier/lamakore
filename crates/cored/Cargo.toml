@@ -7,6 +7,18 @@ description = "Trusted daemon: policy, secrets, and sandboxed tool dispatch"
 
 [dependencies]
 core-protocol = { path = "../core-protocol" }
+core-store = { path = "../core-store" }
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
 tokio = { version = "1", features = ["full"] }
+hmac = "0.13"
+sha2 = "0.11"
+getrandom = "0.4"
+keyring = "4"
+
+[features]
+# In-memory key provider for headless CI (no OS keychain available).
+# The real-keychain path is always compiled; its test skips honestly when
+# no keychain is reachable and must pass owner-locally with evidence.
+mock-keyring = []
