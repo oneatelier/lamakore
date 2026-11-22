@@ -255,6 +255,36 @@ fn ensure_parent_dir(path: &Path) -> Result<(), StoreError> {
     lock_down_dir(dir)
 }
 
+/// A persisted capability grant row.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Grant {
+    /// Row id; referenced by issued tokens as `grant_id`.
+    pub id: i64,
+    /// Tool (method) the grant covers.
+    pub tool: String,
+    /// Scope document, JSON text (`{"prefix": "<path>"}`).
+    pub scope_json: String,
+    /// Grant time, epoch seconds as text.
+    pub granted_at: String,
+    /// Expiry, epoch seconds as text, or `None` for no expiry.
+    pub expires_at: Option<String>,
+}
+
+/// An audit event row.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AuditEvent {
+    /// Row id.
+    pub id: i64,
+    /// Event time, epoch seconds as text.
+    pub ts: String,
+    /// Who acted (token id when presented, else a fixed label).
+    pub actor: String,
+    /// What happened (`capability.granted`, `capability.denied`, ...).
+    pub action: String,
+    /// Machine-readable detail, JSON text.
+    pub detail: String,
+}
+
 impl Store {
     /// Open (creating if needed) the database at `path`, enforcing the
     /// owner-only ACL, pragmas, migrations, and integrity check.
@@ -539,6 +569,118 @@ impl Store {
             .query_map([], |row| row.get::<_, String>(0))?
             .collect::<Result<Vec<_>, _>>()?;
         Ok(names)
+    }
+
+    /// Narrow (or refresh) a grant's scope and expiry in place. The grant
+    /// id is stable, so outstanding wider tokens deny via scope-narrowing.
+    pub fn update_grant(
+        &self,
+        grant_id: i64,
+        scope_json: &str,
+        granted_at: &str,
+        expires_at: &str,
+    ) -> Result<(), StoreError> {
+        self.conn.execute(
+            "UPDATE capability_grants SET scope_json = ?1, granted_at = ?2, \
+             expires_at = ?3 WHERE id = ?4",
+            rusqlite::params![scope_json, granted_at, expires_at, grant_id],
+        )?;
+        Ok(())
+    }
+
+    /// Delete a capability grant row by id. Returns rows removed (0 or 1).
+    pub fn delete_grant(&self, grant_id: i64) -> Result<i64, StoreError> {
+        let n = self.conn.execute(
+            "DELETE FROM capability_grants WHERE id = ?1",
+            rusqlite::params![grant_id],
+        )?;
+        Ok(n as i64)
+    }
+
+    /// Look up a capability grant row by id.
+    pub fn grant_by_id(&self, grant_id: i64) -> Result<Option<Grant>, StoreError> {
+        use rusqlite::OptionalExtension as _;
+        let hit: Option<Grant> = self
+            .conn
+            .query_row(
+                "SELECT id, tool_name, scope_json, granted_at, expires_at \
+                 FROM capability_grants WHERE id = ?1",
+                rusqlite::params![grant_id],
+                |row| {
+                    Ok(Grant {
+                        id: row.get(0)?,
+                        tool: row.get(1)?,
+                        scope_json: row.get(2)?,
+                        granted_at: row.get(3)?,
+                        expires_at: row.get(4)?,
+                    })
+                },
+            )
+            .optional()?;
+        Ok(hit)
+    }
+
+    /// Look up a capability grant row by tool name.
+    pub fn grant_by_tool(&self, tool: &str) -> Result<Option<Grant>, StoreError> {
+        use rusqlite::OptionalExtension as _;
+        let hit: Option<Grant> = self
+            .conn
+            .query_row(
+                "SELECT id, tool_name, scope_json, granted_at, expires_at \
+                 FROM capability_grants WHERE tool_name = ?1",
+                rusqlite::params![tool],
+                |row| {
+                    Ok(Grant {
+                        id: row.get(0)?,
+                        tool: row.get(1)?,
+                        scope_json: row.get(2)?,
+                        granted_at: row.get(3)?,
+                        expires_at: row.get(4)?,
+                    })
+                },
+            )
+            .optional()?;
+        Ok(hit)
+    }
+
+    /// All capability grant rows, ordered by id.
+    pub fn list_grants(&self) -> Result<Vec<Grant>, StoreError> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, tool_name, scope_json, granted_at, expires_at \
+             FROM capability_grants ORDER BY id",
+        )?;
+        let rows = stmt
+            .query_map([], |row| {
+                Ok(Grant {
+                    id: row.get(0)?,
+                    tool: row.get(1)?,
+                    scope_json: row.get(2)?,
+                    granted_at: row.get(3)?,
+                    expires_at: row.get(4)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(rows)
+    }
+
+    /// Recent audit events, newest last, up to `limit` rows.
+    pub fn audit_events(&self, limit: i64) -> Result<Vec<AuditEvent>, StoreError> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, ts, actor, action, detail_json FROM audit_events \
+             ORDER BY id LIMIT ?1",
+        )?;
+        let rows = stmt
+            .query_map(rusqlite::params![limit], |row| {
+                Ok(AuditEvent {
+                    id: row.get(0)?,
+                    ts: row.get(1)?,
+                    actor: row.get(2)?,
+                    action: row.get(3)?,
+                    detail: row.get(4)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(rows)
     }
 
     /// Table names present in the database (for schema assertions).

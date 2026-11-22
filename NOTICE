@@ -27,3 +27,25 @@ PROJECT ONE is licensed under the Apache License, Version 2.0
   `bundled` compiles SQLite in — no system dependency on any OS — with WAL,
   forward-only embedded migrations, and an integrity check on every open.
   No secret columns: credentials stay in the vault.
+
+### hmac 0.13 + sha2 0.11 + getrandom 0.4 (P012)
+
+- **Version:** hmac 0.13.x, sha2 0.11.x, getrandom 0.4.x (crates.io).
+- **License:** MIT OR Apache-2.0 (all three; getrandom dual MIT/Apache).
+- **Upstream:** https://github.com/RustCrypto/hmacs (hmac),
+  https://github.com/RustCrypto/hashes (sha2),
+  https://github.com/rust-random/getrandom (getrandom).
+- **Reason (P012):** capability tokens for `cored` (`crates/cored`):
+  HMAC-SHA256 mint/verify under the device root key; OS randomness for
+  first-run key creation. No new network or system surface.
+
+### keyring 4.2 (P012)
+
+- **Version:** keyring 4.2.x, default `v1` feature (crates.io).
+- **License:** MIT OR Apache-2.0.
+- **Upstream:** https://github.com/open-source-cooperative/keyring-rs
+- **Reason (P012):** device root key storage in the OS keychain
+  (Credential Manager / Keychain / Secret Service). Headless CI cannot
+  reach a keychain: CI runs the in-memory `mock-keyring` suite and
+  honestly skips the live-keychain test; owner-local runs carry the real
+  evidence (see report-P012).

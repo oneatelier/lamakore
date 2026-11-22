@@ -16,7 +16,17 @@ pub const PROTOCOL_ID: &str = "wire/1";
 /// Current protocol version. Any other version is refused.
 pub const PROTOCOL_VERSION: u32 = 1;
 /// Method names the daemon will ever execute (validated on both sides).
-pub const ALLOWED_METHODS: &[&str] = &["system.health", "system.info"];
+/// Capability issuance (`capability.*`) is allowlisted like health/info: you
+/// cannot require a capability in order to obtain one. Every other method
+/// must present a valid capability (see `cored::capability`).
+pub const ALLOWED_METHODS: &[&str] = &[
+    "system.health",
+    "system.info",
+    "capability.request",
+    "capability.grant",
+    "capability.revoke",
+    "capability.list",
+];
 /// Handshake must complete within this window or the peer is dropped.
 pub const HANDSHAKE_TIMEOUT_SECS: u64 = 5;
 /// Maximum single frame size (8 MiB); larger frames are a protocol error.
@@ -220,7 +230,12 @@ mod tests {
     fn allowlist_gates_methods() {
         assert!(is_allowed("system.health"));
         assert!(is_allowed("system.info"));
+        assert!(is_allowed("capability.request"));
+        assert!(is_allowed("capability.grant"));
+        assert!(is_allowed("capability.revoke"));
+        assert!(is_allowed("capability.list"));
         assert!(!is_allowed("shell.exec"));
+        assert!(!is_allowed("tool.exec"));
         assert!(!is_allowed("system.health "));
     }
 
