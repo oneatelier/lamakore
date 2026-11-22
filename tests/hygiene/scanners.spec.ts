@@ -130,6 +130,32 @@ test('author rejects a valid-shape address when a pinned identity exists', () =>
   assert.match(bad.output, /identity\.json/);
 });
 
+test('author rejects a spoofed dependabot[bot] git identity (actor-gating only)', () => {
+  // The hygiene workflow skips the author step ONLY when
+  // github.actor == 'dependabot[bot]'. A human pushing commits with
+  // git-author "dependabot[bot]" must STILL FAIL this scanner.
+  const dir = fresh('author-spoof-fail');
+  mkdirSync(join(dir, '.hygiene'), { recursive: true });
+  writeFileSync(join(dir, 'branding.config.json'), readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  writeFileSync(join(dir, '.hygiene', 'identity.json'), readFileSync(join(ROOT, '.hygiene', 'identity.json'), 'utf8'));
+  const spoofMail = ['49699333+dependabot[bot]', '@users.noreply.github.com'].join('');
+  const bad = runCli(join(HYG, 'scan-author.mjs'), [
+    '--root', dir,
+    '--author-name', 'dependabot[bot]',
+    '--author-email', spoofMail,
+    '--committer-name', 'dependabot[bot]',
+    '--committer-email', spoofMail,
+  ]);
+  assert.notEqual(bad.exit, 0, 'spoofed dependabot[bot] git identity must fail the author check');
+  assert.match(bad.output, /identity\.json/);
+});
+
+test('hygiene workflow gates the author skip on github.actor, not the commit string', () => {
+  const yml = readFileSync(join(ROOT, '.github', 'workflows', 'hygiene.yml'), 'utf8');
+  assert.match(yml, /if:\s*github\.actor\s*!=\s*'dependabot\[bot\]'/);
+  assert.doesNotMatch(yml, /HEAD_NAME.*dependabot|author-name.*dependabot/i);
+});
+
 test('paths rejects a home-directory path with a username', () => {
   const dir = fresh('paths-fail');
   const homePath = ['C:\\Users\\', 'jdoe', '\\docs\\secret.txt'].join('');

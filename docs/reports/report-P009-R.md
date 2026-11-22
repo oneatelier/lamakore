@@ -122,3 +122,18 @@ Final verification pass (report commit `4188e8c`): `ci` run
   identity; `.mailmap` stays empty; TZ=UTC for this release line.
 - No personal names, no home paths, no tokens anywhere in history.
   Verified by grep over every blob, not by assertion.
+
+## Appendix — cargo test summary, ci run 45006644024 (push `d3515f7`)
+
+- Run: https://github.com/oneatelier/project-one/actions/runs/45006644024 —
+  SUCCESS (ubuntu ✓ 42s, macos ✓ 30s, windows ✓ 1m20s; all 15 steps green
+  on all three, including `cargo test --workspace`).
+- `cargo test --workspace` verbatim `test result` lines (all `ok`, 0 failed):
+  - ubuntu: `test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out` (1 suite) + 8 × `test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out`.
+  - macos: `test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out` (1 suite) + 8 × `test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out`.
+  - windows: `test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out` (1 suite) + 8 × `test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out`.
+- The 6 passing tests (identical on all three OSes):
+  `wire::tests::allowlist_gates_methods`, `events::tests::cumulative_ack_forgets_prefix`,
+  `wire::tests::frames_round_trip`, `wire::tests::handshake_accepts_exact_match`,
+  `wire::tests::handshake_refuses_each_mismatch`,
+  `events::tests::overflow_spills_to_disk_instead_of_dropping`.
