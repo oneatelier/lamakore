@@ -77,6 +77,12 @@ function main() {
       continue;
     }
     if (pinned) {
+      // GitHub-mediated merges (rebase-merge via the web UI/API) preserve the
+      // author but record the committer as GitHub itself. Allow exactly that
+      // pair so the PR-only flow stays green; anything else must be pinned.
+      if (role === 'committer' && name === 'GitHub' && mail === 'noreply@github.com') {
+        continue;
+      }
       if (name !== pinned.name) {
         console.log(`${role}:${tag}_NAME got ${JSON.stringify(name)}; want exactly ${JSON.stringify(pinned.name)} (.hygiene/identity.json is the only accepted identity)`);
         bad += 1;
