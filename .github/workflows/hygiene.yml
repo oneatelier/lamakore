@@ -24,6 +24,14 @@ jobs:
       - run: corepack prepare pnpm@12.22.0 --activate
         env:
           COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+      - name: adopt pinned commit identity
+        run: |
+          NAME="$(node -p "require('./.hygiene/identity.json').name")"
+          MAIL="$(node -p "require('./.hygiene/identity.json').email")"
+          git config user.name "$NAME"
+          git config user.email "$MAIL"
+          git config user.name
+          git config user.email
       - name: full-tree hygiene scan
         run: node scripts/hygiene/run-all.mjs
       - name: staged-author check on the pushed HEAD
