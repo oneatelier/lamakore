@@ -659,7 +659,8 @@ fn macos_write_outside_scope_denied() {
 }
 
 /// Child TCP connect must fail (`deny network*`).
-/// Uses bash `/dev/tcp` (no Python dependency).
+/// Uses Python sockets (reliable connect API; bash `/dev/tcp` availability
+/// varies across macOS shells).
 #[cfg(target_os = "macos")]
 #[test]
 fn macos_tcp_connect_fails() {
@@ -674,21 +675,18 @@ fn macos_tcp_connect_fails() {
     let dir = fresh_dir("macos-net-deny");
     let scope = dir.join("scope");
     std::fs::create_dir_all(&scope).unwrap();
-    let stderr_file = scope.join("netstderr.txt");
-    let exit_file = scope.join("netexit.txt");
+    let denial = scope.join("netdenial.txt");
     let unexpected = scope.join("netok.txt");
 
-    // bash `/dev/tcp` connect must fail under `deny network*`.
-    let sh_cmd = format!(
-        "exec 3<>/dev/tcp/127.0.0.1/{port} 2> '{e}'; echo $? > '{x}'; echo CONNECTED > '{u}' 2>/dev/null || true",
-        e = stderr_file.display(),
-        x = exit_file.display(),
+    let py = format!(
+        "import socket,sys\ntry:\n s=socket.socket()\n s.settimeout(3)\n s.connect(('127.0.0.1',{port}))\n open('{u}','w').write('UNEXPECTED_CONNECTED')\nexcept Exception as e:\n open('{d}','w').write(str(e))\n sys.exit(1)\n",
         u = unexpected.display(),
+        d = denial.display(),
     );
     let child = match core_sandbox::spawn_sandboxed(
         &scope,
-        OsStr::new("/bin/bash"),
-        &[OsStr::new("-c"), OsStr::new(&sh_cmd)],
+        OsStr::new("python3"),
+        &[OsStr::new("-c"), OsStr::new(&py)],
     ) {
         Ok(c) => c,
         Err(e) if posix_unavailable(&e) => {
@@ -700,37 +698,25 @@ fn macos_tcp_connect_fails() {
     };
     let pid = child.pid();
     let code = child.wait().unwrap();
-    println!("macos-net-deny: child pid={pid} wait-code={code}");
+    println!("macos-net-deny: child pid={pid} exit={code}");
 
     match listener.accept() {
         Ok(_) => panic!("SANDBOX BROKEN: listener accepted a connection from pid {pid}"),
         Err(e) => println!("macos-net-deny: listener got no connection as expected: {e}"),
     }
-    let stderr_text = std::fs::read_to_string(&stderr_file).unwrap_or_default();
-    let exit_text = std::fs::read_to_string(&exit_file).unwrap_or_default();
-    println!("macos-net-deny netstderr.txt:\n{stderr_text}");
-    println!("macos-net-deny netexit.txt:\n{exit_text}");
+    let denial_text = std::fs::read_to_string(&denial).unwrap_or_default();
+    println!("macos-net-deny netdenial.txt:\n{denial_text}");
+    assert!(denial.exists(), "child must record the connect failure");
     assert!(
-        !unexpected.exists()
-            || std::fs::read_to_string(&unexpected)
-                .unwrap_or_default()
-                .trim()
-                != "CONNECTED",
+        !unexpected.exists(),
         "child must NOT report a successful connect"
     );
-    // Seatbelt `deny network*` makes bash's `/dev/tcp` connect fail with
-    // EPERM/EACCES; the listener having accepted nothing is the primary
-    // enforcement signal (above), the shell's stderr is the verbatim proof.
-    // Require a connect-related denial (not just any non-zero exit) so a
-    // missing `/dev/tcp` (syntax error) fails instead of faking green.
     assert!(
-        stderr_text.contains("connect:")
-            || stderr_text.contains("Operation not permitted")
-            || stderr_text.contains("Permission denied")
-            || stderr_text.contains("Denied")
-            || stderr_text.contains("denied"),
-        "expected a network-denial signal, got stderr={stderr_text:?} exit.txt={exit_text:?} wait={code}"
+        denial_text.contains("Operation not permitted")
+            || denial_text.contains("Permission denied"),
+        "denial must be sandbox EPERM/EACCES, got:\n{denial_text}"
     );
+    assert_ne!(code, 0, "child must exit non-zero on connect failure");
     scrub(&dir);
 }
 
