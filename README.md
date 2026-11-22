@@ -7,13 +7,10 @@ An open-source unified agent desktop: a real window driven by a trusted local co
 > exists yet. The name, the marks, and the registries are all pending
 > clearance (see TRADEMARK.md and ADR-003).
 
-[![CI](docs/reports/report-P005.md)](.github/workflows/ci.yml)
-[![Hygiene](docs/reports/report-P004.md)](.github/workflows/hygiene.yml)
+[![CI](https://github.com/oneatelier/project-one/actions/workflows/ci.yml/badge.svg)](https://github.com/oneatelier/project-one/actions/workflows/ci.yml)
+[![Hygiene](https://github.com/oneatelier/project-one/actions/workflows/hygiene.yml/badge.svg)](https://github.com/oneatelier/project-one/actions/workflows/hygiene.yml)
 [![License: Apache-2.0](LICENSE)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-brass?style=flat)
-<!-- Badges above link to workflow definitions and evidence reports. Run
-     badges light up on the first public push; no runs exist yet, and none
-     are claimed. See docs/reports/report-P009.md. -->
 
 ![First run: the honest welcome screen](assets/demo/P009-first-run.png)
 

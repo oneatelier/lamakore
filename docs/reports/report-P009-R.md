@@ -51,40 +51,36 @@ changed — expected. Paired by commit message order.)
 - Remote added (no fetch, no merge, no rebase — per instruction).
 - Pre-push verification: working tree clean, hook green, full gate chain
   green on the exact bytes being pushed.
-- Push command: `git push -u origin main --force` — replaces `2d1b9dd`
-  (junk README-only root) with the scrubbed 10-commit history.
+- First attempt via GCM-stored credential: **HTTP 403** (wrong account —
+  recorded, not retried blindly).
+- Owner unblocked with `gh` auth (`oneatelier`, scopes `repo` +
+  `workflow` verified); stale GCM credential deleted; `gh` wired as the
+  sole git credential helper.
+- Push: `git push -u origin main --force` → **landed**:
+  `52a3285..d3515f7 main -> main`. Remote `main` =
+  `d3515f7` = local HEAD (verified via `git ls-remote`).
 - Commit identity on the wire: org voice + numeric noreply (new commits
   only; history authors untouched — pre-publish automation identities,
   disclosed, not persons).
 
-### Phase 3 outcome: BLOCKED on remote authorization (no repo changes made)
+## Phase 4 — CI watch (observed, not asserted)
 
-The push authenticates (Git Credential Manager engages a stored
-`github.com` credential) but GitHub answers **HTTP 403: the
-authenticated account lacks write access** to `oneatelier/project-one`.
-This is an authorization problem, not an authentication or history
-problem: the local history is verified-clean and push-ready.
-
-Owner action required (any one):
-1. Grant the authenticated account write access to the repo (collaborator
-   with Write, or org membership with repository access), or
-2. Re-authenticate GCM with an account/token that has `contents:write`
-   (fine-grained PAT needs Contents: read+write on this repo; classic
-   PAT needs the `repo` scope), then tell me to retry the identical
-   command above.
-3. If SSO enforcement applies to `oneatelier`, authorize the token/SSO
-   session for the org.
-
-On retry I will re-run the pre-push gate chain first (nothing ships
-without a green tree), then push `--force` as instructed.
-
-## Phase 4 — CI watch (filled after the push)
-
-- Pending: `ci.yml` (3 OS jobs) + `hygiene.yml` run URLs and conclusions.
-- Expected first genuine failure: `cargo test` (see report-P008 toolchain notes).
-- Rule: fix forward, never mark green without an observed green run.
-- Then: README badges → real workflow badges; branch protection per
-  `docs/guides/branch-protection.md` (exact required checks listed there).
+Push `d3515f1` (`fix(P009-R): CI adopts pinned identity`):
+- `ci` run `45006644024` — **SUCCESS**: `verify (ubuntu-latest)` ✓ 42s,
+  `verify (macos-latest)` ✓ 30s, `verify (windows-latest)` ✓ 1m20s.
+  All 15 steps green on all three, including `cargo test --workspace`
+  (the expected first genuine failure did NOT occur — MSVC is present
+  on all CI images). https://github.com/oneatelier/project-one/actions/runs/45006644024
+- `hygiene` run `45006643958` — **SUCCESS** after the pinned-identity
+  fix. The initial hygiene run (`45006318241`) failed in 13s because
+  the fresh checkout has no git identity configured — the fix makes CI
+  adopt `.hygiene/identity.json` before scanning. No red remains.
+  https://github.com/oneatelier/project-one/actions/runs/45006643958
+- Dependabot is already active (setup-node 7.1.0 + checkout 7.0.1 PRs);
+  its hygiene runs fail on the dependabot[bot] author as designed —
+  follow-up policy decision, not a P009-R blocker (those PRs are not ours).
+- Rule honored throughout: fix forward (`d3515f7`), re-watch to green,
+  never claim unobserved runs.
 
 ## Standing rules restated
 
