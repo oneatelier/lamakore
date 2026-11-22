@@ -12,7 +12,9 @@
 //! `SKIP ... AppContainer unavailable ...` and passes, leaving the STOP
 //! condition to the report (which then requires owner-local evidence).
 
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsStr;
+#[cfg(windows)]
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
