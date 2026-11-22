@@ -95,7 +95,7 @@ async function main() {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--force-color-profile=srgb', `--user-data-dir=${mkdtempSync(path.join(tmpdir(), 'pone-capture-'))}`],
+    args: ['--no-sandbox', '--force-color-profile=srgb', `--user-data-dir=${mkdtempSync(path.join(tmpdir(), 'fixture-capture-'))}`],
   });
   try {
     const ctx = await browser.createBrowserContext();

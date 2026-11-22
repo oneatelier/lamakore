@@ -3,7 +3,9 @@
  * Author-hygiene scanner: the author and committer of the staged commit must
  * use the org voice — the name is derived at runtime from
  * branding.config.json, never written here — plus a noreply address.
- * Anything else fails closed with a remediation hint.
+ * When .hygiene/identity.json exists it names the single accepted
+ * identity and both fields must match it exactly. Anything else fails
+ * closed with a remediation hint.
  * Usage: scan-author.mjs [--root DIR] [--staged]
  *   [--author-name N --author-email E --committer-name N --committer-email E]
  */
@@ -47,6 +49,17 @@ function main() {
   }
   const wantName = `${cfg.productName} Maintainers`;
   const mailRe = /^[A-Za-z0-9_.+-]+\+[^@\s]+@users\.noreply\.github\.com$/;
+  // Pinned identity (P009-R): .hygiene/identity.json names the single
+  // accepted commit identity. When present, BOTH name and email must match
+  // it exactly; the generic noreply rule below only applies to trees without
+  // a pinned identity (templates, forks).
+  let pinned = null;
+  try {
+    const idj = JSON.parse(readFileSync(path.join(root, '.hygiene', 'identity.json'), 'utf8'));
+    if (typeof idj.name === 'string' && typeof idj.email === 'string') pinned = idj;
+  } catch {
+    pinned = null;
+  }
   const author = get('--author-name') ?? gitIdent(root, 'GIT_AUTHOR_IDENT')?.name ?? null;
   const authorMail = get('--author-email') ?? gitIdent(root, 'GIT_AUTHOR_IDENT')?.email ?? null;
   const committer = get('--committer-name') ?? gitIdent(root, 'GIT_COMMITTER_IDENT')?.name ?? null;
@@ -61,6 +74,17 @@ function main() {
     if (name === null || name === '' || mail === null || mail === '') {
       console.log(`${role}:${tag}_NAME cannot determine identity; hint: commit inside the repo or pass --${role}-name/--${role}-email`);
       bad += 1;
+      continue;
+    }
+    if (pinned) {
+      if (name !== pinned.name) {
+        console.log(`${role}:${tag}_NAME got ${JSON.stringify(name)}; want exactly ${JSON.stringify(pinned.name)} (.hygiene/identity.json is the only accepted identity)`);
+        bad += 1;
+      }
+      if (mail !== pinned.email) {
+        console.log(`${role}:${tag}_EMAIL got ${JSON.stringify(mail)}; want exactly ${JSON.stringify(pinned.email)} (.hygiene/identity.json is the only accepted identity)`);
+        bad += 1;
+      }
       continue;
     }
     if (name !== wantName) {

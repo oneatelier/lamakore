@@ -10,7 +10,10 @@ paths, metadata, commit authorship, or fixtures. The repository speaks
 only in the org voice:
 
 - `user.name = "PROJECT ONE Maintainers"` (repo-local, never `--global`)
-- `user.email = <org-id>+<handle>@users.noreply.github.com`
+- `user.email` = the exact address pinned in `.hygiene/identity.json`
+  (currently `359786796+oneatelier@users.noreply.github.com`). No other
+  author or committer identity is accepted — the pre-commit hook enforces
+  an exact match, not just a noreply shape.
 - `.mailmap` stays empty by policy (see ADR-004).
 
 ## 2. Dedicated OS user

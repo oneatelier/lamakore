@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import path from 'node:path';
+import path, { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SPEC_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -106,6 +106,28 @@ test('author accepts the org voice with a noreply address', () => {
     '--committer-email', voiceMail,
   ]);
   assert.equal(r.exit, 0, r.output);
+});
+
+test('author enforces a pinned identity exactly', () => {
+  const dir = fresh('author-pinned-pass');
+  mkdirSync(join(dir, '.hygiene'), { recursive: true });
+  writeFileSync(join(dir, 'branding.config.json'), readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  const pinned = { name: 'Pinned Fixture', email: '000000+fixture@example.invalid' };
+  writeFileSync(join(dir, '.hygiene', 'identity.json'), JSON.stringify(pinned));
+  const args = ['--root', dir, '--author-name', pinned.name, '--author-email', pinned.email, '--committer-name', pinned.name, '--committer-email', pinned.email];
+  const ok = runCli(join(HYG, 'scan-author.mjs'), args);
+  assert.equal(ok.exit, 0, ok.output);
+});
+
+test('author rejects a valid-shape address when a pinned identity exists', () => {
+  const dir = fresh('author-pinned-fail');
+  mkdirSync(join(dir, '.hygiene'), { recursive: true });
+  writeFileSync(join(dir, 'branding.config.json'), readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  writeFileSync(join(dir, '.hygiene', 'identity.json'), JSON.stringify({ name: 'Pinned Fixture', email: '000000+fixture@example.invalid' }));
+  const other = 'someone+else@users.noreply.github.com';
+  const bad = runCli(join(HYG, 'scan-author.mjs'), ['--root', dir, '--author-name', 'Pinned Fixture', '--author-email', other, '--committer-name', 'Pinned Fixture', '--committer-email', other]);
+  assert.notEqual(bad.exit, 0, 'pinned identity must reject even well-formed alternatives');
+  assert.match(bad.output, /identity\.json/);
 });
 
 test('paths rejects a home-directory path with a username', () => {
