@@ -74,6 +74,14 @@ mod tier1;
 #[cfg(windows)]
 pub use tier1::SandboxedChild;
 
+/// Off-Windows placeholder: [`spawn_sandboxed`] always fails here, so this
+/// is never constructed, but the symbol must exist for the shared signature.
+#[cfg(not(windows))]
+#[derive(Debug)]
+pub struct SandboxedChild {
+    _never: std::convert::Infallible,
+}
+
 /// Spawn `program` with `args` confined to Tier-1.
 ///
 /// The child runs with the working directory inside `scope_dir`, which is
