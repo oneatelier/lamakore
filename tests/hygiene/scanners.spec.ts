@@ -156,6 +156,20 @@ test('hygiene workflow gates the author skip on github.actor, not the commit str
   assert.doesNotMatch(yml, /HEAD_NAME.*dependabot|author-name.*dependabot/i);
 });
 
+test('author accepts a pinned author with a GitHub-mediated committer (rebase-merge)', () => {
+  const dir = fresh('author-github-committer-pass');
+  mkdirSync(join(dir, '.hygiene'), { recursive: true });
+  writeFileSync(join(dir, 'branding.config.json'), readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  const pinned = JSON.parse(readFileSync(join(ROOT, '.hygiene', 'identity.json'), 'utf8'));
+  writeFileSync(join(dir, '.hygiene', 'identity.json'), JSON.stringify(pinned));
+  const ok = runCli(join(HYG, 'scan-author.mjs'), [
+    '--root', dir,
+    '--author-name', pinned.name, '--author-email', pinned.email,
+    '--committer-name', 'GitHub', '--committer-email', 'noreply@github.com',
+  ]);
+  assert.equal(ok.exit, 0, ok.output);
+});
+
 test('paths rejects a home-directory path with a username', () => {
   const dir = fresh('paths-fail');
   const homePath = ['C:\\Users\\', 'jdoe', '\\docs\\secret.txt'].join('');

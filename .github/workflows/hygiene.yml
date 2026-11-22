@@ -37,13 +37,22 @@ jobs:
       # Author-identity exemption is actor-gated (github.actor), NOT commit-string
       # gated: a human pushing commits with git-author "dependabot[bot]" still
       # fails this check when the step runs. Content scans above always run.
+      # On pull_request events the checkout is the ephemeral merge commit, so
+      # check the PR head SHA instead (fetched explicitly: shallow clones may
+      # not contain it). On push events check HEAD (linear history: no merges).
       - name: staged-author check on the pushed HEAD
         if: github.actor != 'dependabot[bot]'
         run: |
-          HEAD_NAME="$(git log -1 --format='%an')"
-          HEAD_EMAIL="$(git log -1 --format='%ae')"
-          HEAD_CNAME="$(git log -1 --format='%cn')"
-          HEAD_CEMAIL="$(git log -1 --format='%ce')"
+          if [ -n "${{ github.event.pull_request.head.sha }}" ]; then
+            git fetch --depth 1 origin "${{ github.event.pull_request.head.sha }}"
+            TARGET="${{ github.event.pull_request.head.sha }}"
+          else
+            TARGET="HEAD"
+          fi
+          HEAD_NAME="$(git log -1 --format='%an' "$TARGET")"
+          HEAD_EMAIL="$(git log -1 --format='%ae' "$TARGET")"
+          HEAD_CNAME="$(git log -1 --format='%cn' "$TARGET")"
+          HEAD_CEMAIL="$(git log -1 --format='%ce' "$TARGET")"
           node scripts/hygiene/scan-author.mjs \
             --author-name "$HEAD_NAME" --author-email "$HEAD_EMAIL" \
             --committer-name "$HEAD_CNAME" --committer-email "$HEAD_CEMAIL"
