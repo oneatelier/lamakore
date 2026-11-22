@@ -44,12 +44,24 @@ No change merges unless BOTH gates are evidenced in its report
 ## Branch protection — PR-only flow (enforced, including admins)
 
 - `main` is protected: strict required status checks
-  (`ci / verify (ubuntu-latest)`, `ci / verify (macos-latest)`,
-  `ci / verify (windows-latest)`, `hygiene / hygiene`), linear history,
-  no force pushes, no deletions, and `enforce_admins: true` — the owner
-  cannot push directly either.
+  (`verify (ubuntu-latest)`, `verify (macos-latest)`,
+  `verify (windows-latest)`, `hygiene` — bare job names, exactly as the
+  check runs report them), linear history, no force pushes, no deletions,
+  and `enforce_admins: true` — the owner cannot push directly either.
+  NOTE (P010 finding): the legacy branch-protection `checks` list matches
+  Actions check runs by bare job name. Workflow-qualified strings such as
+  `ci / verify (ubuntu-latest)` are accepted by the API but never match, so
+  every PR stayed unmergeable ("4 of 4 required status checks are
+  expected") until the entries were corrected to bare names.
 - Every change lands via a pull request with all four checks green and a
   rebase-merge; there are no direct pushes to `main`.
+- Identity gates differ by event (see `hygiene.yml`): on `pull_request`
+  the PR head SHA must carry the pinned author AND committer (strict gate;
+  spoofs fail here and can never land). On `push` (post-merge `main`)
+  only the landed author is checked (pinned, or the exact dependabot
+  identity for future grouped patch/minor merges) — GitHub's rebase-merge
+  preserves the author but rewrites the committer to the merger, so a
+  pinned committer cannot hold there.
 - Dependabot is the only bot author exempted from the author-identity rule,
   and the exemption is actor-gated (`github.actor == 'dependabot[bot]'` in
   `hygiene.yml`), never commit-string gated — a human pushing commits with

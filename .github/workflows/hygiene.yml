@@ -39,16 +39,13 @@ jobs:
       # fails this check when the step runs. Content scans above always run.
       # On pull_request events the checkout is the ephemeral merge commit, so
       # check the PR head SHA instead (fetched explicitly: shallow clones may
-      # not contain it). On push events check HEAD (linear history: no merges).
-      - name: staged-author check on the pushed HEAD
-        if: github.actor != 'dependabot[bot]'
+      # not contain it). The PR-event check is the strict gate: author AND
+      # committer must be pinned (a spoofed dependabot author fails here).
+      - name: staged-author check on the PR head SHA
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
         run: |
-          if [ -n "${{ github.event.pull_request.head.sha }}" ]; then
-            git fetch --depth 1 origin "${{ github.event.pull_request.head.sha }}"
-            TARGET="${{ github.event.pull_request.head.sha }}"
-          else
-            TARGET="HEAD"
-          fi
+          git fetch --depth 1 origin "${{ github.event.pull_request.head.sha }}"
+          TARGET="${{ github.event.pull_request.head.sha }}"
           HEAD_NAME="$(git log -1 --format='%an' "$TARGET")"
           HEAD_EMAIL="$(git log -1 --format='%ae' "$TARGET")"
           HEAD_CNAME="$(git log -1 --format='%cn' "$TARGET")"
@@ -56,3 +53,16 @@ jobs:
           node scripts/hygiene/scan-author.mjs \
             --author-name "$HEAD_NAME" --author-email "$HEAD_EMAIL" \
             --committer-name "$HEAD_CNAME" --committer-email "$HEAD_CEMAIL"
+      # On push events (post-merge main) check the landed author only.
+      # GitHub's rebase-merge preserves the author but rewrites the committer
+      # to the merger, so a pinned committer cannot hold here; the PR-event
+      # gate above already vetted the full identity pre-merge. Dependabot
+      # authors are allowed (future grouped patch/minor merges); spoofs
+      # cannot reach main because the PR gate rejects them first.
+      - name: landed-author check on the pushed HEAD
+        if: github.event_name == 'push'
+        run: |
+          HEAD_NAME="$(git log -1 --format='%an' HEAD)"
+          HEAD_EMAIL="$(git log -1 --format='%ae' HEAD)"
+          node scripts/hygiene/scan-author.mjs --author-only --allow-bot-author \
+            --author-name "$HEAD_NAME" --author-email "$HEAD_EMAIL"
