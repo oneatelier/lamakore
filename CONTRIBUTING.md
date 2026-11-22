@@ -40,3 +40,32 @@ No change merges unless BOTH gates are evidenced in its report
 - Never commit secrets (`.env*` is ignored and stays ignored).
 - License headers: new source files carry the Apache-2.0 header naming
   "The PROJECT ONE Authors" — never a personal name.
+
+## Branch protection — PR-only flow (enforced, including admins)
+
+- `main` is protected: strict required status checks
+  (`ci / verify (ubuntu-latest)`, `ci / verify (macos-latest)`,
+  `ci / verify (windows-latest)`, `hygiene / hygiene`), linear history,
+  no force pushes, no deletions, and `enforce_admins: true` — the owner
+  cannot push directly either.
+- Every change lands via a pull request with all four checks green and a
+  rebase-merge; there are no direct pushes to `main`.
+- Dependabot is the only bot author exempted from the author-identity rule,
+  and the exemption is actor-gated (`github.actor == 'dependabot[bot]'` in
+  `hygiene.yml`), never commit-string gated — a human pushing commits with
+  git-author `dependabot[bot]` still fails `scan-author.mjs` (covered by
+  `tests/hygiene/scanners.spec.ts`). All content scans still run on
+  dependabot PRs.
+
+## Why required reviews and signatures stay off (for now)
+
+- Required reviews: off. With a single maintainer, requiring a review would
+  deadlock every PR (including the owner's own and dependabot's) — no second
+  human exists to approve. Recorded, not deferred lightly.
+- Required signatures: off. The commit-signing key ceremony is still pending;
+  DCO sign-off (`git commit -s`) plus the pinned author identity
+  (`.hygiene/identity.json` + `scan-author.mjs`) is the interim provenance
+  control.
+- Revisit trigger: the arrival of the first external contributor. At that
+  point enable at least one required approving review (and re-evaluate
+  required signatures once the key ceremony is complete).

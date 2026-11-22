@@ -32,9 +32,13 @@ jobs:
           git config user.email "$MAIL"
           git config user.name
           git config user.email
-      - name: full-tree hygiene scan
+      - name: full-tree hygiene scan (content scans always run, including dependabot PRs)
         run: node scripts/hygiene/run-all.mjs
+      # Author-identity exemption is actor-gated (github.actor), NOT commit-string
+      # gated: a human pushing commits with git-author "dependabot[bot]" still
+      # fails this check when the step runs. Content scans above always run.
       - name: staged-author check on the pushed HEAD
+        if: github.actor != 'dependabot[bot]'
         run: |
           HEAD_NAME="$(git log -1 --format='%an')"
           HEAD_EMAIL="$(git log -1 --format='%ae')"

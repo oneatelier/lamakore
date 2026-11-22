@@ -9,7 +9,7 @@ An open-source unified agent desktop: a real window driven by a trusted local co
 
 [![CI](https://github.com/oneatelier/project-one/actions/workflows/ci.yml/badge.svg)](https://github.com/oneatelier/project-one/actions/workflows/ci.yml)
 [![Hygiene](https://github.com/oneatelier/project-one/actions/workflows/hygiene.yml/badge.svg)](https://github.com/oneatelier/project-one/actions/workflows/hygiene.yml)
-[![License: Apache-2.0](LICENSE)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-brass?style=flat)
 
 ![First run: the honest welcome screen](assets/demo/P009-first-run.png)
