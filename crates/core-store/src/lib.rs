@@ -301,10 +301,10 @@ impl Store {
         }
         #[cfg(not(any(windows, target_os = "macos")))]
         {
-            if let Ok(xdg) = std::env::var("XDG_DATA_HOME") {
-                if !xdg.trim().is_empty() {
-                    return Ok(PathBuf::from(xdg));
-                }
+            if let Ok(xdg) = std::env::var("XDG_DATA_HOME")
+                && !xdg.trim().is_empty()
+            {
+                return Ok(PathBuf::from(xdg));
             }
             let home = std::env::var("HOME")
                 .map_err(|_| StoreError::Config("HOME is not set".to_string()))?;
