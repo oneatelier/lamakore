@@ -13,7 +13,7 @@
     "visual_excellence": {
       "weight": 15,
       "anchors": {
-        "0": { "label": "Unstyled default components", "evidence": "scripts/detect-placeholders.mjs failing on tsx" },
+        "0": { "label": "Unstyled default components", "evidence": "the unstyled-component lint failing on tsx" },
         "50": { "label": "Token sheet renders live branding", "evidence": "docs/reports/report-P007 with screenshots" },
         "75": { "label": "Themed accessible views across the shell", "evidence": "contrast and tab-order measurements in the P007x reports" },
         "100": { "label": "Best-in-class look on all three OS images", "evidence": "P007 token-sheet gate plus independent design review note" }

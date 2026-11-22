@@ -7,7 +7,9 @@
     "skipLibCheck": true,
     "types": ["node"],
     "noEmit": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["packages/branding/src/**/*.ts", "tests/**/*.ts"]
+  "include": ["packages/branding/src/**/*.ts", "packages/ui/src/**/*.ts", "apps/**/*.ts", "apps/**/*.tsx", "tests/**/*.ts"]
 }

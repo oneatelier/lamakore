@@ -32,7 +32,7 @@ function storedTheme(): ThemeName | null {
   return null;
 }
 
-export function ThemeProvider({ children, initial }: { children: React.ReactNode; initial?: ThemeName }) {
+export function ThemeProvider({ children, initial }: { children?: React.ReactNode; initial?: ThemeName }) {
   const [theme, setThemeState] = useState<ThemeName>(() => initial ?? storedTheme() ?? systemTheme());
   const [reducedMotion, setReducedMotion] = useState<boolean>(() =>
     typeof window !== 'undefined' && typeof window.matchMedia === 'function'

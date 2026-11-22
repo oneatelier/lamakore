@@ -1,0 +1,8 @@
+# P008: local Windows builds use the GNU target with zig as the linker
+# (zigcc.exe forwards to `zig cc -target x86_64-windows-gnu`).
+# The default target stays msvc, so CI (which has MSVC) is unaffected.
+# Host build scripts ALSO need the zig linker locally: set
+#   $env:CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER = "<...>\zigcc.exe"
+# in the shell (documented in report-P008; never committed, CI has link.exe).
+[target.x86_64-pc-windows-gnu]
+linker = "zigcc"

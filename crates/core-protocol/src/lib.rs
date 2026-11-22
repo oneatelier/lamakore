@@ -4,8 +4,16 @@
 //!
 //! Versioned explicitly so renderer, daemon, and tools can negotiate
 //! compatibility at session start instead of assuming it.
+//!
+//! Panics are a bug: unwraps and expects are denied outside tests.
+
+#![deny(clippy::unwrap_used)]
+#![deny(clippy::expect_used)]
+#![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 
 pub mod brand;
+pub mod events;
+pub mod wire;
 
 /// Wire-protocol version negotiated at session start.
 pub const PROTOCOL_VERSION: u32 = 0;

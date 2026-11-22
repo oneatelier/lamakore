@@ -18,7 +18,7 @@ import {
 import { THEME_NAMES, themeLabel } from '../../../../../packages/ui/src/theme/themes.js';
 import { useTheme } from '../../../../../packages/ui/src/theme/ThemeProvider.js';
 
-function Swatch({ label, cssVar, sub }: { label: string; cssVar: string; sub: string }) {
+function Swatch({ label, cssVar, sub }: { label: string; cssVar: string; sub: string }): React.JSX.Element {
   return React.createElement(
     'div',
     { style: { display: 'flex', gap: 'var(--space-s3)', alignItems: 'center' } },
@@ -41,7 +41,7 @@ function Swatch({ label, cssVar, sub }: { label: string; cssVar: string; sub: st
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: { title: string; children?: React.ReactNode }): React.JSX.Element {
   return React.createElement(
     'section',
     { style: { marginTop: 'var(--space-s8)' } },

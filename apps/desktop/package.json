@@ -1,0 +1,11 @@
+{
+  "name": "@project-one/desktop",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Unified agent desktop shell",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "node ../../scripts/build-desktop.mjs"
+  }
+}
