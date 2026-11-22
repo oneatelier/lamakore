@@ -16,5 +16,14 @@ PROJECT ONE is licensed under the Apache License, Version 2.0
 
 ## Entries
 
-No third-party components attributed yet. The scaffold (P002) ships with
-zero runtime dependencies by design.
+### rusqlite 0.43.0 + libsqlite3-sys 0.40.0 (bundled SQLite)
+
+- **Version:** rusqlite 0.43.0 (crates.io), libsqlite3-sys 0.40.0, built with
+  the `bundled` feature; the SQLite amalgamation it compiles is public
+  domain, the Rust shims are MIT (build helper `cc` 1.11.3 is MIT/Apache-2.0).
+- **License:** MIT (rusqlite, libsqlite3-sys).
+- **Upstream:** https://github.com/rusqlite/rusqlite
+- **Reason (P011):** durable local store for `cored` (`crates/core-store`).
+  `bundled` compiles SQLite in — no system dependency on any OS — with WAL,
+  forward-only embedded migrations, and an integrity check on every open.
+  No secret columns: credentials stay in the vault.
