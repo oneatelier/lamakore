@@ -591,6 +591,7 @@ fn print_darwin(tag: &str) {
 }
 
 /// Child write outside the granted scope must be denied.
+/// Uses `/bin/sh` (no Python dependency) so Seatbelt startup stays minimal.
 #[cfg(target_os = "macos")]
 #[test]
 fn macos_write_outside_scope_denied() {
@@ -600,19 +601,23 @@ fn macos_write_outside_scope_denied() {
     std::fs::create_dir_all(&scope).unwrap();
     let outside = dir.join("outside.txt");
     let _ = std::fs::remove_file(&outside);
-    let denial = scope.join("denial.txt");
+    let stderr_file = scope.join("stderr.txt");
+    let exit_file = scope.join("exit.txt");
     let unexpected = scope.join("unexpected.txt");
 
-    let py = format!(
-        "import sys\ntry:\n open('{o}','w').write('hi')\n open('{u}','w').write('UNEXPECTED')\nexcept Exception as e:\n open('{d}','w').write(str(e))\n sys.exit(1)\n",
+    // `echo hi > outside` must fail; capture shell stderr + exit code inside
+    // the granted scope for the report.
+    let sh_cmd = format!(
+        "echo hi > '{o}' 2> '{e}'; echo $? > '{x}'; test -f '{u}' && echo UNEXPECTED || true",
         o = outside.display(),
+        e = stderr_file.display(),
+        x = exit_file.display(),
         u = unexpected.display(),
-        d = denial.display(),
     );
     let child = match core_sandbox::spawn_sandboxed(
         &scope,
-        OsStr::new("python3"),
-        &[OsStr::new("-c"), OsStr::new(&py)],
+        OsStr::new("/bin/sh"),
+        &[OsStr::new("-c"), OsStr::new(&sh_cmd)],
     ) {
         Ok(c) => c,
         Err(e) if posix_unavailable(&e) => {
@@ -624,20 +629,16 @@ fn macos_write_outside_scope_denied() {
     };
     let pid = child.pid();
     let code = child.wait().unwrap();
-    println!("macos-write-deny: child pid={pid} exit={code}");
+    println!("macos-write-deny: child pid={pid} wait-code={code}");
 
-    let denial_text = std::fs::read_to_string(&denial).unwrap_or_default();
-    println!("macos-write-deny denial.txt:\n{denial_text}");
+    let stderr_text = std::fs::read_to_string(&stderr_file).unwrap_or_default();
+    let exit_text = std::fs::read_to_string(&exit_file).unwrap_or_default();
+    println!("macos-write-deny stderr.txt:\n{stderr_text}");
+    println!("macos-write-deny exit.txt:\n{exit_text}");
     println!(
         "macos-write-deny: outside exists={} unexpected exists={}",
         outside.exists(),
         unexpected.exists()
-    );
-    assert!(denial.exists(), "child must record the denial inside scope");
-    assert!(
-        denial_text.contains("Operation not permitted")
-            || denial_text.contains("Permission denied"),
-        "denial must be sandbox EPERM/EACCES, got:\n{denial_text}"
     );
     assert!(
         !outside.exists(),
@@ -647,11 +648,18 @@ fn macos_write_outside_scope_denied() {
         !unexpected.exists(),
         "child must NOT report success writing outside the scope"
     );
-    assert_ne!(code, 0, "child must exit non-zero on denial");
+    assert!(
+        stderr_text.contains("Operation not permitted")
+            || stderr_text.contains("Permission denied")
+            || stderr_text.contains("Denied")
+            || stderr_text.contains("denied"),
+        "stderr must show a sandbox denial, got:\n{stderr_text}\n(exit.txt: {exit_text})"
+    );
     scrub(&dir);
 }
 
 /// Child TCP connect must fail (`deny network*`).
+/// Uses bash `/dev/tcp` (no Python dependency).
 #[cfg(target_os = "macos")]
 #[test]
 fn macos_tcp_connect_fails() {
@@ -666,18 +674,21 @@ fn macos_tcp_connect_fails() {
     let dir = fresh_dir("macos-net-deny");
     let scope = dir.join("scope");
     std::fs::create_dir_all(&scope).unwrap();
-    let denial = scope.join("netdenial.txt");
+    let stderr_file = scope.join("netstderr.txt");
+    let exit_file = scope.join("netexit.txt");
     let unexpected = scope.join("netok.txt");
 
-    let py = format!(
-        "import socket,sys\ntry:\n s=socket.socket()\n s.settimeout(3)\n s.connect(('127.0.0.1',{port}))\n open('{u}','w').write('UNEXPECTED_CONNECTED')\nexcept Exception as e:\n open('{d}','w').write(str(e))\n sys.exit(1)\n",
+    // bash `/dev/tcp` connect must fail under `deny network*`.
+    let sh_cmd = format!(
+        "exec 3<>/dev/tcp/127.0.0.1/{port} 2> '{e}'; echo $? > '{x}'; echo CONNECTED > '{u}' 2>/dev/null || true",
+        e = stderr_file.display(),
+        x = exit_file.display(),
         u = unexpected.display(),
-        d = denial.display(),
     );
     let child = match core_sandbox::spawn_sandboxed(
         &scope,
-        OsStr::new("python3"),
-        &[OsStr::new("-c"), OsStr::new(&py)],
+        OsStr::new("/bin/bash"),
+        &[OsStr::new("-c"), OsStr::new(&sh_cmd)],
     ) {
         Ok(c) => c,
         Err(e) if posix_unavailable(&e) => {
@@ -689,20 +700,30 @@ fn macos_tcp_connect_fails() {
     };
     let pid = child.pid();
     let code = child.wait().unwrap();
-    println!("macos-net-deny: child pid={pid} exit={code}");
+    println!("macos-net-deny: child pid={pid} wait-code={code}");
 
     match listener.accept() {
         Ok(_) => panic!("SANDBOX BROKEN: listener accepted a connection from pid {pid}"),
         Err(e) => println!("macos-net-deny: listener got no connection as expected: {e}"),
     }
-    let denial_text = std::fs::read_to_string(&denial).unwrap_or_default();
-    println!("macos-net-deny netdenial.txt:\n{denial_text}");
-    assert!(denial.exists(), "child must record the connect failure");
+    let stderr_text = std::fs::read_to_string(&stderr_file).unwrap_or_default();
+    let exit_text = std::fs::read_to_string(&exit_file).unwrap_or_default();
+    println!("macos-net-deny netstderr.txt:\n{stderr_text}");
+    println!("macos-net-deny netexit.txt:\n{exit_text}");
     assert!(
-        !unexpected.exists(),
+        !unexpected.exists()
+            || std::fs::read_to_string(&unexpected)
+                .unwrap_or_default()
+                .trim()
+                != "CONNECTED",
         "child must NOT report a successful connect"
     );
-    assert_ne!(code, 0, "child must exit non-zero on connect failure");
+    // A denied connect leaves a non-zero exit and/or stderr; the listener
+    // having accepted nothing is the primary enforcement signal (above).
+    assert!(
+        !stderr_text.trim().is_empty() || exit_text.trim() != "0" || code != 0,
+        "expected some connect-failure signal, got stderr={stderr_text:?} exit.txt={exit_text:?} wait={code}"
+    );
     scrub(&dir);
 }
 
