@@ -7,7 +7,8 @@
 //! feature.
 //!
 //! Dispatch rule (see `dispatch` in `server.rs`): `system.health`,
-//! `system.info` and the `capability.*` issuance methods need no token.
+//! `system.info` and the issuance-plane methods (`capability.*`,
+//! `approval.*`, `audit.verify`, `audit.export`) need no token.
 //! EVERY other method must present a valid token or the call is refused
 //! with wire error `CAPABILITY_DENIED` (-32001) and an audit event is
 //! recorded. There is no path around [`Gate::authorize`].
@@ -34,6 +35,11 @@ pub const ISSUANCE_METHODS: &[&str] = &[
     "capability.grant",
     "capability.revoke",
     "capability.list",
+    "approval.request",
+    "approval.decide",
+    "approval.status",
+    "audit.verify",
+    "audit.export",
 ];
 
 const TOKEN_VERSION: u8 = 1;
@@ -398,18 +404,25 @@ impl KeyProvider for MockProvider {
 }
 
 /// A pending `capability.request`: issuance intent awaiting `grant`.
+/// `approval.request` extends this with a human-readable `reason` and a
+/// decision deadline (`expires_at = requested_at + ttl_secs`): the deck
+/// card counts down to it and expiry is DEFAULT DENY.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PendingRequest {
-    /// Request id (`req-...`).
+    /// Request id (`req-...` or `apr-...` for approval cards).
     pub id: String,
     /// Requested tool (method).
     pub tool: String,
     /// Requested scope prefix.
     pub scope: String,
-    /// Requested TTL, seconds.
+    /// Requested TTL, seconds (also the decision window for approvals).
     pub ttl_secs: u64,
     /// Request time, epoch seconds.
     pub requested_at: u64,
+    /// Human-readable reason shown on the deck card (`approval.request`).
+    pub reason: String,
+    /// Decision deadline, epoch seconds (`requested_at + ttl_secs`).
+    pub expires_at: u64,
 }
 
 /// The enforcement point. Holds only the root key; the store (grants +
@@ -430,6 +443,66 @@ pub struct GrantArgs<'a> {
     pub ttl_secs: u64,
     /// Pending request this grant fulfills, if any.
     pub request_id: Option<&'a str>,
+}
+
+/// Arguments for [`Gate::request_approval`] (bundled so the method stays
+/// under the argument-count lint).
+pub struct ApprovalRequestArgs<'a> {
+    /// Tool (method) the grant covers; must be non-empty.
+    pub tool: &'a str,
+    /// Scope prefix the grant covers.
+    pub scope: &'a str,
+    /// Human-readable reason shown on the deck card.
+    pub reason: &'a str,
+    /// Time to live, seconds; must be >= 1.
+    pub ttl_secs: u64,
+}
+
+/// Arguments for [`Gate::decide_approval`] (bundled so the method stays
+/// under the argument-count lint).
+pub struct DecideArgs<'a> {
+    /// Pending request this decision fulfills.
+    pub request_id: &'a str,
+    /// `approve` or `deny`.
+    pub decision: &'a str,
+    /// Narrowed scope, if the deck edited it (must narrow, never widen).
+    pub scope: Option<&'a str>,
+    /// Who decided (`deck`, `countdown`, ...).
+    pub decided_by: &'a str,
+    /// Free-text note persisted with the decision.
+    pub note: &'a str,
+}
+
+/// Arguments for persisting an approval decision (bundled so the method
+/// stays under the argument-count lint).
+pub struct PersistArgs<'a> {
+    /// Tool (method) the decision covers.
+    pub tool: &'a str,
+    /// Effective (possibly narrowed) scope.
+    pub scope: &'a str,
+    /// `allow`, `allow_once`, or `deny`.
+    pub decision: &'a str,
+    /// Who decided.
+    pub decided_by: &'a str,
+    /// Free-text note persisted with the decision.
+    pub note: &'a str,
+}
+
+/// Pending-request id namespace: issuance plane (`req-…`) vs approval
+/// plane (`apr-…`). Private: only the two `request_*` entry points pick one.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum RequestPrefix {
+    Capability,
+    Approval,
+}
+
+impl RequestPrefix {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Capability => "req",
+            Self::Approval => "apr",
+        }
+    }
 }
 
 impl Gate {
@@ -457,32 +530,119 @@ impl Gate {
         ttl_secs: u64,
         now: u64,
     ) -> Result<String, CapError> {
+        self.request_with_reason(
+            store,
+            pending,
+            ApprovalRequestArgs {
+                tool,
+                scope,
+                reason: "",
+                ttl_secs,
+            },
+            now,
+            RequestPrefix::Capability,
+        )
+    }
+
+    /// Record an approval request (`approval.request {tool, scope, reason, ttl}`).
+    /// Returns the request id; the deck card counts down to `expires_at` and
+    /// expiry is DEFAULT DENY.
+    pub fn request_approval(
+        &self,
+        store: &Store,
+        pending: &Mutex<HashMap<String, PendingRequest>>,
+        args: ApprovalRequestArgs<'_>,
+        now: u64,
+    ) -> Result<ApprovalFiled, CapError> {
+        let ApprovalRequestArgs {
+            tool,
+            scope,
+            reason,
+            ttl_secs,
+        } = args;
         if tool.is_empty() {
             return Err(CapError::InvalidParams("tool is empty".to_string()));
         }
         if ttl_secs == 0 {
             return Err(CapError::InvalidParams("ttl_secs must be >= 1".to_string()));
         }
-        let id = self.unique_id("req", now);
+        let id = self.request_with_reason(
+            store,
+            pending,
+            ApprovalRequestArgs {
+                tool,
+                scope,
+                reason,
+                ttl_secs,
+            },
+            now,
+            RequestPrefix::Approval,
+        )?;
+        let expires_at = now
+            .checked_add(ttl_secs)
+            .ok_or_else(|| CapError::InvalidParams("ttl overflows".to_string()))?;
+        self.audit(
+            store,
+            now,
+            "wire-client",
+            "approval.requested",
+            &serde_json::json!({"request_id": id, "tool": tool, "scope": scope}).to_string(),
+        );
+        Ok(ApprovalFiled {
+            request_id: id,
+            expires_at,
+        })
+    }
+
+    fn request_with_reason(
+        &self,
+        store: &Store,
+        pending: &Mutex<HashMap<String, PendingRequest>>,
+        args: ApprovalRequestArgs<'_>,
+        now: u64,
+        prefix: RequestPrefix,
+    ) -> Result<String, CapError> {
+        let ApprovalRequestArgs {
+            tool,
+            scope,
+            reason,
+            ttl_secs,
+        } = args;
+        if tool.is_empty() {
+            return Err(CapError::InvalidParams("tool is empty".to_string()));
+        }
+        if ttl_secs == 0 {
+            return Err(CapError::InvalidParams("ttl_secs must be >= 1".to_string()));
+        }
+        let id = self.unique_id(prefix.as_str(), now);
+        let expires_at = now
+            .checked_add(ttl_secs)
+            .ok_or_else(|| CapError::InvalidParams("ttl overflows".to_string()))?;
         let req = PendingRequest {
             id: id.clone(),
             tool: tool.to_string(),
             scope: scope.to_string(),
             ttl_secs,
             requested_at: now,
+            reason: reason.to_string(),
+            expires_at,
         };
         let mut map = pending
             .lock()
             .map_err(|_| CapError::Crypto("pending-request lock poisoned".to_string()))?;
         map.insert(id.clone(), req);
         drop(map);
-        self.audit(
-            store,
-            now,
-            "wire-client",
-            "capability.requested",
-            &serde_json::json!({"request_id": id, "tool": tool}).to_string(),
-        );
+        // Capability-plane audit stays for `req-*`; approval-plane audit is
+        // added by request_approval so both planes stay queryable.
+        if prefix == RequestPrefix::Capability {
+            self.audit(
+                store,
+                now,
+                "wire-client",
+                "capability.requested",
+                &serde_json::json!({"request_id": id, "tool": tool}).to_string(),
+            );
+        }
         Ok(id)
     }
 
@@ -577,6 +737,242 @@ impl Gate {
         Ok(())
     }
 
+    /// Decide a pending approval (`approval.decide`).
+    /// `decision` is `"approve"` or `"deny"`; `scope` may only narrow the
+    /// requested scope. Approve mints a signed capability token and persists
+    /// `allow` (`allow_once` when narrowed); deny/expired persists `deny`.
+    /// Expiry is checked first: a late decision is DEFAULT DENY.
+    pub fn decide_approval(
+        &self,
+        store: &Store,
+        pending: &Mutex<HashMap<String, PendingRequest>>,
+        args: DecideArgs<'_>,
+        now: u64,
+    ) -> Result<ApprovalDecided, CapError> {
+        let DecideArgs {
+            request_id,
+            decision,
+            scope,
+            decided_by,
+            note,
+        } = args;
+        let req = {
+            let map = pending
+                .lock()
+                .map_err(|_| CapError::Crypto("pending-request lock poisoned".to_string()))?;
+            map.get(request_id)
+                .cloned()
+                .ok_or(CapError::UnknownRequest)?
+        };
+        // Countdown expiry -> DEFAULT DENY, persisted + audited.
+        if now >= req.expires_at {
+            {
+                let mut map = pending
+                    .lock()
+                    .map_err(|_| CapError::Crypto("pending-request lock poisoned".to_string()))?;
+                map.remove(request_id);
+            }
+            self.persist_approval(
+                store,
+                PersistArgs {
+                    tool: &req.tool,
+                    scope: &req.scope,
+                    decision: "deny",
+                    decided_by: if decided_by.is_empty() {
+                        "countdown"
+                    } else {
+                        decided_by
+                    },
+                    note: "expired: default deny",
+                },
+                &now.to_string(),
+            )?;
+            self.audit(
+                store,
+                now,
+                "deck",
+                "approval.expired",
+                &serde_json::json!({"request_id": request_id, "tool": req.tool}).to_string(),
+            );
+            return Ok(ApprovalDecided {
+                approved: false,
+                decision: "expired".to_string(),
+                token: None,
+                grant_id: None,
+                scope: req.scope,
+                expires_at: req.expires_at.to_string(),
+            });
+        }
+        if decision == "deny" {
+            {
+                let mut map = pending
+                    .lock()
+                    .map_err(|_| CapError::Crypto("pending-request lock poisoned".to_string()))?;
+                map.remove(request_id);
+            }
+            self.persist_approval(
+                store,
+                PersistArgs {
+                    tool: &req.tool,
+                    scope: &req.scope,
+                    decision: "deny",
+                    decided_by: if decided_by.is_empty() {
+                        "deck"
+                    } else {
+                        decided_by
+                    },
+                    note,
+                },
+                &now.to_string(),
+            )?;
+            self.audit(
+                store,
+                now,
+                "deck",
+                "approval.denied",
+                &serde_json::json!({"request_id": request_id, "tool": req.tool}).to_string(),
+            );
+            return Ok(ApprovalDecided {
+                approved: false,
+                decision: "denied".to_string(),
+                token: None,
+                grant_id: None,
+                scope: req.scope,
+                expires_at: req.expires_at.to_string(),
+            });
+        }
+        if decision != "approve" {
+            return Err(CapError::InvalidParams(
+                "decision must be approve or deny".to_string(),
+            ));
+        }
+        let final_scope = scope.unwrap_or(&req.scope);
+        if !scope_narrows_or_equal(&req.scope, final_scope) {
+            return Err(CapError::ScopeWidening);
+        }
+        let edited = final_scope != req.scope;
+        // Mint the signed token via the standard grant path. The pending
+        // entry is consumed by grant(); approval audit follows.
+        let issued = self.grant(
+            store,
+            pending,
+            GrantArgs {
+                tool: &req.tool,
+                scope: final_scope,
+                ttl_secs: req.ttl_secs,
+                request_id: Some(request_id),
+            },
+            now,
+        )?;
+        let db_decision = if edited { "allow_once" } else { "allow" };
+        self.persist_approval(
+            store,
+            PersistArgs {
+                tool: &req.tool,
+                scope: final_scope,
+                decision: db_decision,
+                decided_by: if decided_by.is_empty() {
+                    "deck"
+                } else {
+                    decided_by
+                },
+                note,
+            },
+            &now.to_string(),
+        )?;
+        self.audit(
+            store,
+            now,
+            "deck",
+            if edited {
+                "approval.edited"
+            } else {
+                "approval.approved"
+            },
+            &serde_json::json!({"request_id": request_id, "tool": req.tool, "scope": final_scope})
+                .to_string(),
+        );
+        Ok(ApprovalDecided {
+            approved: true,
+            decision: if edited {
+                "edited".to_string()
+            } else {
+                "approved".to_string()
+            },
+            token: Some(issued.token),
+            grant_id: Some(issued.grant_id),
+            scope: final_scope.to_string(),
+            expires_at: issued.expires_at,
+        })
+    }
+
+    /// Current status of a pending approval (checks expiry first).
+    /// Store-independent: status derives from the in-memory pending map.
+    pub fn approval_status(
+        &self,
+        pending: &Mutex<HashMap<String, PendingRequest>>,
+        request_id: &str,
+        now: u64,
+    ) -> Result<ApprovalStatus, CapError> {
+        let req = {
+            let map = pending
+                .lock()
+                .map_err(|_| CapError::Crypto("pending-request lock poisoned".to_string()))?;
+            map.get(request_id)
+                .cloned()
+                .ok_or(CapError::UnknownRequest)?
+        };
+        if now >= req.expires_at {
+            return Ok(ApprovalStatus {
+                status: "expired".to_string(),
+                tool: req.tool,
+                scope: req.scope,
+                reason: req.reason,
+                expires_at: req.expires_at.to_string(),
+            });
+        }
+        Ok(ApprovalStatus {
+            status: "pending".to_string(),
+            tool: req.tool,
+            scope: req.scope,
+            reason: req.reason,
+            expires_at: req.expires_at.to_string(),
+        })
+    }
+
+    /// Persist one decision to the `approvals` table. Approvals reference a
+    /// `tool_calls` row, so each decision hosts an ephemeral
+    /// session/message/tool_call triple (`approval-<request_id>`).
+    fn persist_approval(
+        &self,
+        store: &Store,
+        args: PersistArgs<'_>,
+        now: &str,
+    ) -> Result<(), CapError> {
+        let PersistArgs {
+            tool,
+            scope,
+            decision,
+            decided_by,
+            note,
+        } = args;
+        let session_id = format!("approval-{}-{}", tool, now);
+        let _ = store.insert_session(&session_id, tool, now);
+        let message_id = store.insert_message(&session_id, "tool", note, now)?;
+        let args_json = serde_json::json!({"scope": scope}).to_string();
+        let status = if decision == "deny" {
+            "cancelled"
+        } else {
+            "succeeded"
+        };
+        let tool_call_id = store.insert_tool_call(message_id, tool, &args_json, status, now)?;
+        // A retrying decider (double-click, re-sent frame) must not fail the
+        // second insert on the UNIQUE(tool_call_id) row: each decision hosts
+        // its own tool_call, so uniqueness holds per decision.
+        store.insert_approval(tool_call_id, decision, decided_by, note, now)?;
+        Ok(())
+    }
+
     /// Authorize one dispatch. Every refusal records an audit event.
     pub fn authorize(
         &self,
@@ -648,6 +1044,47 @@ pub struct Issued {
     pub expires_at: String,
 }
 
+/// Filed approval request (`approval.request` result).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ApprovalFiled {
+    /// Pending request id (`apr-...`).
+    pub request_id: String,
+    /// Decision deadline, epoch seconds.
+    pub expires_at: u64,
+}
+
+/// Decided approval (`approval.decide` result, persisted to `approvals`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ApprovalDecided {
+    /// True when a signed token was issued.
+    pub approved: bool,
+    /// `approved` | `edited` | `denied` | `expired`.
+    pub decision: String,
+    /// Signed capability token (approve path only).
+    pub token: Option<String>,
+    /// Grant row id (approve path only).
+    pub grant_id: Option<i64>,
+    /// Effective (possibly narrowed) scope.
+    pub scope: String,
+    /// Token/decision expiry, epoch seconds as text.
+    pub expires_at: String,
+}
+
+/// Pending approval status (`approval.status` result).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ApprovalStatus {
+    /// `pending` or `expired` (expiry is computed, not stored).
+    pub status: String,
+    /// Requested tool.
+    pub tool: String,
+    /// Requested scope.
+    pub scope: String,
+    /// Human-readable reason.
+    pub reason: String,
+    /// Decision deadline, epoch seconds as text.
+    pub expires_at: String,
+}
+
 /// Current epoch seconds; `Err` only when the system clock is unusable
 /// (callers fail closed).
 pub fn now_secs() -> Result<u64, CapError> {
@@ -701,8 +1138,9 @@ fn internal(req: &Request, what: &str) -> Response {
     err_result(req, -32603, format!("internal error: {what}"))
 }
 
-/// Serve one `capability.*` method. These never require a token (issuance
-/// plane); every other method is gated by [`Gate::authorize`] in dispatch.
+/// Serve one issuance-plane method (`capability.*`, `approval.*`,
+/// `audit.verify`, `audit.export`). These never require a token; every
+/// other method is gated by [`Gate::authorize`] in dispatch.
 pub fn handle_capability(
     req: &Request,
     pending: &Mutex<HashMap<String, PendingRequest>>,
@@ -798,6 +1236,139 @@ pub fn handle_capability(
             }
             Err(e) => internal(req, &e.to_string()),
         },
+        "approval.request" => {
+            let (Some(tool), ttl) = (
+                param_str(&req.params, "tool"),
+                param_u64(&req.params, "ttl_secs"),
+            ) else {
+                return invalid(
+                    req,
+                    "need {tool: string, scope?: string, reason?: string, ttl_secs: u64}",
+                );
+            };
+            let scope = param_str(&req.params, "scope").unwrap_or("");
+            let reason = param_str(&req.params, "reason").unwrap_or("");
+            let Some(ttl) = ttl else {
+                return invalid(
+                    req,
+                    "need {tool: string, scope?: string, reason?: string, ttl_secs: u64}",
+                );
+            };
+            match gate.request_approval(
+                store,
+                pending,
+                ApprovalRequestArgs {
+                    tool,
+                    scope,
+                    reason,
+                    ttl_secs: ttl,
+                },
+                now,
+            ) {
+                Ok(filed) => ok_result(
+                    req,
+                    serde_json::json!({
+                        "request_id": filed.request_id,
+                        "expires_at": filed.expires_at.to_string(),
+                    }),
+                ),
+                Err(CapError::InvalidParams(m)) => invalid(req, &m),
+                Err(e) => internal(req, &e.to_string()),
+            }
+        }
+        "approval.decide" => {
+            let (Some(rid), Some(decision)) = (
+                param_str(&req.params, "request_id"),
+                param_str(&req.params, "decision"),
+            ) else {
+                return invalid(
+                    req,
+                    "need {request_id: string, decision: approve|deny, scope?: string}",
+                );
+            };
+            let scope = param_str(&req.params, "scope");
+            let decided_by = param_str(&req.params, "decided_by").unwrap_or("deck");
+            let note = param_str(&req.params, "note").unwrap_or("");
+            match gate.decide_approval(
+                store,
+                pending,
+                DecideArgs {
+                    request_id: rid,
+                    decision,
+                    scope,
+                    decided_by,
+                    note,
+                },
+                now,
+            ) {
+                Ok(d) => {
+                    let mut v = serde_json::json!({
+                        "approved": d.approved,
+                        "decision": d.decision,
+                        "scope": d.scope,
+                        "expires_at": d.expires_at,
+                    });
+                    if let Some(t) = d.token {
+                        v["token"] = serde_json::Value::String(t);
+                    }
+                    if let Some(g) = d.grant_id {
+                        v["grant_id"] = serde_json::json!(g);
+                    }
+                    ok_result(req, v)
+                }
+                Err(CapError::InvalidParams(m)) => invalid(req, &m),
+                Err(CapError::ScopeWidening) => invalid(req, "scope edit must narrow, not widen"),
+                Err(CapError::UnknownRequest) => invalid(req, "unknown request id"),
+                Err(e) => internal(req, &e.to_string()),
+            }
+        }
+        "approval.status" => {
+            let Some(rid) = param_str(&req.params, "request_id") else {
+                return invalid(req, "need {request_id: string}");
+            };
+            match gate.approval_status(pending, rid, now) {
+                Ok(s) => ok_result(
+                    req,
+                    serde_json::json!({
+                        "status": s.status,
+                        "tool": s.tool,
+                        "scope": s.scope,
+                        "reason": s.reason,
+                        "expires_at": s.expires_at,
+                    }),
+                ),
+                Err(CapError::UnknownRequest) => invalid(req, "unknown request id"),
+                Err(e) => internal(req, &e.to_string()),
+            }
+        }
+        "audit.verify" => match store.verify_audit_chain() {
+            Ok(r) => ok_result(
+                req,
+                serde_json::json!({
+                    "ok": r.ok,
+                    "events": r.events,
+                    "bad_seq": r.bad_seq,
+                    "bad_reason": r.bad_reason,
+                    "head": r.head_hash,
+                }),
+            ),
+            Err(e) => internal(req, &e.to_string()),
+        },
+        "audit.export" => {
+            let limit = param_i64(&req.params, "limit").unwrap_or(1000);
+            match store.export_audit_jsonl(limit) {
+                Ok(jsonl) => {
+                    let events = if jsonl.is_empty() {
+                        0
+                    } else {
+                        jsonl.lines().count() as u64
+                    };
+                    ok_result(req, serde_json::json!({"jsonl": jsonl, "events": events}))
+                }
+                Err(core_store::StoreError::Config(m)) => invalid(req, &m),
+                Err(e) => internal(req, &e.to_string()),
+            }
+        }
         _ => err_result(req, -32601, format!("method not found: {}", req.method)),
     }
 }
@@ -1451,6 +2022,233 @@ mod mock_tests {
                 r.ts, r.actor, r.action, r.detail
             );
         }
+        scrub(&dir);
+    }
+
+    #[test]
+    fn approval_approve_issues_signed_token_and_persists() {
+        let (dir, store) = test_store("apr-approve");
+        let p = pending();
+        let g = gate();
+        let filed = g
+            .request_approval(
+                &store,
+                &p,
+                ApprovalRequestArgs {
+                    tool: "tool.exec",
+                    scope: "/proj",
+                    reason: "read logs",
+                    ttl_secs: 60,
+                },
+                NOW,
+            )
+            .unwrap();
+        assert!(filed.request_id.starts_with("apr-"));
+        // Deck approves: signed token, tool proceeds.
+        let decided = g
+            .decide_approval(
+                &store,
+                &p,
+                DecideArgs {
+                    request_id: &filed.request_id,
+                    decision: "approve",
+                    scope: None,
+                    decided_by: "deck",
+                    note: "looks good",
+                },
+                NOW + 5,
+            )
+            .unwrap();
+        assert!(decided.approved);
+        assert_eq!(decided.decision, "approved");
+        let token = decided.token.clone().unwrap();
+        assert!(
+            g.authorize(
+                &store,
+                "tool.exec",
+                Some("/proj/a.txt"),
+                Some(&token),
+                NOW + 5
+            )
+            .is_ok(),
+            "approved token must authorize"
+        );
+        let rows = store.audit_events(100).unwrap();
+        let kinds: Vec<&str> = rows.iter().map(|r| r.action.as_str()).collect();
+        assert!(kinds.contains(&"approval.requested"));
+        assert!(kinds.contains(&"approval.approved"));
+        scrub(&dir);
+    }
+
+    #[test]
+    fn approval_deny_maps_to_capability_denied() {
+        let (dir, store) = test_store("apr-deny");
+        let p = pending();
+        let g = gate();
+        let filed = g
+            .request_approval(
+                &store,
+                &p,
+                ApprovalRequestArgs {
+                    tool: "tool.exec",
+                    scope: "/proj",
+                    reason: "risky",
+                    ttl_secs: 60,
+                },
+                NOW,
+            )
+            .unwrap();
+        let decided = g
+            .decide_approval(
+                &store,
+                &p,
+                DecideArgs {
+                    request_id: &filed.request_id,
+                    decision: "deny",
+                    scope: None,
+                    decided_by: "deck",
+                    note: "no",
+                },
+                NOW + 5,
+            )
+            .unwrap();
+        assert!(!decided.approved);
+        assert_eq!(decided.decision, "denied");
+        assert!(decided.token.is_none());
+        // No token: dispatch denies with CAPABILITY_DENIED shape.
+        let r = g.authorize(&store, "tool.exec", Some("/proj/a.txt"), None, NOW + 5);
+        assert_eq!(r.unwrap_err(), Deny::Missing);
+        let rows = store.audit_events(100).unwrap();
+        assert!(
+            rows.iter().any(|r| r.action == "approval.denied"),
+            "deny must audit approval.denied"
+        );
+        scrub(&dir);
+    }
+
+    #[test]
+    fn approval_timeout_is_default_deny() {
+        let (dir, store) = test_store("apr-timeout");
+        let p = pending();
+        let g = gate();
+        let filed = g
+            .request_approval(
+                &store,
+                &p,
+                ApprovalRequestArgs {
+                    tool: "tool.exec",
+                    scope: "/proj",
+                    reason: "slow",
+                    ttl_secs: 10,
+                },
+                NOW,
+            )
+            .unwrap();
+        // Countdown hits zero: late approve stays expired (fail closed).
+        let decided = g
+            .decide_approval(
+                &store,
+                &p,
+                DecideArgs {
+                    request_id: &filed.request_id,
+                    decision: "approve",
+                    scope: None,
+                    decided_by: "deck",
+                    note: "too late",
+                },
+                NOW + 11,
+            )
+            .unwrap();
+        assert!(!decided.approved);
+        assert_eq!(decided.decision, "expired");
+        let status = g
+            .approval_status(&p, &filed.request_id, NOW + 11)
+            .unwrap_err();
+        assert_eq!(status.to_string(), CapError::UnknownRequest.to_string());
+        let rows = store.audit_events(100).unwrap();
+        assert!(
+            rows.iter().any(|r| r.action == "approval.expired"),
+            "timeout must audit approval.expired"
+        );
+        scrub(&dir);
+    }
+
+    #[test]
+    fn approval_edit_may_only_narrow() {
+        let (dir, store) = test_store("apr-edit");
+        let p = pending();
+        let g = gate();
+        let filed = g
+            .request_approval(
+                &store,
+                &p,
+                ApprovalRequestArgs {
+                    tool: "tool.exec",
+                    scope: "/proj",
+                    reason: "narrow me",
+                    ttl_secs: 60,
+                },
+                NOW,
+            )
+            .unwrap();
+        // Widening edit is refused.
+        assert_eq!(
+            g.decide_approval(
+                &store,
+                &p,
+                DecideArgs {
+                    request_id: &filed.request_id,
+                    decision: "approve",
+                    scope: Some("/other"),
+                    decided_by: "deck",
+                    note: "",
+                },
+                NOW + 5
+            )
+            .unwrap_err()
+            .to_string(),
+            CapError::ScopeWidening.to_string()
+        );
+        // Narrowing edit approves as `edited` and authorizes the subset only.
+        let decided = g
+            .decide_approval(
+                &store,
+                &p,
+                DecideArgs {
+                    request_id: &filed.request_id,
+                    decision: "approve",
+                    scope: Some("/proj/sub"),
+                    decided_by: "deck",
+                    note: "narrowed",
+                },
+                NOW + 5,
+            )
+            .unwrap();
+        assert!(decided.approved);
+        assert_eq!(decided.decision, "edited");
+        assert_eq!(decided.scope, "/proj/sub");
+        let token = decided.token.unwrap();
+        assert!(
+            g.authorize(
+                &store,
+                "tool.exec",
+                Some("/proj/sub/a.txt"),
+                Some(&token),
+                NOW + 5
+            )
+            .is_ok()
+        );
+        assert_eq!(
+            g.authorize(
+                &store,
+                "tool.exec",
+                Some("/proj/a.txt"),
+                Some(&token),
+                NOW + 5
+            )
+            .unwrap_err(),
+            Deny::ScopeViolation
+        );
         scrub(&dir);
     }
 }

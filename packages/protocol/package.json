@@ -1,0 +1,7 @@
+{
+  "name": "@project-one/protocol",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Wire/1 tool manifests: read-only filesystem tool",
+  "type": "module"
+}

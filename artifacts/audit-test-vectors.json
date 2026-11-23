@@ -1,0 +1,65 @@
+{
+  "genesis": "0000000000000000000000000000000000000000000000000000000000000000",
+  "domain": "audit-v1",
+  "epoch_example": {
+    "epoch_secs": 1800000000,
+    "rfc3339": "2027-01-15T08:00:00Z"
+  },
+  "vectors": [
+    {
+      "seq": 1,
+      "ts": "2026-11-22T00:00:00Z",
+      "actor": "wire-client",
+      "event": "capability.requested",
+      "payload": {
+        "tool": "tool.exec",
+        "request_id": "req-1"
+      },
+      "canonical_payload": "{\"request_id\":\"req-1\",\"tool\":\"tool.exec\"}",
+      "payload_hash": "c02e56bdadd222668b4f92e7622f0b9fb378ba159a7f95ba431fe0aac8aac3b9",
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "ec34baa8c69917707e753b8947f256f0b2841be0afee8bc754c7039018007f5d"
+    },
+    {
+      "seq": 2,
+      "ts": "2026-11-22T00:00:01Z",
+      "actor": "wire-client",
+      "event": "capability.granted",
+      "payload": {
+        "grant_id": 7,
+        "tool": "tool.exec"
+      },
+      "canonical_payload": "{\"grant_id\":7,\"tool\":\"tool.exec\"}",
+      "payload_hash": "d838e7161f9217917d0c6af8d9a079729c220677976732ca533422c961a8923d",
+      "prev_hash": "ec34baa8c69917707e753b8947f256f0b2841be0afee8bc754c7039018007f5d",
+      "hash": "598090c3420db68cc18c421cc04b82869c20851d519b4abe3ab0216e640b2211"
+    },
+    {
+      "seq": 3,
+      "ts": "2026-11-22T00:00:02Z",
+      "actor": "deck",
+      "event": "approval.denied",
+      "payload": {
+        "tool": "tool.exec",
+        "request_id": "apr-9"
+      },
+      "canonical_payload": "{\"request_id\":\"apr-9\",\"tool\":\"tool.exec\"}",
+      "payload_hash": "bbdf38725f5fbf21f1ddca2143a3ff68f8c9aaf0813ecf2aa9c9463ad0dbd811",
+      "prev_hash": "598090c3420db68cc18c421cc04b82869c20851d519b4abe3ab0216e640b2211",
+      "hash": "f09a3583bbe17948a8c4d4868daada40709eae65cc0a5be77f91cf60cb7d9dfa"
+    }
+  ],
+  "tamper_case": {
+    "seq": 2,
+    "original_payload": {
+      "grant_id": 7,
+      "tool": "tool.exec"
+    },
+    "flipped_payload": {
+      "grant_id": 7,
+      "tool": "tool.exed"
+    },
+    "flipped_payload_hash": "0093eb7abc49a1109a79c1ab3de43eb32b7a6d763394cdc110b9c1ae9f9d01c6",
+    "note": "any byte flip changes payload_hash, so verify fails at seq 2 with payload-hash-mismatch"
+  }
+}

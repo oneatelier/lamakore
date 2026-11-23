@@ -1,3 +1,6 @@
 file,prompt,scene,theme,dimensions,duration,sha256,captured_at,scrubbed
 P009-first-run.png,P009,first-run,brass-void,1280x800,still,3cd8d44af780a627350e9a135cae2f4cd4cc4ae2c4fdf53320845a60ccda3b21,2026-11-22 07:48:12,true
 P009-shell.gif,P009,first-run-to-deck,brass-void,960x600,6s@10fps,e58f5ac673417408c9cafa2b98071b8a17918b9dae6e3f588a04a07422cc7a6e,2026-11-22 07:48:12,true
+fs-deck-demo.gif,FS-DECK,fs-list-approve-read,brass-void,960x600,6s@10fps,428cffd27c0fe861e3c7fc1911d789a3c13d0cfbf44bae145c82afe58e35d02d,2026-11-23 07:17:07,true
+fs-deck-approval-brass-void.png,FS-DECK,fs-approval-card,brass-void,960x600,still,1509d1a2f5f7e3cf6229a494de40868953e7c6f35732cf005da662ae783f0dfd,2026-11-23 07:17:07,true
+fs-deck-listed-brass-void.png,FS-DECK,fs-listed,brass-void,960x600,still,5962c5e99cdc76ce800178897225b730b2b4814d6a742d068c5bcf3c75090392,2026-11-23 07:17:07,true

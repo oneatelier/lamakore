@@ -7,6 +7,7 @@ description = "Trusted daemon: policy, secrets, and sandboxed tool dispatch"
 
 [dependencies]
 core-protocol = { path = "../core-protocol" }
+core-sandbox = { path = "../core-sandbox" }
 core-store = { path = "../core-store" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -22,3 +23,6 @@ keyring = "4"
 # The real-keychain path is always compiled; its test skips honestly when
 # no keychain is reachable and must pass owner-locally with evidence.
 mock-keyring = []
+
+[dev-dependencies]
+rusqlite = { version = "0.43", features = ["bundled"] }

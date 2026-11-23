@@ -26,6 +26,13 @@ pub const ALLOWED_METHODS: &[&str] = &[
     "capability.grant",
     "capability.revoke",
     "capability.list",
+    "approval.request",
+    "approval.decide",
+    "approval.status",
+    "audit.verify",
+    "audit.export",
+    "fs.list",
+    "fs.read",
 ];
 /// Handshake must complete within this window or the peer is dropped.
 pub const HANDSHAKE_TIMEOUT_SECS: u64 = 5;
@@ -234,6 +241,13 @@ mod tests {
         assert!(is_allowed("capability.grant"));
         assert!(is_allowed("capability.revoke"));
         assert!(is_allowed("capability.list"));
+        assert!(is_allowed("approval.request"));
+        assert!(is_allowed("approval.decide"));
+        assert!(is_allowed("approval.status"));
+        assert!(is_allowed("audit.verify"));
+        assert!(is_allowed("audit.export"));
+        assert!(is_allowed("fs.list"));
+        assert!(is_allowed("fs.read"));
         assert!(!is_allowed("shell.exec"));
         assert!(!is_allowed("tool.exec"));
         assert!(!is_allowed("system.health "));

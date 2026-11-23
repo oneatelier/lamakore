@@ -5,7 +5,7 @@ import type { ThemeName } from '../../../../packages/ui/src/theme/themes.js';
 import { THEME_NAMES, themeLabel } from '../../../../packages/ui/src/theme/themes.js';
 import { FirstRun } from './screens/FirstRun.js';
 import { Shell } from './screens/Shell.js';
-import type { ConnState } from '../main/daemon.js';
+import type { ConnState, LedgerStatus } from '../main/daemon.js';
 
 declare global {
   interface Window {
@@ -35,6 +35,7 @@ function Connected({ forcedConn, forcedScreen }: { forcedConn?: ConnState | null
   const { theme, setTheme } = useTheme();
   const [conn, setConn] = React.useState<ConnState>(forcedConn ?? 'connecting');
   const [info, setInfo] = React.useState<Record<string, unknown> | null>(null);
+  const [ledger, setLedger] = React.useState<LedgerStatus | null>(null);
   const [screen, setScreen] = React.useState<'first-run' | 'deck'>(() => {
     if (forcedScreen === 'firstrun') return 'first-run';
     if (forcedScreen === 'deck') return 'deck';
@@ -81,13 +82,33 @@ function Connected({ forcedConn, forcedScreen }: { forcedConn?: ConnState | null
           if (!cancelled) setConn((c) => (c === 'connecting' ? 'unreachable' : c));
         });
     };
+    const refreshLedger = () => {
+      b.invoke('audit.verify', {})
+        .then((v) => {
+          if (cancelled) return;
+          const o = (v as Record<string, unknown>) ?? {};
+          setLedger({
+            ok: o['ok'] === true,
+            events: typeof o['events'] === 'number' ? (o['events'] as number) : 0,
+            badSeq: typeof o['bad_seq'] === 'number' ? (o['bad_seq'] as number) : null,
+            head: typeof o['head'] === 'string' ? (o['head'] as string) : null,
+          });
+        })
+        .catch(() => {
+          /* ledger unknown: no banner rather than a wrong banner */
+        });
+    };
     sub = b.subscribe('daemon.state', (s) => {
       if (typeof s !== 'string') return;
       if (cancelled) return;
       setConn(s as ConnState);
-      if (s === 'connected') refreshInfo();
+      if (s === 'connected') {
+        refreshInfo();
+        refreshLedger();
+      }
     });
     refreshInfo();
+    refreshLedger();
     return () => {
       cancelled = true;
       try {
@@ -97,6 +118,12 @@ function Connected({ forcedConn, forcedScreen }: { forcedConn?: ConnState | null
       }
     };
   }, [forcedConn]);
+
+  const invoke = React.useCallback((method: string, params?: unknown) => {
+    const b = bridge();
+    if (!b) return Promise.reject(new Error('no bridge: not running inside the desktop shell'));
+    return b.invoke(method, params ?? {});
+  }, []);
 
   const retry = React.useCallback(() => {
     setConn('connecting');
@@ -114,6 +141,24 @@ function Connected({ forcedConn, forcedScreen }: { forcedConn?: ConnState | null
       .catch(() => setConn('unreachable'));
   }, []);
 
+  const recheckLedger = React.useCallback(() => {
+    const b = bridge();
+    if (!b) return;
+    b.invoke('audit.verify', {})
+      .then((v) => {
+        const o = (v as Record<string, unknown>) ?? {};
+        setLedger({
+          ok: o['ok'] === true,
+          events: typeof o['events'] === 'number' ? (o['events'] as number) : 0,
+          badSeq: typeof o['bad_seq'] === 'number' ? (o['bad_seq'] as number) : null,
+          head: typeof o['head'] === 'string' ? (o['head'] as string) : null,
+        });
+      })
+      .catch(() => {
+        /* keep the last known ledger state */
+      });
+  }, []);
+
   if (screen === 'first-run' && !forcedConn) {
     return React.createElement(FirstRun, {
       conn,
@@ -126,6 +171,7 @@ function Connected({ forcedConn, forcedScreen }: { forcedConn?: ConnState | null
   }
   return React.createElement(Shell, {
     conn,
+    ledger,
     product: typeof info?.['product'] === 'string' ? (info['product'] as string) : getProductName(),
     daemon: typeof info?.['daemon'] === 'string' ? (info['daemon'] as string) : '…',
     build: typeof info?.['build'] === 'string' ? (info['build'] as string) : '…',
@@ -134,6 +180,8 @@ function Connected({ forcedConn, forcedScreen }: { forcedConn?: ConnState | null
     themeLabel,
     setTheme,
     onRetry: retry,
+    onRecheckLedger: recheckLedger,
+    invoke,
   });
 }
 

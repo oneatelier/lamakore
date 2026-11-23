@@ -14,7 +14,9 @@
     "test": "node --test tests/hygiene/scanners.spec.ts tests/branding/rename.spec.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build:desktop": "node scripts/build-desktop.mjs",
-    "test:e2e": "node --test tests/e2e/handshake.spec.ts"
+    "test:e2e": "node --test tests/e2e/handshake.spec.ts",
+    "test:e2e:fs": "node --test tests/e2e/fs-tools.spec.ts",
+    "perf:fs": "node tests/e2e/fs-perf.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

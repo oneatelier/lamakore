@@ -14,8 +14,11 @@
 //!   than a single `ok` row.
 //!
 //! Schema v1 holds `sessions`, `messages`, `tool_calls`, `approvals`,
-//! `capability_grants`, `audit_events` and `settings`. There are
-//! deliberately NO secret columns anywhere: credentials stay in the vault.
+//! `capability_grants`, `audit_events` and `settings`. Schema v2 extends
+//! `audit_events` with the append-only hash chain (`seq`, `event`,
+//! `payload_json`, `payload_hash`, `prev_hash`, `hash`; see [`audit`]).
+//! There are deliberately NO secret columns anywhere: credentials stay in
+//! the vault.
 //!
 //! The database lives in the OS user-data directory under the provisional
 //! token directory (see [`default_db_path`]).
@@ -26,6 +29,8 @@
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
+pub mod audit;
+
 include!(concat!(env!("OUT_DIR"), "/brand_token.rs"));
 
 #[cfg(not(any(unix, windows)))]
@@ -35,14 +40,21 @@ compile_error!(
 
 const DB_FILE_NAME: &str = "store.db";
 /// Current schema version (maximum migration version in `migrations/`).
-pub const SCHEMA_VERSION: u32 = 1;
+pub const SCHEMA_VERSION: u32 = 2;
 const BUSY_TIMEOUT: Duration = Duration::from_millis(5000);
 
-const MIGRATIONS: &[(&str, u32, &str)] = &[(
-    "0001_init.sql",
-    1,
-    include_str!("../migrations/0001_init.sql"),
-)];
+const MIGRATIONS: &[(&str, u32, &str)] = &[
+    (
+        "0001_init.sql",
+        1,
+        include_str!("../migrations/0001_init.sql"),
+    ),
+    (
+        "0002_audit_chain.sql",
+        2,
+        include_str!("../migrations/0002_audit_chain.sql"),
+    ),
+];
 
 /// Errors from opening or using the store. Panics are a bug: every failure
 /// is reported here instead.
@@ -62,6 +74,9 @@ pub enum StoreError {
     /// `PRAGMA integrity_check` returned anything but a single `ok` row.
     #[error("integrity check failed: {0}")]
     Corrupt(String),
+    /// The audit hash chain could not be built or read.
+    #[error("audit chain error: {0}")]
+    Chain(String),
     /// `PRAGMA journal_mode=WAL` did not engage (got the reported mode).
     #[error("WAL journal mode unavailable (got {0})")]
     WalUnavailable(String),
@@ -159,6 +174,88 @@ fn apply_migrations(conn: &mut rusqlite::Connection) -> Result<(), StoreError> {
     }
     tx.commit()?;
     Ok(())
+}
+
+/// Backfill the v2 audit chain over rows written before the chain
+/// existed. Runs inside `Store::open` after migrations: rows whose `hash`
+/// is empty are hashed in `id` order with `seq = id`, continuing the
+/// previous hashed prefix (or genesis). Legacy timestamps (epoch seconds)
+/// are normalized to UTC RFC3339 in place; unparseable legacy payloads
+/// are wrapped, never dropped. Fails the open fail-closed when a legacy
+/// timestamp cannot be represented (delete the local store file to reset;
+/// see the retention guide).
+fn backfill_audit_chain(conn: &rusqlite::Connection) -> Result<(), StoreError> {
+    let pending: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM audit_events WHERE hash IS NULL OR hash = ''",
+        [],
+        |row| row.get(0),
+    )?;
+    if pending == 0 {
+        return Ok(());
+    }
+    conn.execute_batch("BEGIN IMMEDIATE")?;
+    let result: Result<(), StoreError> = (|| {
+        use rusqlite::OptionalExtension as _;
+        let last: Option<String> = conn
+            .query_row(
+                "SELECT hash FROM audit_events \
+                 WHERE hash IS NOT NULL AND hash != '' ORDER BY seq DESC LIMIT 1",
+                [],
+                |row| row.get(0),
+            )
+            .optional()?;
+        let mut prev_hash = last.unwrap_or_else(|| audit::GENESIS_PREV_HASH.to_string());
+        let mut stmt = conn.prepare(
+            "SELECT id, ts, actor, action, detail_json FROM audit_events \
+             WHERE hash IS NULL OR hash = '' ORDER BY id",
+        )?;
+        let rows: Vec<(i64, String, String, String, String)> = stmt
+            .query_map([], |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                ))
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+        for (id, ts, actor, action, detail) in rows {
+            let ts_utc = audit::normalize_ts(&ts)
+                .map_err(|e| StoreError::Chain(format!("legacy audit ts unusable: {e}")))?;
+            let payload_json = audit::coerce_legacy_payload(&detail);
+            let payload_hash = audit::payload_hash(&payload_json)
+                .map_err(|e| StoreError::Chain(format!("legacy audit payload unusable: {e}")))?;
+            let hash = audit::event_hash(id, &ts_utc, &actor, &action, &payload_hash, &prev_hash);
+            conn.execute(
+                "UPDATE audit_events SET seq = ?1, ts = ?2, event = ?3, \
+                 payload_json = ?4, payload_hash = ?5, prev_hash = ?6, hash = ?7 \
+                 WHERE id = ?8",
+                rusqlite::params![
+                    id,
+                    ts_utc,
+                    action,
+                    payload_json,
+                    payload_hash,
+                    prev_hash,
+                    hash,
+                    id
+                ],
+            )?;
+            prev_hash = hash;
+        }
+        Ok(())
+    })();
+    match result {
+        Ok(()) => {
+            conn.execute_batch("COMMIT")?;
+            Ok(())
+        }
+        Err(e) => {
+            let _ = conn.execute_batch("ROLLBACK");
+            Err(e)
+        }
+    }
 }
 
 #[cfg(unix)]
@@ -270,19 +367,36 @@ pub struct Grant {
     pub expires_at: Option<String>,
 }
 
-/// An audit event row.
+/// An audit event row: one link of the append-only hash chain (see
+/// [`audit`]). `action` mirrors `event` and `detail` mirrors
+/// `payload_json`; both pairs are written in sync for readers that predate
+/// the chain.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AuditEvent {
     /// Row id.
     pub id: i64,
-    /// Event time, epoch seconds as text.
+    /// Monotonic chain sequence (strictly +1 per row).
+    pub seq: i64,
+    /// Event time, UTC RFC3339 (`YYYY-MM-DDTHH:MM:SSZ`).
     pub ts: String,
     /// Who acted (token id when presented, else a fixed label).
     pub actor: String,
     /// What happened (`capability.granted`, `capability.denied`, ...).
+    /// Pre-chain alias of [`AuditEvent::event`].
     pub action: String,
-    /// Machine-readable detail, JSON text.
+    /// What happened (`capability.granted`, `capability.denied`, ...).
+    pub event: String,
+    /// Machine-readable detail, JSON text. Pre-chain alias of
+    /// [`AuditEvent::payload_json`].
     pub detail: String,
+    /// Machine-readable detail, JSON text.
+    pub payload_json: String,
+    /// Lowercase hex SHA-256 of the canonical payload.
+    pub payload_hash: String,
+    /// Lowercase hex hash of the previous row (genesis for the first).
+    pub prev_hash: String,
+    /// Lowercase hex hash of this row.
+    pub hash: String,
 }
 
 impl Store {
@@ -309,6 +423,8 @@ impl Store {
         lock_down_file(path)?;
         check_integrity(&conn)?;
         apply_migrations(&mut conn)?;
+        check_integrity(&conn)?;
+        backfill_audit_chain(&conn)?;
         check_integrity(&conn)?;
         Ok(Self { conn })
     }
@@ -483,7 +599,15 @@ impl Store {
         Ok(())
     }
 
-    /// Append an audit event.
+    /// Append an audit event to the hash chain.
+    ///
+    /// The write is serialized with `BEGIN IMMEDIATE`: the sequence number
+    /// and previous hash are read and the row inserted atomically, so
+    /// concurrent writers from separate handles cannot fork the chain
+    /// (the loser blocks on the busy timeout, then retries against the new
+    /// head). `ts` accepts epoch seconds (the historical writer format) or
+    /// UTC RFC3339; `detail_json` must be valid JSON. Failures roll back
+    /// and report [`StoreError`]; nothing partial is left behind.
     pub fn record_audit_event(
         &self,
         ts: &str,
@@ -491,12 +615,116 @@ impl Store {
         action: &str,
         detail_json: &str,
     ) -> Result<(), StoreError> {
-        self.conn.execute(
-            "INSERT INTO audit_events (ts, actor, action, detail_json) \
-             VALUES (?1, ?2, ?3, ?4)",
-            rusqlite::params![ts, actor, action, detail_json],
+        let ts_utc =
+            audit::normalize_ts(ts).map_err(|e| StoreError::Chain(format!("audit ts: {e}")))?;
+        let payload_hash = audit::payload_hash(detail_json)
+            .map_err(|e| StoreError::Chain(format!("audit payload: {e}")))?;
+        self.conn.execute_batch("BEGIN IMMEDIATE")?;
+        let result: Result<(), StoreError> = (|| {
+            use rusqlite::OptionalExtension as _;
+            let head: Option<(i64, String)> = self
+                .conn
+                .query_row(
+                    "SELECT seq, hash FROM audit_events ORDER BY seq DESC LIMIT 1",
+                    [],
+                    |row| Ok((row.get(0)?, row.get(1)?)),
+                )
+                .optional()?;
+            let (seq, prev_hash) = match head {
+                Some((s, h)) => (s + 1, h),
+                None => (1, audit::GENESIS_PREV_HASH.to_string()),
+            };
+            let hash = audit::event_hash(seq, &ts_utc, actor, action, &payload_hash, &prev_hash);
+            self.conn.execute(
+                "INSERT INTO audit_events \
+                 (seq, ts, actor, action, event, detail_json, payload_json, \
+                  payload_hash, prev_hash, hash) \
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+                rusqlite::params![
+                    seq,
+                    ts_utc,
+                    actor,
+                    action,
+                    action,
+                    detail_json,
+                    detail_json,
+                    payload_hash,
+                    prev_hash,
+                    hash
+                ],
+            )?;
+            Ok(())
+        })();
+        match result {
+            Ok(()) => {
+                self.conn.execute_batch("COMMIT")?;
+                Ok(())
+            }
+            Err(e) => {
+                let _ = self.conn.execute_batch("ROLLBACK");
+                Err(e)
+            }
+        }
+    }
+
+    /// Verify the audit hash chain from genesis. Pure read: recomputes
+    /// every payload hash and link, checks sequencing is exactly +1.
+    /// Tampering reports `ok: false` with the first broken `seq`; a broken
+    /// chain never errors, only reports.
+    pub fn verify_audit_chain(&self) -> Result<audit::VerifyReport, StoreError> {
+        let mut stmt = self.conn.prepare(
+            "SELECT seq, ts, actor, event, payload_json, payload_hash, prev_hash, hash \
+             FROM audit_events ORDER BY seq",
         )?;
-        Ok(())
+        let rows: Vec<audit::ChainRow> = stmt
+            .query_map([], |row| {
+                Ok(audit::ChainRow {
+                    seq: row.get(0)?,
+                    ts: row.get(1)?,
+                    actor: row.get(2)?,
+                    event: row.get(3)?,
+                    payload_json: row.get(4)?,
+                    payload_hash: row.get(5)?,
+                    prev_hash: row.get(6)?,
+                    hash: row.get(7)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(audit::verify_rows(&rows))
+    }
+
+    /// Export the chain as JSONL, one object per line in `seq` order.
+    /// Envelope keys are exactly [`audit::EXPORT_KEYS`]; payloads carry
+    /// only [`audit::ALLOWED_PAYLOAD_KEYS`]. Free-text fields and key
+    /// material can never appear: they are dropped, not redacted.
+    pub fn export_audit_jsonl(&self, limit: i64) -> Result<String, StoreError> {
+        if limit < 1 {
+            return Err(StoreError::Config("export limit must be >= 1".to_string()));
+        }
+        let mut stmt = self.conn.prepare(
+            "SELECT seq, ts, actor, event, payload_json, payload_hash, prev_hash, hash \
+             FROM audit_events ORDER BY seq LIMIT ?1",
+        )?;
+        let rows: Vec<audit::ChainRow> = stmt
+            .query_map(rusqlite::params![limit], |row| {
+                Ok(audit::ChainRow {
+                    seq: row.get(0)?,
+                    ts: row.get(1)?,
+                    actor: row.get(2)?,
+                    event: row.get(3)?,
+                    payload_json: row.get(4)?,
+                    payload_hash: row.get(5)?,
+                    prev_hash: row.get(6)?,
+                    hash: row.get(7)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+        let mut out = String::new();
+        for row in &rows {
+            out.push_str(&audit::export_line(row));
+            out.push('\n');
+        }
+        Ok(out)
     }
 
     /// Upsert a setting value (JSON text).
@@ -663,20 +891,28 @@ impl Store {
         Ok(rows)
     }
 
-    /// Recent audit events, newest last, up to `limit` rows.
+    /// Recent audit events, newest last, up to `limit` rows, in chain
+    /// order. `action`/`detail` mirror `event`/`payload_json`.
     pub fn audit_events(&self, limit: i64) -> Result<Vec<AuditEvent>, StoreError> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, ts, actor, action, detail_json FROM audit_events \
-             ORDER BY id LIMIT ?1",
+            "SELECT id, seq, ts, actor, action, event, detail_json, payload_json, \
+                    payload_hash, prev_hash, hash \
+             FROM audit_events ORDER BY seq LIMIT ?1",
         )?;
         let rows = stmt
             .query_map(rusqlite::params![limit], |row| {
                 Ok(AuditEvent {
                     id: row.get(0)?,
-                    ts: row.get(1)?,
-                    actor: row.get(2)?,
-                    action: row.get(3)?,
-                    detail: row.get(4)?,
+                    seq: row.get(1)?,
+                    ts: row.get(2)?,
+                    actor: row.get(3)?,
+                    action: row.get(4)?,
+                    event: row.get(5)?,
+                    detail: row.get(6)?,
+                    payload_json: row.get(7)?,
+                    payload_hash: row.get(8)?,
+                    prev_hash: row.get(9)?,
+                    hash: row.get(10)?,
                 })
             })?
             .collect::<Result<Vec<_>, _>>()?;

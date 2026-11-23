@@ -184,6 +184,31 @@ where
     };
     let gate = Gate::new(cfg.root_key);
 
+    // Startup chain verification. A broken chain never blocks serving —
+    // the deck must stay reachable so it can show LEDGER_TAMPER — but it
+    // is loud on stderr and advertised in the ready event.
+    let (ledger_ok, ledger_events) = match store.verify_audit_chain() {
+        Ok(r) => {
+            if r.ok {
+                eprintln!(
+                    "ledger: ok events={} head={}",
+                    r.events,
+                    r.head_hash.as_deref().unwrap_or("genesis")
+                );
+            } else {
+                eprintln!(
+                    "ledger: TAMPER bad_seq={:?} reason={:?} (deck shows LEDGER_TAMPER)",
+                    r.bad_seq, r.bad_reason
+                );
+            }
+            (r.ok, r.events)
+        }
+        Err(e) => {
+            eprintln!("ledger: verify error ({e})");
+            (false, 0)
+        }
+    };
+
     let mut ring = RingBuffer::new(RING_CAPACITY, cfg.spill_path.clone());
     let mut ready = Event {
         jsonrpc: "2.0".to_string(),
@@ -191,7 +216,11 @@ where
         params: EventParams {
             seq: 0,
             topic: "daemon.ready".to_string(),
-            data: json!({ "build": cfg.build }),
+            data: json!({
+                "build": cfg.build,
+                "ledger_ok": ledger_ok,
+                "ledger_events": ledger_events,
+            }),
         },
     };
     let seq = ring.push(ready.clone()).map_err(wire::WireError::Io)?;
@@ -249,10 +278,11 @@ fn method_not_found(req: &Request) -> Response {
     }
 }
 
-/// Route one request. `system.health`/`system.info` and the `capability.*`
-/// issuance plane need no token. EVERY other method — known or not — must
-/// present a valid capability or it is refused with CAPABILITY_DENIED and
-/// audited. Authorization success on an unimplemented method still yields
+/// Route one request. `system.health`/`system.info` and the issuance plane
+/// (`capability.*`, `approval.*`, `audit.verify`, `audit.export`) need no
+/// token. EVERY other method — known or not — must present a valid
+/// capability or it is refused with CAPABILITY_DENIED and audited.
+/// Authorization success on an unimplemented method still yields
 /// method-not-found: gating and dispatch are separate layers.
 fn dispatch(
     req: &Request,
@@ -306,6 +336,25 @@ fn dispatch(
             };
             capability::handle_capability(req, &cfg.pending_requests, gate, store, now)
         }
+        m if m == crate::fs_tool::FS_LIST_METHOD || m == crate::fs_tool::FS_READ_METHOD => {
+            let now = match now {
+                Ok(n) => n,
+                Err(e) => {
+                    return Response {
+                        jsonrpc: "2.0".to_string(),
+                        id: Some(req.id.clone()),
+                        result: None,
+                        error: Some(RpcError {
+                            code: -32603,
+                            message: format!("internal error: {e}"),
+                        }),
+                    };
+                }
+            };
+            // Single funnel: the gate, the sandboxed spawn, and the audit
+            // all live inside fs_tool::execute. No path spawns un-gated.
+            crate::fs_tool::execute(req, gate, store, now)
+        }
         _ => {
             let now = match now {
                 Ok(n) => n,
@@ -343,9 +392,10 @@ fn dispatch(
 mod gate_matrix_tests {
     //! Exhaustive proof that no dispatch path bypasses the capability gate.
     //!
-    //! The method space that reaches `dispatch` is finite: the six
-    //! allowlisted methods plus anything else a peer can spell (the gate arm
-    //! is total — there is no third arm). For every non-allowlisted method we
+    //! The method space that reaches `dispatch` is finite: the allowlisted
+    //! methods (`system.*`, `capability.*`, `approval.*`, `audit.*`) plus
+    //! anything else a peer can spell (the gate arm is total — there is no
+    //! third arm). For every non-allowlisted method we
     //! try every capability state (absent, valid, wrong-tool, expired,
     //! tampered, revoked) on in-scope and out-of-scope paths, plus a
     //! dedicated scope-violation dispatch below.
@@ -701,6 +751,79 @@ mod gate_matrix_tests {
             Ok(NOW),
         );
         assert_eq!(err_code(&inside), Some(-32601));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn audit_plane_reports_exports_and_detects_tamper() {
+        let (dir, store, cfg, gate) = harness("audit-plane");
+        let gate = &gate;
+        // A grant leaves chained audit rows behind.
+        let _ = gate
+            .grant(
+                &store,
+                &cfg.pending_requests,
+                GrantArgs {
+                    tool: "tool.exec",
+                    scope: "/proj",
+                    ttl_secs: 3600,
+                    request_id: None,
+                },
+                NOW,
+            )
+            .unwrap();
+        let verify = dispatch(&req("audit.verify", json!({})), &cfg, gate, &store, Ok(NOW));
+        assert!(verify.error.is_none());
+        let body = verify.result.as_ref().unwrap();
+        assert_eq!(body["ok"], Value::Bool(true));
+        assert!(body["events"].as_u64().unwrap() >= 1);
+        assert!(body["bad_seq"].is_null());
+        // Export is JSONL with the fixed envelope, no secret material.
+        let export = dispatch(
+            &req("audit.export", json!({"limit": 100})),
+            &cfg,
+            gate,
+            &store,
+            Ok(NOW),
+        );
+        assert!(export.error.is_none());
+        let out = export.result.as_ref().unwrap();
+        assert!(out["events"].as_u64().unwrap() >= 1);
+        let jsonl = out["jsonl"].as_str().unwrap();
+        for line in jsonl.lines() {
+            let v: Value = serde_json::from_str(line).unwrap();
+            let mut keys: Vec<&str> = v.as_object().unwrap().keys().map(String::as_str).collect();
+            keys.sort_unstable();
+            assert_eq!(
+                keys,
+                vec![
+                    "actor",
+                    "event",
+                    "hash",
+                    "payload",
+                    "payload_hash",
+                    "prev_hash",
+                    "seq",
+                    "ts"
+                ]
+            );
+        }
+        assert!(!jsonl.to_lowercase().contains("token"));
+        // Byte-flip row 1's payload out of band: verify must fail at seq 1.
+        {
+            let conn = rusqlite::Connection::open(dir.join("test.db")).unwrap();
+            conn.execute(
+                "UPDATE audit_events SET payload_json = ?1 WHERE seq = 1",
+                ["{\"tampered\":true}"],
+            )
+            .unwrap();
+        }
+        let after = dispatch(&req("audit.verify", json!({})), &cfg, gate, &store, Ok(NOW));
+        assert!(after.error.is_none());
+        let bad = after.result.as_ref().unwrap();
+        assert_eq!(bad["ok"], Value::Bool(false));
+        assert_eq!(bad["bad_seq"], serde_json::json!(1));
+        assert!(bad["bad_reason"].is_string());
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

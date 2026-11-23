@@ -333,6 +333,8 @@ name = "core-store"
 version = "0.0.0"
 dependencies = [
  "rusqlite",
+ "serde_json",
+ "sha2",
  "thiserror",
 ]
 
@@ -341,10 +343,12 @@ name = "cored"
 version = "0.0.0"
 dependencies = [
  "core-protocol",
+ "core-sandbox",
  "core-store",
  "getrandom",
  "hmac",
  "keyring",
+ "rusqlite",
  "serde",
  "serde_json",
  "sha2",

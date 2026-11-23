@@ -1,0 +1,21 @@
+{
+  "platform": "win32",
+  "arch": "x64",
+  "cold_start_ms": 26,
+  "cold_start_budget_ms": 2500,
+  "cored_idle_rss_mb": 15.3,
+  "fs_list_ms": {
+    "n": 50,
+    "p50": 167,
+    "p95": 238,
+    "mean": 177.36,
+    "max": 296
+  },
+  "fs_read_ms": {
+    "n": 50,
+    "p50": 142,
+    "p95": 204,
+    "mean": 143.58,
+    "max": 231
+  }
+}
