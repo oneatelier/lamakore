@@ -16,7 +16,7 @@ import path from 'node:path';
 import cfg from '../../../../branding.config.json';
 
 const BRIDGE: string = cfg.cliBinary;
-const ALLOWED = new Set(['system.health', 'system.info']);
+const ALLOWED = new Set(['system.health', 'system.info', 'audit.verify', 'audit.export', 'fs.list', 'fs.read', 'approval.request', 'approval.decide']);
 const PING_MS = 5000;
 const BACKOFF_MS = [1000, 2000, 4000];
 const MAX_RESTARTS = 3;
@@ -24,6 +24,15 @@ const HEALTH_TIMEOUT_MS = 10000;
 const DEGRADED_RTT_MS = 2000;
 
 export type ConnState = 'connecting' | 'connected' | 'unreachable' | 'degraded';
+
+/** Ledger verification outcome, from `audit.verify`. Null means unknown
+ * (not yet fetched, or the bridge refused it) — never a banner. */
+export interface LedgerStatus {
+  ok: boolean;
+  events: number;
+  badSeq: number | null;
+  head: string | null;
+}
 
 interface Pending {
   resolve: (v: unknown) => void;

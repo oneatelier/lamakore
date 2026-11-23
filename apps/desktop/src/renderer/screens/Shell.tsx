@@ -1,13 +1,54 @@
 // Shell: the designed application shell — title bar, left rail, main canvas,
 // status strip with the daemon connection state. All four states are built
 // from the shared state components; every state is fully designed.
+// The connected canvas hosts the wire/1 approval.request deck card.
 import React from 'react';
 import type { ThemeName } from '../../../../../packages/ui/src/theme/themes.js';
-import type { ConnState } from '../../main/daemon.js';
-import { DegradedState, EmptyState, ErrorState, LoadingState } from '../components/states.js';
+import type { ConnState, LedgerStatus } from '../../main/daemon.js';
+import {
+  approve as approveApproval,
+  createApproval,
+  deny as denyApproval,
+  editScope as editApprovalScope,
+  tick as tickApproval,
+  type ApprovalCardState,
+} from '../../../../../packages/ui/src/approvals/approval.js';
+import { ApprovalCard } from '../../../../../packages/ui/src/approvals/ApprovalCard.js';
+import { DegradedState, EmptyState, ErrorState, LedgerTamperBanner, LoadingState } from '../components/states.js';
+import { FilesPanel, type FilesInvoke } from '../components/FilesPanel.js';
+
+function useDemoApproval(): { state: ApprovalCardState; now: number; onApprove: () => void; onDeny: () => void; onEdit: (scope: string) => void } {
+  const [state, setState] = React.useState<ApprovalCardState>(() =>
+    createApproval({ tool: 'tool.exec', scope: '/proj', reason: 'Read logs to diagnose the failure.', ttlSecs: 120 }, Date.now() / 1000, 'apr-deck-demo'),
+  );
+  const [now, setNow] = React.useState<number>(() => Date.now() / 1000);
+  React.useEffect(() => {
+    const t = setInterval(() => {
+      const tnow = Date.now() / 1000;
+      setNow(tnow);
+      setState((s) => tickApproval(s, tnow));
+    }, 500);
+    return () => clearInterval(t);
+  }, []);
+  return {
+    state,
+    now,
+    onApprove: () => setState((s) => approveApproval(s, Date.now() / 1000, 'deck')),
+    onDeny: () => setState((s) => denyApproval(s, Date.now() / 1000, 'deck')),
+    onEdit: (scope: string) =>
+      setState((s) => {
+        try {
+          return editApprovalScope(s, scope, Date.now() / 1000);
+        } catch {
+          return s;
+        }
+      }),
+  };
+}
 
 export interface ShellProps {
   conn: ConnState;
+  ledger: LedgerStatus | null;
   product: string;
   daemon: string;
   build: string;
@@ -16,6 +57,8 @@ export interface ShellProps {
   themeLabel: (t: ThemeName) => string;
   setTheme: (t: ThemeName) => void;
   onRetry: () => void;
+  onRecheckLedger: () => void;
+  invoke: FilesInvoke;
 }
 
 const DOT: Record<ConnState, string> = {
@@ -45,6 +88,40 @@ function Bar({ children }: { children?: React.ReactNode }): React.JSX.Element {
       },
     },
     children,
+  );
+}
+
+function ConnectedCanvas(props: { daemon: string; build: string; invoke: FilesInvoke }): React.JSX.Element {
+  const demo = useDemoApproval();
+  return React.createElement(
+    'div',
+    null,
+    React.createElement(
+      'h1',
+      { style: { fontFamily: 'var(--font-display)', fontSize: 'var(--text-t34)', margin: '0 0 var(--space-s2)' } },
+      'Ready to work',
+    ),
+    React.createElement(
+      'p',
+      { style: { color: 'var(--text-secondary)', fontSize: 'var(--text-t14)' } },
+      `Daemon ${props.daemon} · build ${props.build} · wire/1 handshake verified.`,
+    ),
+    React.createElement(EmptyState, {
+      title: 'The canvas starts empty.',
+      body: 'Ask anything. Tools run sandboxed; every mutation asks first.',
+    }),
+    React.createElement(FilesPanel, { invoke: props.invoke, initialScope: '' }),
+    React.createElement(
+      'div',
+      { style: { marginTop: 'var(--space-s6)' } },
+      React.createElement(ApprovalCard, {
+        state: demo.state,
+        now: demo.now,
+        onApprove: demo.onApprove,
+        onDeny: demo.onDeny,
+        onEdit: demo.onEdit,
+      }),
+    ),
   );
 }
 
@@ -139,27 +216,17 @@ export function Shell(props: ShellProps): React.JSX.Element {
       React.createElement(
         'section',
         { style: { flex: 1, padding: 'var(--space-s6)', overflow: 'auto' } },
+        props.ledger !== null &&
+          !props.ledger.ok &&
+          React.createElement(LedgerTamperBanner, {
+            events: props.ledger.events,
+            badSeq: props.ledger.badSeq,
+            onRecheck: props.onRecheckLedger,
+          }),
         conn === 'connecting' &&
           React.createElement(LoadingState, { label: 'Connecting to the daemon — hang tight.' }),
         conn === 'connected' &&
-          React.createElement(
-            'div',
-            null,
-            React.createElement(
-              'h1',
-              { style: { fontFamily: 'var(--font-display)', fontSize: 'var(--text-t34)', margin: '0 0 var(--space-s2)' } },
-              'Ready to work',
-            ),
-            React.createElement(
-              'p',
-              { style: { color: 'var(--text-secondary)', fontSize: 'var(--text-t14)' } },
-              `Daemon ${props.daemon} · build ${props.build} · wire/1 handshake verified.`,
-            ),
-            React.createElement(EmptyState, {
-              title: 'The canvas starts empty.',
-              body: 'Ask anything. Tools run sandboxed; every mutation asks first.',
-            }),
-          ),
+          React.createElement(ConnectedCanvas, { daemon: props.daemon, build: props.build, invoke: props.invoke }),
         conn === 'unreachable' &&
           React.createElement(ErrorState, {
             title: 'Daemon unreachable',

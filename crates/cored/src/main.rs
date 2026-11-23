@@ -10,6 +10,7 @@
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 
 mod capability;
+mod fs_tool;
 mod server;
 
 use capability::KeyProvider as _;
@@ -29,13 +30,25 @@ fn build_string() -> String {
 
 fn usage() -> ! {
     eprintln!("usage: cored --socket <path>");
+    eprintln!("   or: cored fs-list --scope <dir> [--path <rel>] --limit <n> --out <file>");
+    eprintln!("   or: cored fs-read --scope <dir> --path <rel> --max-bytes <n> --out <file>");
     std::process::exit(2);
 }
 
 #[tokio::main]
 async fn main() -> Result<(), WireError> {
+    // Sandboxed fs worker subcommands run first: pure filesystem work, no
+    // store, no keychain, no network. The parent spawns these confined.
+    let mut raw = std::env::args().skip(1);
+    let Some(first) = raw.next() else {
+        usage();
+    };
+    if first == "fs-list" || first == "fs-read" {
+        let rest: Vec<String> = raw.collect();
+        std::process::exit(fs_tool::run_worker(&first, &rest));
+    }
     let mut socket: Option<PathBuf> = None;
-    let mut argv = std::env::args().skip(1);
+    let mut argv = std::iter::once(first).chain(raw);
     while let Some(arg) = argv.next() {
         if arg == "--socket" {
             socket = argv.next().map(PathBuf::from);

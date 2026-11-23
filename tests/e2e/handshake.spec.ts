@@ -32,6 +32,23 @@ function cleanCargoEnv(): NodeJS.ProcessEnv {
   // Local Windows builds use the pinned GNU toolchain (no MSVC on this
   // host; see report-P008). CI uses default msvc and is unaffected.
   env.RUSTUP_TOOLCHAIN = '1.100.0-x86_64-pc-windows-gnu';
+  // Same host quirk for the C bits of the build (bundled SQLite): if the
+  // user-local compiler shim exists, point cc-rs at it; otherwise leave
+  // the environment alone (CI toolchains bring their own cc/ar). Paths
+  // derive from env so no username is ever committed.
+  try {
+    const binDir = path.join(process.env.LOCALAPPDATA ?? '', 'Programs', 'project-one', 'bin');
+    const cc = path.join(binDir, 'ccwrap.exe');
+    const ar = path.join(binDir, 'zig.exe');
+    if (existsSync(cc) && existsSync(ar)) {
+      env.CC_x86_64_pc_windows_gnu = cc;
+      env.AR_x86_64_pc_windows_gnu = `${ar} ar`;
+      env.CARGO_TARGET_DIR = 'D:\\t';
+      env.CARGO_PROFILE_DEV_CODEGEN_UNITS = '1';
+    }
+  } catch {
+    /* fall back to the ambient toolchain */
+  }
   return env;
 }
 
@@ -168,7 +185,18 @@ test('wire/1 handshake succeeds; health and info answer', async () => {
       assert.ok(info.result && typeof info.result['daemon'] === 'string', 'info must carry daemon binary');
       client.send({ jsonrpc: '2.0', method: 'bogus.method', id: 3 });
       const bad = (await client.next()) as { error?: { code?: number } };
-      assert.equal(bad.error?.code, -32601);
+      // DEFAULT-DENY since P012: the gate runs before dispatch, so an
+      // unknown method without a token is denied, not "not found".
+      assert.equal(bad.error?.code, -32001);
+      // With a token minted for that exact (unknown) method the gate passes
+      // and the unknown method itself fails closed with method-not-found.
+      client.send({ jsonrpc: '2.0', id: 4, method: 'capability.grant', params: { tool: 'bogus.method', scope: '/proj', ttl_secs: 60 } });
+      const granted = (await client.next()) as { result?: { token?: string } };
+      const probeToken = granted.result?.token;
+      assert.ok(typeof probeToken === 'string' && probeToken.length > 0, 'grant must issue a token');
+      client.send({ jsonrpc: '2.0', id: 5, method: 'bogus.method', params: { capability: probeToken } });
+      const notFound = (await client.next()) as { error?: { code?: number } };
+      assert.equal(notFound.error?.code, -32601);
       client.close();
     } finally {
       client.close();

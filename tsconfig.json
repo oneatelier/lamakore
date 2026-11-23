@@ -11,5 +11,5 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["packages/branding/src/**/*.ts", "packages/ui/src/**/*.ts", "apps/**/*.ts", "apps/**/*.tsx", "tests/**/*.ts"]
+  "include": ["packages/branding/src/**/*.ts", "packages/ui/src/**/*.ts", "packages/protocol/src/**/*.ts", "apps/**/*.ts", "apps/**/*.tsx", "tests/**/*.ts"]
 }

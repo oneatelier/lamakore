@@ -77,6 +77,66 @@ export function LoadingState(props: { label: string }): React.JSX.Element {
   );
 }
 
+/** Ledger-tamper banner: the append-only audit log failed verification.
+ * Persistent by design — it stays visible until the log is purged per the
+ * retention guide — with a keyboard-reachable re-check. P007 tokens only. */
+export function LedgerTamperBanner(props: {
+  events: number;
+  badSeq: number | null;
+  onRecheck: () => void;
+}): React.JSX.Element {
+  return React.createElement(
+    'div',
+    {
+      role: 'alert',
+      'data-testid': 'ledger-tamper-banner',
+      style: {
+        backgroundColor: 'var(--surface-raised)',
+        border: '1px solid var(--signal-danger)',
+        borderRadius: 'var(--radius-r12)',
+        padding: 'var(--space-s4)',
+        marginBottom: 'var(--space-s4)',
+      },
+    },
+    React.createElement(
+      'p',
+      {
+        'data-testid': 'ledger-tamper-title',
+        style: { color: 'var(--text-primary)', fontSize: 'var(--text-t16)', fontWeight: 600, margin: '0 0 var(--space-s2)' },
+      },
+      'Audit ledger tampered',
+    ),
+    React.createElement(
+      'p',
+      {
+        'data-testid': 'ledger-tamper-body',
+        style: { color: 'var(--text-secondary)', fontSize: 'var(--text-t14)', margin: '0 0 var(--space-s3)' },
+      },
+      `The append-only audit log failed verification at record ${props.badSeq ?? 'unknown'} of ${props.events} examined. ` +
+        'Recording continues, but the break stays visible. This log never leaves the device — nothing was uploaded. ' +
+        'To start a fresh log, quit the app, delete the local store file, and reopen (see the retention guide).',
+    ),
+    React.createElement(
+      'button',
+      {
+        type: 'button',
+        onClick: props.onRecheck,
+        'data-testid': 'ledger-recheck',
+        style: {
+          backgroundColor: 'var(--brass-primary)',
+          color: 'var(--surface-void)',
+          border: 'none',
+          borderRadius: 'var(--radius-r8)',
+          padding: 'var(--space-s2) var(--space-s4)',
+          cursor: 'pointer',
+          fontSize: 'var(--text-t14)',
+        },
+      },
+      'Re-check ledger',
+    ),
+  );
+}
+
 /** Degraded state: honest banner — what is wrong, what still works, retry. */
 export function DegradedState(props: { body: string; actionLabel: string; onAction: () => void }): React.JSX.Element {
   return React.createElement(
