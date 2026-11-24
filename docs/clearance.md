@@ -1,4 +1,4 @@
-# Clearance record — "Shedu" (ABANDONED) and "Lamakore" (current candidate)
+# Clearance record — "Shedu" (ABANDONED) and "Lamakore" (owner-confirmed; claims pending)
 
 - **Owner confirmation on record:** LAMAKORE (2026-11-24). Publisher stays
   One Atelier. Publisher mark (bull) unchanged; product mark separate.
@@ -169,3 +169,8 @@ registries + ONE domain claimed (pending above) AND CI green AND owner
 sign-off (LAMAKORE, 2026-11-24 — recorded). Self-clearance only; formal
 TM search deferred to entity formation; (tm) now, never (R) before
 registration.
+
+- **Status 2026-11-24 (post-rename):** repo renamed to
+  `oneatelier/lamakore` (redirect verified); Lamakore live on all living
+  surfaces. Claims + domain still pending owner credentials/payment;
+  `publishBlocked` stays `true`. Sweep tables above unchanged.

@@ -2,10 +2,8 @@
 
 ## Reporting a vulnerability — private disclosure only
 
-- Email: **security@project-one.dev**. Encrypt if you can; we will send
-  you our public key on first reply.
-- Alternatively, once this repository is public on GitHub, use
-  **Private Vulnerability Reporting** on the Security tab.
+- Use **GitHub Private Vulnerability Reporting** on the Security tab.
+  This is the primary channel.
 - Do NOT open a public issue, discussion, or pull request for a
   suspected vulnerability.
 
@@ -29,7 +27,7 @@ laundering into privileged context are all treated as security bugs, not
 feature requests.
 
 Out of scope: the commercial `ee/` modules' licensing enforcement
-(report piracy to the same address; it is triaged separately), upstream
+(report piracy via Private Vulnerability Reporting; it is triaged separately), upstream
 Electron/Chromium CVEs already fixed in our pinned version (upgrade
 requests still welcome), and social-engineering of maintainers.
 
