@@ -18,12 +18,23 @@ An open-source unified agent desktop: a real window driven by a trusted local co
 
 ![First run to deck walkthrough](assets/demo/P009-shell.gif)
 
+*Files deck (brass-void). GIF #2: approve the first grant, then read — every outcome audited.*
+
+![Files deck: approve then read](assets/demo/fs-deck-demo.gif)
+
 ## What this is
 
 - A **real desktop window** (Electron 45.4.1) that treats web content as hostile.
 - A **trusted Rust core** (`cored`) that owns credentials, policy, and tool dispatch.
 - A **local-only wire protocol** (`wire/1`, named pipes / Unix sockets — never TCP).
-- **Sandboxed tools**: Job Objects + AppContainer first, hypervisor tiers later.
+- **Real read-only workspace tools** (`fs.list` / `fs.read`): sandboxed
+  helpers, capability-checked per call, approval card on first grant,
+  hash-chained audit on every outcome — driven from the deck's Files panel.
+- **Real secret handling**: provider keys live only in the OS keychain
+  (Settings panel: masked input, provider select, one explicit test
+  request, zero background calls); plaintext never crosses the wire to the deck.
+- **Sandboxed tools**: Job Objects + AppContainer first (Tier-1 enforced),
+  POSIX Landlock/seccomp/Seatbelt where present, hypervisor tiers later.
 - **Design tokens as code** (Brass & Void), verified contrast, keyboard-first.
 
 ## What this is not
