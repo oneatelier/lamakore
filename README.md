@@ -17,7 +17,7 @@ An open-source unified agent desktop: a real window driven by a trusted local co
 
 *First run (brass-void). The GIF below walks it: read the guide, open the deck.*
 
-![First run to deck walkthrough](assets/demo/P009-shell.gif)
+![First run to deck walkthrough (re-recorded under final branding)](assets/demo/P009-shell-v2.gif)
 
 *Files deck (brass-void). GIF #2: approve the first grant, then read — every outcome audited.*
 
