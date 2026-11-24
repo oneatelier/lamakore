@@ -17,9 +17,14 @@ const NODE = process.execPath;
 const DCO = join(ROOT, 'scripts', 'hygiene', 'check-dco.mjs');
 const EMPTY_TREE = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
 
-const AUTHOR = 'Lamakore Maintainers';
+const AUTHOR = orgVoice();
 const EMAIL = ['359786796+oneatelier', '@users.noreply.github.com'].join('');
 const TRAILER = `Signed-off-by: ${AUTHOR} <${EMAIL}>`;
+
+function orgVoice(): string {
+  const cfg = JSON.parse(readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  return `${cfg.productName} Maintainers`;
+}
 
 function git(dir: string, args: string[]): string {
   return execFileSync('git', ['-c', 'commit.gpgsign=false', ...args], {
