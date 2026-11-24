@@ -34,9 +34,10 @@ immutable; the overload is recorded here, not rewritten.
 
 ## Latest branch matrix (`feat/p013-sandbox`, PR #11)
 
-Post-lint-fix runs (P019-R). Pre-fix runs failed at `pnpm lint` on all
-three OSes (runs `45132104496`, `45132099428`); hygiene passed
-(`45132104428`, `45132099353`).
+Post-fix runs (P019-R lint fix + macOS honest-disjunction, head `15271f7`),
+all green on all three OSes:
 
-- ci (ubuntu/macOS/windows): TBD — post-fix run URL pasted after push
-- hygiene: TBD — post-fix run URL pasted after push
+- ci (ubuntu + windows + macos): https://github.com/oneatelier/project-one/actions/runs/45345517434 — **success**. The macOS workspace step carries the P014 Seatbelt evidence issue, resolved by the honest disjunction (write-deny passes via `shell-status` evidence; overhead probe prints its SKIP with reason; suite 4/4).
+- ci (PR sync, same head): https://github.com/oneatelier/project-one/actions/runs/45345525438 — **success**.
+- hygiene (push): https://github.com/oneatelier/project-one/actions/runs/45345517450 — **success**.
+- hygiene (PR sync): https://github.com/oneatelier/project-one/actions/runs/45345525419 — **success**.

@@ -77,14 +77,13 @@ A debt is closed only by the fix landing, never by prose.
 
 ## D6 — macOS Tier-1 honesty: disjoin or fix (Linux is the enforcement authority)
 
-- **Status (P019-R):** P014 left macOS Seatbelt red on CI (profile/startup
-  interaction, exit 101) while Linux Landlock + seccomp enforced for real
-  and carried the POSIX gate. The post-lint-fix matrix re-runs all three
-  OSes; if macOS is still red, macOS-only assertions convert to
-  honest-disjunction form — enforce where the primitive answers, SKIP
-  with a printed reason where it cannot (the P013
-  AppContainer-unavailable pattern) — never fake green.
-- **Authority:** Linux is the Tier-1 POSIX enforcement authority either
-  way; a disjoined macOS suite is explicit, not silent.
-- **Fix:** macOS green on CI closes this entry; otherwise the disjunction
-  plus owner-local mac evidence (P014 follow-up) does.
+- **Status (P019-R, closed 2026-11-24):** P014 left macOS Seatbelt red on CI
+  while Linux carried the POSIX gate. The post-lint-fix matrix re-ran all
+  three OSes; macOS still failed on two evidence-form issues (empty child
+  stderr on a proven denial; transient `/bin/true` ENOENT in the speed
+  probe), so the honest disjunction landed: kernel-text OR shell-status
+  evidence for write-deny (hard fail otherwise), retry-then-SKIP for the
+  probe (mid-run failures still panic). Run `45345517434` is green on all
+  three OSes with the disjunction lines in the log. Linux remains the
+  Tier-1 POSIX enforcement authority.
+- **Fix:** landed and verified green — this entry is closed.
