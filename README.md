@@ -2,10 +2,11 @@
 
 An open-source unified agent desktop: a real window driven by a trusted local core over a local-only protocol, with every tool sandboxed.
 
-> **Status: pre-alpha. Provisional name — not cleared for distribution.**
-> Nothing here is finished, nothing phones home, and no binary release
-> exists yet. The name, the marks, and the registries are all pending
-> clearance (see TRADEMARK.md and ADR-003).
+> **Status: pre-alpha. Not cleared for distribution. Lamakore is the confirmed
+> product name (owner-confirmed 2026-11-24; self-clearance sweep in
+> docs/clearance.md; formal trademark search pending). Nothing here is finished,
+> nothing phones home, no binary release exists yet. Registry claims and the
+> product domain are pending; clearance.publishBlocked is true.**
 
 [![CI](https://github.com/oneatelier/lamakore/actions/workflows/ci.yml/badge.svg)](https://github.com/oneatelier/lamakore/actions/workflows/ci.yml)
 [![Hygiene](https://github.com/oneatelier/lamakore/actions/workflows/hygiene.yml/badge.svg)](https://github.com/oneatelier/lamakore/actions/workflows/hygiene.yml)
@@ -41,8 +42,9 @@ An open-source unified agent desktop: a real window driven by a trusted local co
 
 - Not a finished product. Screens say what they cannot do yet.
 - Not a cloud service. No accounts, no telemetry, no open ports.
-- Not cleared for distribution: the name is provisional, the marks are
-  unregistered, and `clearance.publishBlocked` is `true`.
+- Not cleared for distribution: registry claims and the product domain
+  are pending, the marks are unregistered, and `clearance.publishBlocked`
+  is `true`.
 
 ```
 ┌──────────────┐   contextBridge (allowlisted)   ┌─────────────────────┐
@@ -67,7 +69,7 @@ Full statement: `docs/adr/ADR-000-host-profile-and-threat-boundary.md`.
 ## Quickstart (real commands, pinned toolchain)
 
 ```sh
-git clone <org-url> && cd lamakore
+git clone https://github.com/oneatelier/lamakore.git && cd lamakore
 powershell -ExecutionPolicy Bypass -File scripts/bootstrap/windows.ps1
 # or: ./scripts/bootstrap/macos.sh  |  ./scripts/bootstrap/linux.sh
 node scripts/bootstrap/verify.mjs
@@ -111,8 +113,8 @@ never from prose. Roadmap: [roadmap.json](artifacts/roadmap.json) ·
 ## Security
 
 Suspected vulnerability? **Do not open a public issue.**
-Email security@project-one.dev or use GitHub Private Vulnerability
-Reporting once the repo is public. 90-day policy, tool-execution bugs
+Use **GitHub Private Vulnerability Reporting** on the Security tab —
+the primary channel. 90-day policy, tool-execution bugs
 explicitly in scope. Full policy: [SECURITY.md](SECURITY.md).
 
 ## Contributing
@@ -125,8 +127,8 @@ Be kind; see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Governance:
 ## License and trademark
 
 Apache-2.0 — see [LICENSE](LICENSE). Copyright 2026 The Lamakore Authors.
-The name and marks are **provisional** and not licensed for reuse; policy
-modeled on the Apache/PostgreSQL pattern: [TRADEMARK.md](TRADEMARK.md).
+The name and marks are **unregistered (™), not licensed for reuse**;
+policy modeled on the Apache/PostgreSQL pattern: [TRADEMARK.md](TRADEMARK.md).
 
 ## Acknowledgements
 

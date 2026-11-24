@@ -1,8 +1,13 @@
 # Trademark Policy
 
-The name "Lamakore" and any associated logos are **provisional**:
-they identify this project while it finds its permanent identity, and
-this policy will follow the name if it changes.
+The name "Lamakore" is the confirmed product name, and this policy
+follows the mark: the code is Apache-2.0, the name and marks are not.
+No license to use them is granted by the code license (see LICENSE §6,
+which withholds trademark rights).
+
+House rule: use ™ (unregistered claim of use) where the mark is
+asserted, never ® before an actual registration. No registration
+exists; filing is deferred to entity formation.
 
 ## What this means
 
