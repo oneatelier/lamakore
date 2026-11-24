@@ -27,6 +27,10 @@ use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
+// Brand token from `branding.config.json` via `build.rs` (generated into
+// `OUT_DIR`, never a literal in source — the brand lint forbids it).
+include!(concat!(env!("OUT_DIR"), "/brand_token.rs"));
+
 /// Wire method for directory listing.
 pub const FS_LIST_METHOD: &str = "fs.list";
 /// Wire method for file reading.
@@ -303,10 +307,14 @@ fn audit_outcome(
     );
 }
 
-/// Unique hidden result-file path inside the scope.
+/// Unique hidden result-file path inside the scope. The prefix is
+/// brand-derived at build time (never a literal — see `build.rs`).
 fn result_path(scope: &Path) -> PathBuf {
     let n = RESULT_COUNTER.fetch_add(1, Ordering::SeqCst);
-    scope.join(format!(".pone-fs-result-{}-{n}.json", std::process::id()))
+    scope.join(format!(
+        ".{CODE_TOKEN}-fs-result-{}-{n}.json",
+        std::process::id()
+    ))
 }
 
 /// Route one fs.list / fs.read request. Gate first (on the lexical path),
@@ -1055,7 +1063,7 @@ mod tests {
                 .filter(|e| e
                     .file_name()
                     .to_string_lossy()
-                    .starts_with(".pone-fs-result-"))
+                    .starts_with(&format!(".{CODE_TOKEN}-fs-result-")))
                 .count(),
             0
         );
