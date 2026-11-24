@@ -1,0 +1,18 @@
+[package]
+name = "vault"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Provider API keys in the OS keychain; never in SQLite, never on the wire to the deck"
+
+[dependencies]
+core-protocol = { path = "../core-protocol" }
+keyring = "4"
+serde_json = "1"
+thiserror = "2"
+
+[features]
+# In-memory backend for headless CI (no OS keychain available).
+# The real-keychain path is always compiled; its test skips honestly when
+# no keychain is reachable and must pass owner-locally with evidence.
+mock-keyring = []

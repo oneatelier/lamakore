@@ -16,6 +16,7 @@ import {
 import { ApprovalCard } from '../../../../../packages/ui/src/approvals/ApprovalCard.js';
 import { DegradedState, EmptyState, ErrorState, LedgerTamperBanner, LoadingState } from '../components/states.js';
 import { FilesPanel, type FilesInvoke } from '../components/FilesPanel.js';
+import { SettingsPanel } from '../components/SettingsPanel.js';
 
 function useDemoApproval(): { state: ApprovalCardState; now: number; onApprove: () => void; onDeny: () => void; onEdit: (scope: string) => void } {
   const [state, setState] = React.useState<ApprovalCardState>(() =>
@@ -127,6 +128,10 @@ function ConnectedCanvas(props: { daemon: string; build: string; invoke: FilesIn
 
 export function Shell(props: ShellProps): React.JSX.Element {
   const { conn } = props;
+  // Deck tab: Agent hosts the wire/1 canvas; Settings hosts the vault
+  // panel (masked input, provider select, explicit test button, zero
+  // background calls). Tools/Memory are not yet wired — no wire traffic.
+  const [tab, setTab] = React.useState<string>('Agent');
   return React.createElement(
     'main',
     {
@@ -191,16 +196,17 @@ export function Shell(props: ShellProps): React.JSX.Element {
             gap: 'var(--space-s2)',
           },
         },
-        ['Agent', 'Tools', 'Memory', 'Settings'].map((item, i) =>
+        ['Agent', 'Tools', 'Memory', 'Settings'].map((item) =>
           React.createElement(
             'button',
             {
               key: item,
               type: 'button',
-              'aria-current': i === 0 ? 'page' : undefined,
+              onClick: () => setTab(item),
+              'aria-current': item === tab ? 'page' : undefined,
               style: {
                 textAlign: 'left',
-                backgroundColor: i === 0 ? 'var(--surface-raised)' : 'transparent',
+                backgroundColor: item === tab ? 'var(--surface-raised)' : 'transparent',
                 color: 'var(--text-primary)',
                 border: 'none',
                 borderRadius: 'var(--radius-r8)',
@@ -223,11 +229,27 @@ export function Shell(props: ShellProps): React.JSX.Element {
             badSeq: props.ledger.badSeq,
             onRecheck: props.onRecheckLedger,
           }),
-        conn === 'connecting' &&
+        tab === 'Settings' &&
+          (conn === 'connected' || conn === 'degraded') &&
+          React.createElement(SettingsPanel, { invoke: props.invoke }),
+        tab === 'Settings' &&
+          conn !== 'connected' &&
+          conn !== 'degraded' &&
+          React.createElement(ErrorState, {
+            title: 'Daemon unreachable',
+            cause: 'Settings need the trusted core.',
+            fix: 'Reconnect to manage provider keys.',
+            actionLabel: 'Retry connection',
+            onAction: props.onRetry,
+          }),
+        tab !== 'Settings' &&
+          conn === 'connecting' &&
           React.createElement(LoadingState, { label: 'Connecting to the daemon — hang tight.' }),
-        conn === 'connected' &&
+        tab !== 'Settings' &&
+          conn === 'connected' &&
           React.createElement(ConnectedCanvas, { daemon: props.daemon, build: props.build, invoke: props.invoke }),
-        conn === 'unreachable' &&
+        tab !== 'Settings' &&
+          conn === 'unreachable' &&
           React.createElement(ErrorState, {
             title: 'Daemon unreachable',
             cause: 'The trusted core stopped answering.',
@@ -235,7 +257,8 @@ export function Shell(props: ShellProps): React.JSX.Element {
             actionLabel: 'Retry connection',
             onAction: props.onRetry,
           }),
-        conn === 'degraded' &&
+        tab !== 'Settings' &&
+          conn === 'degraded' &&
           React.createElement(
             'div',
             null,

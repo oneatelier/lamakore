@@ -19,6 +19,10 @@ pub const PROTOCOL_VERSION: u32 = 1;
 /// Capability issuance (`capability.*`) is allowlisted like health/info: you
 /// cannot require a capability in order to obtain one. Every other method
 /// must present a valid capability (see `cored::capability`).
+/// Secret methods (`secret.*`) are issuance-plane like capabilities: the
+/// user configures keys without holding a token, and the daemon never
+/// returns plaintext (only opaque handles), so no token is required to
+/// call them. They are audited with provider names only.
 pub const ALLOWED_METHODS: &[&str] = &[
     "system.health",
     "system.info",
@@ -33,6 +37,11 @@ pub const ALLOWED_METHODS: &[&str] = &[
     "audit.export",
     "fs.list",
     "fs.read",
+    "secret.set",
+    "secret.list",
+    "secret.delete",
+    "secret.ref",
+    "secret.test",
 ];
 /// Handshake must complete within this window or the peer is dropped.
 pub const HANDSHAKE_TIMEOUT_SECS: u64 = 5;
@@ -248,9 +257,17 @@ mod tests {
         assert!(is_allowed("audit.export"));
         assert!(is_allowed("fs.list"));
         assert!(is_allowed("fs.read"));
+        // Vault: provider keys live in the OS keychain only. The daemon
+        // never returns plaintext — list/ref/test carry handles and slugs.
+        assert!(is_allowed("secret.set"));
+        assert!(is_allowed("secret.list"));
+        assert!(is_allowed("secret.delete"));
+        assert!(is_allowed("secret.ref"));
+        assert!(is_allowed("secret.test"));
         assert!(!is_allowed("shell.exec"));
         assert!(!is_allowed("tool.exec"));
         assert!(!is_allowed("system.health "));
+        assert!(!is_allowed("secret.get"));
     }
 
     #[test]

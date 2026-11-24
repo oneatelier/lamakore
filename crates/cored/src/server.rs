@@ -24,6 +24,8 @@ use tokio::sync::watch;
 /// Daemon configuration. The session token arrives via `PONE_WIRE_TOKEN`
 /// and is never logged. The capability root key is loaded once from the OS
 /// keychain and shared read-only; each connection opens its own store.
+/// Provider API keys live in the OS keychain behind [`vault::Vault`]
+/// (shared across connections); SQLite never holds secrets.
 pub struct ServerConfig {
     pub socket_path: PathBuf,
     pub spill_path: PathBuf,
@@ -33,6 +35,7 @@ pub struct ServerConfig {
     pub root_key: [u8; 32],
     pub db_path: PathBuf,
     pub pending_requests: Mutex<HashMap<String, PendingRequest>>,
+    pub vault: std::sync::Arc<vault::Vault>,
 }
 
 /// Bind the single-instance listener. A live peer on the address means
@@ -279,11 +282,13 @@ fn method_not_found(req: &Request) -> Response {
 }
 
 /// Route one request. `system.health`/`system.info` and the issuance plane
-/// (`capability.*`, `approval.*`, `audit.verify`, `audit.export`) need no
-/// token. EVERY other method — known or not — must present a valid
-/// capability or it is refused with CAPABILITY_DENIED and audited.
-/// Authorization success on an unimplemented method still yields
+/// (`capability.*`, `approval.*`, `audit.verify`, `audit.export`,
+/// `secret.*`) need no token. EVERY other method — known or not — must
+/// present a valid capability or it is refused with CAPABILITY_DENIED and
+/// audited. Authorization success on an unimplemented method still yields
 /// method-not-found: gating and dispatch are separate layers.
+/// Secret methods never return, log, or audit key bytes (see
+/// `crate::secret_tool`); the STOP gate fails closed on any leak.
 fn dispatch(
     req: &Request,
     cfg: &ServerConfig,
@@ -320,6 +325,27 @@ fn dispatch(
             error: None,
         },
         m if capability::ISSUANCE_METHODS.contains(&m) => {
+            // Secret methods funnel through the vault (handles only, never
+            // bytes); everything else on the issuance plane goes through
+            // the capability handler. The secret arm must stay first: it is
+            // the only path that touches key material, and it never logs it.
+            if m.starts_with("secret.") {
+                let now = match now {
+                    Ok(n) => n,
+                    Err(e) => {
+                        return Response {
+                            jsonrpc: "2.0".to_string(),
+                            id: Some(req.id.clone()),
+                            result: None,
+                            error: Some(RpcError {
+                                code: -32603,
+                                message: format!("internal error: {e}"),
+                            }),
+                        };
+                    }
+                };
+                return crate::secret_tool::execute(req, &cfg.vault, store, now);
+            }
             let now = match now {
                 Ok(n) => n,
                 Err(e) => {
@@ -432,6 +458,7 @@ mod gate_matrix_tests {
             root_key: key,
             db_path: dir.join("test.db"),
             pending_requests: Mutex::new(HashMap::new()),
+            vault: std::sync::Arc::new(vault::Vault::mock()),
         };
         (dir, store, cfg, Gate::new(key))
     }

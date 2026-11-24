@@ -4,7 +4,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 import cfg from '../../../../branding.config.json';
 
 const BRIDGE: string = cfg.cliBinary;
-const ALLOWED = new Set(['system.health', 'system.info', 'audit.verify', 'audit.export', 'fs.list', 'fs.read', 'approval.request', 'approval.decide']);
+const ALLOWED = new Set(['system.health', 'system.info', 'audit.verify', 'audit.export', 'fs.list', 'fs.read', 'approval.request', 'approval.decide', 'secret.set', 'secret.list', 'secret.delete', 'secret.ref', 'secret.test']);
 const TOPIC_RE = /^[a-z0-9.-]+$/i;
 
 function validMethod(m: unknown): m is string {
