@@ -35,6 +35,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - name: explicit-any AST gate (blocking; word rules stay advisory)
+        run: node scripts/detect-placeholders.mjs --any-only
       - run: cargo fmt --check
       - run: cargo clippy --workspace -- -D warnings
       - run: cargo check --workspace

@@ -2,14 +2,17 @@
 /*
  * Placeholder / stub detector (P006): fails closed on unfinished-surface
  * markers in tracked text — TODO, FIXME, lorem, "coming soon", the p-word
- * for unfinished filler, `any` in TS (via the TS compiler API, so comments
- * and strings do not count), and unstyled default components in tsx/jsx.
- * deferred:#NNN markers pass only with a resolvable open issue.
+ * for unfinished filler, `any` in TS (via the TypeScript 5 compiler AST,
+ * so comments and strings do not count), and unstyled default components
+ * in tsx/jsx. deferred:#NNN markers pass only with a resolvable open issue.
  * History (docs/reports, docs/adr, CHANGELOG) and this script itself are
  * out of scope: history is immutable, and the rule must not flag its own
  * definition. No network is required; issue resolution uses a local
  * registry (artifacts/issues.json) or `gh` when present, and fails closed.
- * Usage: detect-placeholders.mjs [--root DIR]
+ * Usage: detect-placeholders.mjs [--root DIR] [--staged] [--any-only]
+ * (--any-only runs just the explicit-`any` AST rule; that is the blocking
+ * CI step in ci.yml, while the word rules stay advisory until their known
+ * false positives on genuine `placeholder=` input attributes are resolved).
  */
 import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -19,6 +22,13 @@ import { fileList } from './hygiene/lib-files.mjs';
 
 const HISTORY_RES = [/^docs\/reports\//, /^docs\/adr\//, /^CHANGELOG\.md$/];
 const SELF = 'scripts/detect-placeholders.mjs';
+// A linter must not flag its own name: lines naming this script (its CI
+// invocation, docs pointers) trip the naive p-word rule by construction
+// and cannot be reworded away — the path is functional. Word rules skip
+// such lines; the AST rule, deferred validation, and unstyled-component
+// checks still apply to them. (The P025 spec directory was renamed to
+// tests/explicit-any/ instead — rewording wins wherever the name is
+// prose rather than functional.)
 const WORD_RES = [
   [/\bTODO\b/, 'todo-marker'],
   [/\bFIXME\b/, 'fixme-marker'],
@@ -34,49 +44,56 @@ const HINT = 'hint: finish the surface, or convert to a tracked issue reference 
 
 const require = createRequire(import.meta.url);
 
-function anyLinesViaScanner(abs, text) {
-  // Token-stream analysis via the TS 7 scanner API: comments are trivia and
-  // strings are string tokens, so neither can produce an AnyKeyword match.
-  let ast;
+function anyLinesViaAst(rel, text) {
+  // Real AST detector (D1 fix, P025): walk the TypeScript 5 compiler AST
+  // for AnyKeyword nodes. Comments are trivia and strings are literal
+  // tokens — neither can produce an AnyKeyword node, so both are ignored
+  // by construction. Every type position is covered because the walk is
+  // structural: annotations, generics, unions/intersections, arrays,
+  // tuples, `as`/`satisfies`, angle assertions, return types, aliases,
+  // conditional/infer fallbacks.
+  //
+  // Why the typescript5 alias instead of the installed typescript@7:
+  // TS 7 no longer ships a stable parser entry — `require('typescript')`
+  // exposes only { version, versionMajorMinor }; parsing lives behind
+  // `typescript/unstable/*`, which exposes a scanner but no
+  // createSourceFile (verified 2026-11-24). The old token-stream check was
+  // built on that unstable surface. typescript5@npm:typescript@5.9.3 is
+  // the last stable compiler API with createSourceFile/forEachChild, and
+  // typescript-eslint 8.74 (tried first) hard-requires TS <6.1 as a peer
+  // and crashes on TS 7 (`ts.Extension` undefined). The alias is pinned
+  // exact in devDependencies and used ONLY by this scanner — the build
+  // still compiles with TS 7 (tsc --strict stays the implicit-any backstop;
+  // this rule is the explicit-any gate).
+  let ts;
   try {
-    ast = require('typescript/unstable/ast');
+    ts = require('typescript5');
   } catch {
     return { skipped: true, lines: [] };
   }
-  const { createScanner, ScriptTarget, SyntaxKind } = ast;
-  if (typeof createScanner !== 'function' || SyntaxKind.AnyKeyword === undefined) {
-    return { skipped: true, lines: [] };
+  const kind = rel.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  let sf;
+  try {
+    sf = ts.createSourceFile(rel, text, ts.ScriptTarget.Latest, true, kind);
+  } catch {
+    return { skipped: false, parseError: true, lines: [] };
   }
-  const scanner = createScanner(ScriptTarget.Latest, true);
-  scanner.setText(text);
+  if ((sf.parseDiagnostics || []).length > 0) {
+    return { skipped: false, parseError: true, lines: [] };
+  }
   const lines = [];
-  let lastEnd = -1;
-  for (let guard = 0; guard < text.length + 16; guard += 1) {
-    const tok = scanner.scan();
-    let end = -1;
-    try {
-      end = scanner.getTokenEnd();
-    } catch {
-      break;
+  (function walk(node) {
+    if (node.kind === ts.SyntaxKind.AnyKeyword) {
+      lines.push(sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1);
     }
-    if (tok === SyntaxKind.EndOfFileToken || end <= lastEnd) break;
-    lastEnd = end;
-    if (tok === SyntaxKind.AnyKeyword) {
-      let pos = end;
-      try {
-        pos = typeof scanner.getStartPos === 'function' ? scanner.getStartPos() : end;
-      } catch {
-        pos = end;
-      }
-      lines.push(text.slice(0, pos).split('\n').length);
-    }
-  }
+    ts.forEachChild(node, walk);
+  })(sf);
   return { skipped: false, lines };
 }
 
-function resolveIssue(num) {
+function resolveIssue(num, root) {
   try {
-    const reg = JSON.parse(readFileSync(path.join(process.cwd(), 'artifacts', 'issues.json'), 'utf8'));
+    const reg = JSON.parse(readFileSync(path.join(root, 'artifacts', 'issues.json'), 'utf8'));
     const hit = (reg.issues || []).find((i) => String(i.number) === String(num));
     if (hit && hit.state === 'open') return true;
     return false;
@@ -88,6 +105,7 @@ function resolveIssue(num) {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
       timeout: 15000,
+      cwd: root,
     }).trim();
     return state === 'OPEN';
   } catch {
@@ -102,8 +120,34 @@ function main() {
     return i >= 0 ? args[i + 1] : null;
   };
   const root = get('--root') ? path.resolve(get('--root')) : process.cwd();
+  const staged = args.includes('--staged');
+  const anyOnly = args.includes('--any-only');
   let bad = 0;
-  for (const rel of fileList(root, false)) {
+
+  function checkAny(rel, text) {
+    const { skipped, parseError, lines: anyHits } = anyLinesViaAst(rel, text);
+    if (skipped) {
+      console.log(`${rel}:0 [ts-unavailable] typescript5 parser not installed; cannot scan \`any\`; hint: pnpm install`);
+      bad += 1;
+    } else if (parseError) {
+      console.log(`${rel}:0 [ts-parse-error] could not parse TypeScript; failing closed; hint: run pnpm typecheck for the syntax error`);
+      bad += 1;
+    } else {
+      const lines = text.split('\n');
+      for (const ln of anyHits) {
+        // Only exemption: a deferred:#NNN marker on the SAME line that
+        // resolves to an open issue (fail closed otherwise — the
+        // deferred-unresolved rule fires separately in full mode).
+        const lineText = lines[ln - 1] || '';
+        const markers = [...lineText.matchAll(DEFERRED_RE)].map((m) => m[1]);
+        if (markers.length > 0 && markers.every((n) => resolveIssue(n, root))) continue;
+        console.log(`${rel}:${ln} [explicit-any] explicit \`any\` type; hint: type it or use unknown`);
+        bad += 1;
+      }
+    }
+  }
+
+  for (const rel of fileList(root, staged)) {
     const posix = rel.split(path.sep).join('/');
     if (posix === SELF) continue;
     if (HISTORY_RES.some((re) => re.test(posix))) continue;
@@ -115,10 +159,15 @@ function main() {
     }
     if (text.includes('\0')) continue;
     const ext = path.extname(rel).toLowerCase();
+    if (anyOnly) {
+      if (TS_EXTS.has(ext)) checkAny(rel, text);
+      continue;
+    }
     const lines = text.split('\n');
     lines.forEach((line, i) => {
+      const namesSelf = line.includes('detect-placeholders.mjs');
       for (const [re, label] of WORD_RES) {
-        if (re.test(line)) {
+        if (!namesSelf && re.test(line)) {
           console.log(`${rel}:${i + 1} [${label}] ${line.trim().slice(0, 100)}; ${HINT}`);
           bad += 1;
           break;
@@ -129,23 +178,14 @@ function main() {
         bad += 1;
       }
       for (const m of line.matchAll(DEFERRED_RE)) {
-        if (!resolveIssue(m[1])) {
+        if (!resolveIssue(m[1], root)) {
           console.log(`${rel}:${i + 1} [deferred-unresolved] deferred:#${m[1]} has no resolvable open issue; ${HINT}`);
           bad += 1;
         }
       }
     });
     if (TS_EXTS.has(ext)) {
-      const { skipped, lines: anyHits } = anyLinesViaScanner(rel, text);
-      if (skipped) {
-        console.log(`${rel}:0 [ts-unavailable] typescript compiler not installed; cannot scan \`any\`; hint: pnpm add -D typescript`);
-        bad += 1;
-      } else {
-        for (const ln of anyHits) {
-          console.log(`${rel}:${ln} [explicit-any] explicit \`any\` type; hint: type it or use unknown`);
-          bad += 1;
-        }
-      }
+      checkAny(rel, text);
     }
   }
   if (bad > 0) {

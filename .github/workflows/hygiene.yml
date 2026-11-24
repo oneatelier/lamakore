@@ -17,6 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          # Full history: the DCO step resolves base..head rev-lists, which
+          # needs every PR commit locally (depth-1 ships only the merge tip).
+          fetch-depth: 0
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "24"
@@ -38,8 +42,9 @@ jobs:
       # gated: a human pushing commits with git-author "dependabot[bot]" still
       # fails this check when the step runs. Content scans above always run.
       # On pull_request events the checkout is the ephemeral merge commit, so
-      # check the PR head SHA instead (fetched explicitly: shallow clones may
-      # not contain it). The PR-event check is the strict gate: author AND
+      # check the PR head SHA instead (fetched explicitly as defense in
+      # depth; the checkout above already ships full history for the DCO
+      # range check). The PR-event check is the strict gate: author AND
       # committer must be pinned (a spoofed dependabot author fails here).
       - name: staged-author check on the PR head SHA
         if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
@@ -53,6 +58,17 @@ jobs:
           node scripts/hygiene/scan-author.mjs \
             --author-name "$HEAD_NAME" --author-email "$HEAD_EMAIL" \
             --committer-name "$HEAD_CNAME" --committer-email "$HEAD_CEMAIL"
+      # DCO gate (D5): every non-merge commit in the PR range must carry a
+      # Signed-off-by trailer matching its own author. Actor-gated like the
+      # author check (dependabot exempt via github.actor, never via the
+      # commit string). Push events are not re-checked: linear rebase-merges
+      # land exactly the gated PR commits.
+      - name: DCO sign-off check on every PR commit
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+        run: |
+          node scripts/hygiene/check-dco.mjs \
+            --base "${{ github.event.pull_request.base.sha }}" \
+            --head "${{ github.event.pull_request.head.sha }}"
       # On push events (post-merge main) check the landed author only.
       # GitHub's rebase-merge preserves the author but rewrites the committer
       # to the merger, so a pinned committer cannot hold here; the PR-event

@@ -11,7 +11,7 @@
   "scripts": {
     "branding:codegen": "node scripts/branding-codegen.mjs",
     "lint": "node scripts/lint/no-hardcoded-brand.mjs && node scripts/lint/no-raw-hex.mjs && node scripts/lint/check-fonts.mjs",
-    "test": "node --test tests/hygiene/scanners.spec.ts tests/branding/rename.spec.ts",
+    "test": "node --test tests/hygiene/scanners.spec.ts tests/hygiene/dco.spec.ts tests/explicit-any/explicit-any.spec.ts tests/branding/rename.spec.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build:desktop": "node scripts/build-desktop.mjs",
     "test:e2e": "node --test tests/e2e/handshake.spec.ts",
@@ -29,6 +29,7 @@
     "puppeteer": "^25.18.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "typescript5": "npm:typescript@5.9.3"
   }
 }

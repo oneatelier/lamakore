@@ -7,23 +7,28 @@ A debt is closed only by the fix landing, never by prose.
 
 ## D1 — TS7 `any`-check weakening (fix-by: Batch 3 start)
 
-- **Risk:** the P006 unfinished-surface scanner detects explicit `any`
-  in TS through the TypeScript 7 scanner API (`require('typescript/unstable/ast')`,
-  unstable module). As of 2026-11-24 the rule is empirically weakened: a
-  probe file containing `export const x: any = 1;` still reports a clean
-  result (verified both inside and outside the repo root),
-  so an explicit `any` can land undetected. Compounding gaps: the script
-  is wired into no CI workflow (advisory-only; `ci.yml` runs `pnpm lint`
-  = brand + raw-hex + fonts, `hygiene.yml` runs the six scanners), and the
-  word-rules still fire (2 pre-existing unfinished-filler hits — see the
-  Batch 2 report), which masks the silent any-rule.
-- **Mitigation today:** `tsc --strict` (`pnpm typecheck`) still rejects
-  implicit-any errors; reviewers treat explicit `any` as a finding. No
-  explicit `any` exists in the tree (verified by scan + review).
-- **Fix-by Batch 3 start:** repair the scanner loop against the pinned
-  TS 7 API (or replace with a stable-API check, e.g. `ts-morph`-free
-  compiler-API walk), add a positive fixture test (must flag `any`),
-  and wire the script into `ci.yml` so weakening fails the build.
+- **Status (P025, CLOSED 2026-11-24):** the token-stream check built on
+  `typescript/unstable/ast` is gone. `scripts/detect-placeholders.mjs`
+  now walks the TypeScript 5 compiler AST (`typescript5` alias,
+  `npm:typescript@5.9.3`, pinned exact) for `AnyKeyword` nodes, so
+  comments (trivia) and strings (literal tokens) cannot match by
+  construction and every type position is covered — annotations,
+  generics, unions, arrays, `as`/`satisfies`, angle assertions, return
+  types, aliases. The only exemption is a `deferred:#NNN` marker on the
+  SAME line that resolves to an open issue (root-aware registry lookup;
+  fail closed otherwise). `ci.yml` runs
+  `node scripts/detect-placeholders.mjs --any-only` as a blocking step
+  (named "explicit-any AST gate"). Evidence: 5/5
+  `tests/explicit-any/explicit-any.spec.ts` green (fail fixture: 5 hits
+  in bad.ts at lines 1, 2, 3, 3, 4 plus 1 in bad.tsx; pass fixture with
+  comment/string/identifier-only `any` clean, deferred-exempt +
+  deferred-unresolvable controls), `--any-only` clean on the full tree (zero explicit `any`
+  exists), `pnpm test` 34/34. Word rules stay advisory-only: 4
+  pre-existing hits (two genuine React input-attribute names no honest
+  reword can remove — the attribute name itself trips the naive rule —
+  plus two prose uses in Rust docs) — recorded, not wired.
+  This entry is closed; the advisory word-rule gap is noted in
+  report-P025 and is NOT a debt (no silent any-rule remains to mask).
 
 ## D2 — Local VS Build Tools parity (owner action; CI already covers MSVC)
 
@@ -63,17 +68,24 @@ A debt is closed only by the fix landing, never by prose.
   customer/auditor at-rest mandate — or the calendar date, whichever is
   first. This entry closes only when the ADR is superseded.
 
-## D5 — Server-side DCO check candidate (not implemented)
+## D5 — Server-side DCO check (CLOSED 2026-11-24, P025)
 
-- **Gap:** DCO sign-off (`git commit -s`, CONTRIBUTING) is enforced
-  client-side today (`.githooks/pre-commit` + hygiene author-identity
-  checks on the PR head and push). No GitHub-side required check
-  verifies `Signed-off-by` trailers on the landed commits, so a bypassed
-  hook (`--no-verify`, another client) could land unsigned history.
-- **Candidate:** a server-side workflow (e.g. a required `dco.yml` that
-  fails the check suite when any commit in the PR/push range lacks a
-  valid trailer). Candidate only — no implementation, no date. Recorded
-  here so the gap is explicit, not assumed covered.
+- **Status (P025, CLOSED):** the gap is implemented, not just recorded.
+  `scripts/hygiene/check-dco.mjs` requires a
+  `Signed-off-by: <author-name> <author-email>` trailer matching the
+  commit author on every non-merge commit in `--base..--head` (merge
+  commits skipped — they record a merge, not authorship; bad ranges fail
+  closed). `hygiene.yml` runs it on every `pull_request` as a blocking
+  step, actor-gated (`github.actor != 'dependabot[bot]'`, the same
+  pattern as the author check — never commit-string gated), with
+  `fetch-depth: 0` on checkout so the full PR range resolves. Push
+  events are not re-checked: linear rebase-merges land exactly the gated
+  PR commits. Evidence: 5/5 `tests/hygiene/dco.spec.ts` green (unsigned
+  fails, signed passes, mismatched trailer fails, merge-skip + bad-range
+  controls, workflow-gating assertion); the last 5 real commits verify
+  `dco: clean` (the `git commit -s` convention was already practice —
+  16 of the last 20 carry trailers — the gate now enforces it).
+  Client-side practice (CONTRIBUTING + `commit -s`) is unchanged.
 
 ## D6 — macOS Tier-1 honesty: disjoin or fix (Linux is the enforcement authority)
 
