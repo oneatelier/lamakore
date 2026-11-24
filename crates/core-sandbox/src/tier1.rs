@@ -462,7 +462,44 @@ unsafe impl Send for SandboxedChild {}
 
 /// Spawn `program` + `args` confined to Tier-1, with `scope_dir` as the
 /// working directory and the only explicitly granted filesystem location.
+///
+/// First-spawn races (concurrent profile creation, registration
+/// visibility lag) surface as transient failures; the whole sequence is
+/// retried boundedly so a cold host still converges. Genuine failures
+/// (missing exe, denied scope, unavailable primitive) fail identically
+/// every time and still fail closed — never fake enforcement.
 pub fn spawn(
+    scope_dir: &Path,
+    program: &OsStr,
+    args: &[&OsStr],
+) -> Result<SandboxedChild, SandboxError> {
+    let mut attempt = 0;
+    loop {
+        match spawn_once(scope_dir, program, args) {
+            Ok(child) => return Ok(child),
+            Err(e) if is_transient_first_spawn(&e) && attempt < 3 => {
+                attempt += 1;
+                std::thread::sleep(std::time::Duration::from_millis(300));
+            }
+            Err(e) => return Err(e),
+        }
+    }
+}
+
+/// Retryable only while the profile may still be settling: a failed
+/// profile create, or a CreateProcessW that cannot find its file right
+/// after a create. Anything else fails fast.
+fn is_transient_first_spawn(e: &SandboxError) -> bool {
+    match e {
+        SandboxError::Api { op, detail } => {
+            *op == "CreateAppContainerProfile"
+                || (*op == "CreateProcessW" && detail.contains("0x80070002"))
+        }
+        _ => false,
+    }
+}
+
+fn spawn_once(
     scope_dir: &Path,
     program: &OsStr,
     args: &[&OsStr],
