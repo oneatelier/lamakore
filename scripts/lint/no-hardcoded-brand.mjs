@@ -44,6 +44,10 @@ const CONSTITUTIVE = new Set([
   'ee/README.md',
   'audit/README.md',
   'artifacts/README.md',
+  // Clearance record: names every swept candidate mark by necessity
+  // (a sweep that cannot spell the names cannot function), same
+  // rationale as TRADEMARK.md. History stays immutable via reports/adr.
+  'docs/clearance.md',
 ]);
 
 function isAllowed(rel) {
