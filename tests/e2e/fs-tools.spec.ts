@@ -17,6 +17,11 @@ const SPEC_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SPEC_DIR, '..', '..');
 const IS_WIN = process.platform === 'win32';
 
+// Brand-derived helper-result prefix (mirrors cored fs_tool.rs result_path;
+// the token is never spelled literally — the brand lint forbids it).
+const BRAND_TOKEN: string = (JSON.parse(readFileSync(path.join(ROOT, 'branding.config.json'), 'utf8')) as { codeToken: string }).codeToken;
+const RESULT_PREFIX = `.${BRAND_TOKEN}-fs-result-`;
+
 type JsonObj = Record<string, unknown>;
 type WireReply = { result?: JsonObj; error?: { code?: number; message?: string } };
 
@@ -464,7 +469,7 @@ test('sandbox runs confined or refuses honestly with audit (all paths gated)', a
       assert.ok(audited, 'successful execution must be audited');
     }
     // No stray result files may remain in the user scope.
-    const strays = readdirSync(dir).filter((n) => n.startsWith('.pone-fs-result-'));
+    const strays = readdirSync(dir).filter((n) => n.startsWith(RESULT_PREFIX));
     assert.deepEqual(strays, []);
   } finally {
     rmrf(dir);

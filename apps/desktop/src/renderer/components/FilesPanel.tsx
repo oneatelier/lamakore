@@ -61,7 +61,7 @@ function daemonMessage(e: unknown): string {
   if (typeof e === 'string') return e;
   if (e instanceof Error) {
     // Electron wraps daemon failures ("Error invoking remote method
-    // 'pone:invoke': Error: daemon error <code>: <message>"), so match the
+    // '<bridge>:invoke': Error: daemon error <code>: <message>"), so match the
     // inner daemon error anywhere, not just at the start.
     const m = e.message.match(/daemon error (-?\d+): (.+)/);
     if (m) return m[2];
