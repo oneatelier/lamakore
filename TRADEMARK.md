@@ -1,6 +1,6 @@
 # Trademark Policy
 
-The name "PROJECT ONE" and any associated logos are **provisional**:
+The name "Lamakore" and any associated logos are **provisional**:
 they identify this project while it finds its permanent identity, and
 this policy will follow the name if it changes.
 
@@ -10,9 +10,9 @@ this policy will follow the name if it changes.
   use them is granted by the code license (see LICENSE §6, which
   withholds trademark rights).
 - You may make nominative, factual references ("compatible with",
-  "based on PROJECT ONE") where truthful and non-confusing.
+  "based on Lamakore") where truthful and non-confusing.
 - You may NOT present a fork, distribution, hosted service, or commercial
-  product as PROJECT ONE, use confusingly similar names or logos, or
+  product as Lamakore, use confusingly similar names or logos, or
   imply endorsement, without prior written permission from the Maintainer
   of Record.
 - Community ports and builds must be clearly renamed or carry a

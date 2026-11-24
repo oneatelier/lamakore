@@ -1,4 +1,4 @@
-# Contributing to PROJECT ONE
+# Contributing to Lamakore
 
 ## Developer Certificate of Origin (DCO) — required
 
@@ -39,7 +39,7 @@ No change merges unless BOTH gates are evidenced in its report
 - JS/TS code: `pnpm install` green; no new dependency without a NOTICE entry.
 - Never commit secrets (`.env*` is ignored and stays ignored).
 - License headers: new source files carry the Apache-2.0 header naming
-  "The PROJECT ONE Authors" — never a personal name.
+  "The Lamakore Authors" — never a personal name.
 
 ## Branch protection — PR-only flow (enforced, including admins)
 

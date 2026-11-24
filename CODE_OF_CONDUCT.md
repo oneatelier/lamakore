@@ -2,7 +2,7 @@
 
 ## Our pledge
 
-PROJECT ONE is a shared workshop. We pledge to make participation
+Lamakore is a shared workshop. We pledge to make participation
 harassment-free for everyone: no demeaning language, no personal attacks,
 no unwelcome advances, no bad-faith stonewalling in review.
 

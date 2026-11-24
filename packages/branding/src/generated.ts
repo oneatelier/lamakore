@@ -3,14 +3,14 @@
 export const BRANDING = Object.freeze({
   status: "provisional",
   codename: "PROJECT ONE",
-  productName: "PROJECT ONE",
-  codeToken: "pone",
-  cliBinary: "pone",
-  orgHandle: "<owner-provided>",
-  repoName: "<owner-provided>",
-  daemonBinary: "poned",
-  configDirName: ".pone",
-  copyrightHolder: "The PROJECT ONE Authors",
+  productName: "Lamakore",
+  codeToken: "lamakore",
+  cliBinary: "lamakore",
+  orgHandle: "oneatelier",
+  repoName: "lamakore",
+  daemonBinary: "lamakored",
+  configDirName: ".lamakore",
+  copyrightHolder: "The Lamakore Authors",
   domains: Object.freeze([]),
   packages: Object.freeze([]),
   clearance: Object.freeze({
@@ -22,11 +22,11 @@ export const BRANDING = Object.freeze({
 export type Branding = typeof BRANDING;
 
 export const BRAND_CSS_VARS = Object.freeze({
-  productName: "--pone-product-name",
-  codeToken: "--pone-code-token",
-  daemonBinary: "--pone-daemon-binary",
-  cliBinary: "--pone-cli-binary",
-  configDir: "--pone-config-dir",
+  productName: "--lamakore-product-name",
+  codeToken: "--lamakore-code-token",
+  daemonBinary: "--lamakore-daemon-binary",
+  cliBinary: "--lamakore-cli-binary",
+  configDir: "--lamakore-config-dir",
 } as const);
 
 export type BrandCssVars = typeof BRAND_CSS_VARS;

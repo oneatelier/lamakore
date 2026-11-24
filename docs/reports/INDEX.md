@@ -1,5 +1,9 @@
 # Report index — P010 to P019 (plus out-of-series evidence)
 
+Reports P000–P019 were authored under the provisional codename PROJECT ONE;
+the product name is Lamakore. (History is immutable; the codename stays in
+those reports. Living surfaces were renamed; see the P020-R report.)
+
 Seed topics from `artifacts/prompt-seed.json`; report topics are what the
 report actually evidences. The P008+ report series diverged from seed
 numbering early (reports are numbered by landing order, seeds by plan

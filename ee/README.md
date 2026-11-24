@@ -1,6 +1,6 @@
 # `ee/` — Commercial Modules: The Boundary
 
-This directory holds PROJECT ONE's commercial modules. The boundary
+This directory holds Lamakore's commercial modules. The boundary
 below is exact and intentional. There is no ambiguity: if a module is
 not listed as commercial here, it is open-source.
 
