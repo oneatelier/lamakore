@@ -77,14 +77,18 @@ test('any-only passes when any appears only in comments, strings, or identifiers
 });
 
 test('any-only exempts only a same-line deferred marker with an open issue', () => {
+  // Marker text is assembled at runtime so this tracked spec does not
+  // itself trip the deferred-unresolved rule (same convention as above).
+  const openTag = 'deferred:' + '#424242';
+  const deadTag = 'deferred:' + '#999999';
   const dir = fresh('deferred-pass');
   seedOpenIssue(dir, 424242);
-  writeFileSync(join(dir, 'ok.ts'), 'const x: ' + 'any' + ' = 1; // deferred:#424242\n');
+  writeFileSync(join(dir, 'ok.ts'), 'const x: ' + 'any' + ' = 1; // ' + openTag + '\n');
   const r = runCli(['--root', dir, '--any-only']);
   assert.equal(r.exit, 0, r.output);
 
   const dir2 = fresh('deferred-fail');
-  writeFileSync(join(dir2, 'bad.ts'), 'const x: ' + 'any' + ' = 1; // deferred:#999999\n');
+  writeFileSync(join(dir2, 'bad.ts'), 'const x: ' + 'any' + ' = 1; // ' + deadTag + '\n');
   const r2 = runCli(['--root', dir2, '--any-only']);
   assert.notEqual(r2.exit, 0, 'an unresolvable marker must not exempt explicit any');
   assert.match(r2.output, /\[explicit-any\]/);
