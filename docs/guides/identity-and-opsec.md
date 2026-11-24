@@ -9,12 +9,46 @@ The Owner's real identity never enters this repository — not in code,
 paths, metadata, commit authorship, or fixtures. The repository speaks
 only in the org voice:
 
-- `user.name = "PROJECT ONE Maintainers"` (repo-local, never `--global`)
+- `user.name = "Lamakore Maintainers"` (repo-local, never `--global`)
 - `user.email` = the exact address pinned in `.hygiene/identity.json`
   (currently `359786796+oneatelier@users.noreply.github.com`). No other
   author or committer identity is accepted — the pre-commit hook enforces
   an exact match, not just a noreply shape.
 - `.mailmap` stays empty by policy (see ADR-004).
+
+## 1b. Canonical handles (One Atelier voice, everywhere)
+
+| Surface | Handle | Notes |
+|---|---|---|
+| GitHub | `oneatelier` (org) | Sole code home; `git@github.com:oneatelier/...` never a personal fork |
+| X | `one_atelier_` | Bio links `github.com/oneatelier`; see watchlist below |
+| Reddit | `u/oneatelier` | Announcements only, no support DMs |
+| Bluesky | `oneatelier.bsky.social` | Mirror of release notes |
+
+No other handle speaks for the project. A new surface gets a row here
+first (docs PR), then a bio link back — never the reverse.
+
+## 1c. Hidden-Gmail rule (restated)
+
+Exactly one non-noreply address exists in operations: a hidden Gmail
+that receives `hello@<domain>` forwards and GitHub security mail. It
+never appears in code, docs, commit metadata, or fixtures; it is not a
+commit author or committer anywhere. Any Gmail address anywhere else in
+the tree or in commit metadata is a finding (L1 if staged, L2/L3 per
+§5), and the pre-commit hook blocks `@gmail.com` committer identities
+at commit time.
+
+## 1d. ACCEPTED-RISK: pre-flip Gmail in committer metadata
+
+Early history (pre-identity-baseline) carries a pseudonymous Gmail
+(`oneatelier17@gmail.com`) in author/committer metadata on a small
+number of commits. This is accepted as-is: history is immutable, no
+rewrite (rewriting signed history would destroy the evidence chain the
+hygiene system exists to protect — see ADR-004). Mitigations in force:
+the pinned-identity hook blocks any NEW non-noreply identity, and
+owner-side GitHub settings (no personal emails on the org profile,
+noreply enforcement) prevent recurrence. Revisit only if the address is
+abused for impersonation (then L3: rotate, disclose, do not rewrite).
 
 ## 2. Dedicated OS user
 
@@ -51,8 +85,18 @@ Signing and publishing credentials come from a single Owner ceremony:
 Until the ceremony completes, no release is cut and no publish-blocking
 flag is lifted.
 
-## 5. Leak-response playbook
+## 4b. Brand watchlist (impersonation)
 
+- X `@one_atelier` (no trailing underscore) is held by an unknown
+  party; our canonical X handle is `one_atelier_` (with underscore) per
+  §1b — watch the bare handle for impersonation once we post publicly. Check on every release: search X,
+  Reddit, and PyPI/npm/crates.io for the product name; record hits in
+  `docs/clearance.md`.
+- Any impersonating account or package is L3 (treat as compromised
+  trust surface): document, report to the platform, warn users from a
+  canonical handle. Never engage from a personal account.
+
+## 5. Leak-response playbook
 - **L1 — staged but uncommitted:** unstage, clean the file, re-run
   `node scripts/hygiene/run-all.mjs --staged`. No history exists; no
   further action.

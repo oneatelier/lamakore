@@ -8,6 +8,13 @@ By signing off you certify the [Developer Certificate of Origin 1.1](https://dev
 you wrote the change, or you have the right to submit it under the
 project's Apache-2.0 license.
 
+Example trailer (exactly this identity — enforced by `scan-author.mjs`
+exact match against `.hygiene/identity.json`):
+
+```
+Signed-off-by: Lamakore Maintainers <359786796+oneatelier@users.noreply.github.com>
+```
+
 ## Commit format — Conventional Commits with a prompt scope
 
 ```

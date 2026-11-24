@@ -130,6 +130,42 @@ test('author rejects a valid-shape address when a pinned identity exists', () =>
   assert.match(bad.output, /identity\.json/);
 });
 
+test('author rejects any @gmail.com committer identity', () => {
+  // The hidden Gmail must never appear as a commit identity: the hook
+  // enforces the pinned noreply address for BOTH roles (P022 hardening).
+  const dir = fresh('author-gmail-committer-fail');
+  mkdirSync(join(dir, '.hygiene'), { recursive: true });
+  writeFileSync(join(dir, 'branding.config.json'), readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  const pinned = JSON.parse(readFileSync(join(ROOT, '.hygiene', 'identity.json'), 'utf8'));
+  writeFileSync(join(dir, '.hygiene', 'identity.json'), JSON.stringify(pinned));
+  const gmail = ['operator', '@', 'gmail.com'].join('');
+  const bad = runCli(join(HYG, 'scan-author.mjs'), [
+    '--root', dir,
+    '--author-name', pinned.name, '--author-email', pinned.email,
+    '--committer-name', pinned.name, '--committer-email', gmail,
+  ]);
+  assert.notEqual(bad.exit, 0, 'a gmail committer must fail the author check');
+  assert.match(bad.output, /GIT_COMMITTER_EMAIL/);
+});
+
+test('author rejects the retired PROJECT ONE org voice for new commits', () => {
+  // The pre-rename voice fails closed after the P022 flip: only the pinned
+  // identity in .hygiene/identity.json is accepted (history is untouched).
+  const dir = fresh('author-old-voice-fail');
+  mkdirSync(join(dir, '.hygiene'), { recursive: true });
+  writeFileSync(join(dir, 'branding.config.json'), readFileSync(join(ROOT, 'branding.config.json'), 'utf8'));
+  const pinned = JSON.parse(readFileSync(join(ROOT, '.hygiene', 'identity.json'), 'utf8'));
+  writeFileSync(join(dir, '.hygiene', 'identity.json'), JSON.stringify(pinned));
+  const oldVoice = ['PROJECT ONE', ' Maintainers'].join('');
+  const bad = runCli(join(HYG, 'scan-author.mjs'), [
+    '--root', dir,
+    '--author-name', oldVoice, '--author-email', pinned.email,
+    '--committer-name', pinned.name, '--committer-email', pinned.email,
+  ]);
+  assert.notEqual(bad.exit, 0, 'the retired org voice must fail for new commits');
+  assert.match(bad.output, /GIT_AUTHOR_NAME/);
+});
+
 test('author rejects a spoofed dependabot[bot] git identity (actor-gating only)', () => {
   // The hygiene workflow skips the author step ONLY when
   // github.actor == 'dependabot[bot]'. A human pushing commits with
