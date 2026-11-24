@@ -1,6 +1,6 @@
-# Parity Scoreboard — PROJECT ONE
+# Parity Scoreboard — Lamakore
 
-Generated: 2026-11-24 (nightly, commit f482614)
+Generated: 2026-11-24 (nightly, commit cd4fc2b)
 
 ## Evidence
 

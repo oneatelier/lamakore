@@ -18,7 +18,7 @@ only in the org voice:
 
 ## 2. Dedicated OS user
 
-Work on this project under a dedicated OS account (e.g. `pone-dev`).
+Work on this project under a dedicated OS account (e.g. `lamakore-dev`).
 That account holds no personal logins: no personal email, no personal
 GitHub session, no personal cloud drives. The project checkout lives
 under that account's home so a stray absolute path leaks nothing

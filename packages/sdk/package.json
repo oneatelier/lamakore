@@ -1,5 +1,5 @@
 {
-  "name": "@project-one/sdk",
+  "name": "@lamakore/sdk",
   "version": "0.0.0",
   "private": true,
   "description": "Plugin SDK (stub; lands in a later prompt)"

@@ -2,7 +2,7 @@
 
 ## Model: Maintainer of Record
 
-PROJECT ONE is led by a single **Maintainer of Record** holding final
+Lamakore is led by a single **Maintainer of Record** holding final
 authority over technical direction, releases, and the `ee/` boundary.
 Day-to-day review may be delegated to named reviewers, but delegation is
 revocable and every delegation is recorded in an ADR. No commit lands

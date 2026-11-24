@@ -2,11 +2,11 @@
 //! Edit the config (or run scripts/rename.mjs), then re-run the generator.
 pub const STATUS: &str = "provisional";
 pub const CODENAME: &str = "PROJECT ONE";
-pub const PRODUCT_NAME: &str = "PROJECT ONE";
-pub const CODE_TOKEN: &str = "pone";
-pub const CLI_BINARY: &str = "pone";
-pub const DAEMON_BINARY: &str = "poned";
-pub const CONFIG_DIR_NAME: &str = ".pone";
-pub const COPYRIGHT_HOLDER: &str = "The PROJECT ONE Authors";
+pub const PRODUCT_NAME: &str = "Lamakore";
+pub const CODE_TOKEN: &str = "lamakore";
+pub const CLI_BINARY: &str = "lamakore";
+pub const DAEMON_BINARY: &str = "lamakored";
+pub const CONFIG_DIR_NAME: &str = ".lamakore";
+pub const COPYRIGHT_HOLDER: &str = "The Lamakore Authors";
 pub const TRADEMARK_CLEARED: bool = false;
 pub const PUBLISH_BLOCKED: bool = true;

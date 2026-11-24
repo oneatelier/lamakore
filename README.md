@@ -1,4 +1,4 @@
-# PROJECT ONE
+# Lamakore
 
 An open-source unified agent desktop: a real window driven by a trusted local core over a local-only protocol, with every tool sandboxed.
 
@@ -7,8 +7,8 @@ An open-source unified agent desktop: a real window driven by a trusted local co
 > exists yet. The name, the marks, and the registries are all pending
 > clearance (see TRADEMARK.md and ADR-003).
 
-[![CI](https://github.com/oneatelier/project-one/actions/workflows/ci.yml/badge.svg)](https://github.com/oneatelier/project-one/actions/workflows/ci.yml)
-[![Hygiene](https://github.com/oneatelier/project-one/actions/workflows/hygiene.yml/badge.svg)](https://github.com/oneatelier/project-one/actions/workflows/hygiene.yml)
+[![CI](https://github.com/oneatelier/lamakore/actions/workflows/ci.yml/badge.svg)](https://github.com/oneatelier/lamakore/actions/workflows/ci.yml)
+[![Hygiene](https://github.com/oneatelier/lamakore/actions/workflows/hygiene.yml/badge.svg)](https://github.com/oneatelier/lamakore/actions/workflows/hygiene.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-brass?style=flat)
 
@@ -67,7 +67,7 @@ Full statement: `docs/adr/ADR-000-host-profile-and-threat-boundary.md`.
 ## Quickstart (real commands, pinned toolchain)
 
 ```sh
-git clone <org-url> && cd project-one
+git clone <org-url> && cd lamakore
 powershell -ExecutionPolicy Bypass -File scripts/bootstrap/windows.ps1
 # or: ./scripts/bootstrap/macos.sh  |  ./scripts/bootstrap/linux.sh
 node scripts/bootstrap/verify.mjs
@@ -124,7 +124,7 @@ Be kind; see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Governance:
 
 ## License and trademark
 
-Apache-2.0 — see [LICENSE](LICENSE). Copyright 2026 The PROJECT ONE Authors.
+Apache-2.0 — see [LICENSE](LICENSE). Copyright 2026 The Lamakore Authors.
 The name and marks are **provisional** and not licensed for reuse; policy
 modeled on the Apache/PostgreSQL pattern: [TRADEMARK.md](TRADEMARK.md).
 
