@@ -2,6 +2,6 @@ file,prompt,scene,theme,dimensions,duration,sha256,captured_at,scrubbed
 P009-first-run.png,P009,first-run,brass-void,1280x800,still,3cd8d44af780a627350e9a135cae2f4cd4cc4ae2c4fdf53320845a60ccda3b21,2026-11-22 07:48:12,true
 P009-shell.gif,P009,first-run-to-deck,brass-void,960x600,6s@10fps,e58f5ac673417408c9cafa2b98071b8a17918b9dae6e3f588a04a07422cc7a6e,2026-11-22 07:48:12,true
 P009-shell-v2.gif,P009,first-run-to-deck,brass-void,960x600,6s@10fps,6f2c10812ed75ac649e91cc973485a3c245a0cfa7a6f20f7cf23a5d84a022c9d,2026-11-24 09:53:25,true
-fs-deck-demo.gif,FS-DECK,fs-list-approve-read,brass-void,960x600,6s@10fps,2955d1d0aa723fc90b77e6e6e610e84a9cc73e0f3ee2ca8eb1002ed630a61484,2026-11-24 10:31:29,true
-fs-deck-approval-brass-void.png,FS-DECK,fs-approval-card,brass-void,960x600,still,95a811d47d1c2fcb5997d9aea9ce4a394f41e2504d486c97c96992ff4f60905b,2026-11-24 10:31:29,true
-fs-deck-listed-brass-void.png,FS-DECK,fs-listed,brass-void,960x600,still,25a87cfbdcfaae59526fbc998a8fb6e9e8d121c4b77616ac497c000c12b2de09,2026-11-24 10:31:29,true
+fs-deck-demo.gif,FS-DECK,fs-list-approve-read,brass-void,960x600,6s@10fps,d7cd07c60c95358c9ba73821558381a2810853dda97d35a0b201d9688b752a3c,2026-11-24 10:52:51,true
+fs-deck-approval-brass-void.png,FS-DECK,fs-approval-card,brass-void,960x600,still,5e49ee05c84fac9763e2eff961e44b8fec5798ebd9cc19cbf48c37f031f9185b,2026-11-24 10:52:51,true
+fs-deck-listed-brass-void.png,FS-DECK,fs-listed,brass-void,960x600,still,5c369a4aaab46dd9eb9c4e3284ef6ced8f8ec084f0c88802ba9b94303b135227,2026-11-24 10:52:51,true

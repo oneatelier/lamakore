@@ -102,9 +102,10 @@ A debt is closed only by the fix landing, never by prose.
   this host masked it locally until the token flip changed the profile
   name.
 - **Mitigation applied:** create-first with ALREADY_EXISTS → derive
-  fallback plus bounded retries for concurrent first-time creates.
-  Verified: missing-profile probe fails closed, real enforcement shows
-  zero SKIP lines with verbatim denials, e2e fs-tools 10/10 green.
+  fallback; bounded retries at both layers (concurrent creates;
+  whole-sequence respawn on first-spawn FILE_NOT_FOUND).
+  Verified: profile auto-registers on a wiped host, real enforcement
+  shows zero SKIP lines with verbatim denials, e2e fs-tools 10/10 green.
 - **Fix:** landed with the GIF #1/#2 re-records; closes D7 once CI is
   green on the fix (then CI windows tier1 enforces for real).
 
