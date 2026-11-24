@@ -11,6 +11,7 @@
 
 mod capability;
 mod fs_tool;
+mod secret_tool;
 mod server;
 
 use capability::KeyProvider as _;
@@ -130,6 +131,9 @@ async fn main() -> Result<(), WireError> {
         root_key,
         db_path,
         pending_requests: std::sync::Mutex::new(std::collections::HashMap::new()),
+        // Provider keys live in the OS keychain (vault); SQLite never
+        // holds secrets. The vault handle is shared across connections.
+        vault: std::sync::Arc::new(vault::Vault::production()),
     };
     println!("ready socket={} build={}", socket_path.display(), cfg.build);
     match server::run(cfg, shutdown_tx.subscribe()).await {

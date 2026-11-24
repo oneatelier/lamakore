@@ -354,6 +354,7 @@ dependencies = [
  "sha2",
  "thiserror",
  "tokio",
+ "vault",
 ]
 
 [[package]]
@@ -1370,6 +1371,16 @@ dependencies = [
  "js-sys",
  "serde_core",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "vault"
+version = "0.0.0"
+dependencies = [
+ "core-protocol",
+ "keyring",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]

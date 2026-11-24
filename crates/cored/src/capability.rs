@@ -30,6 +30,10 @@ use std::sync::atomic::{AtomicU64, Ordering};
 /// Wire error code for refused dispatch.
 pub const CAPABILITY_DENIED_CODE: i64 = -32001;
 /// Issuance-plane methods (no token required to call them).
+/// Secret methods live here too: the user configures provider keys without
+/// holding a capability token, and the daemon never returns plaintext —
+/// only opaque handles — so no token is needed to call them. Every
+/// secret.* call is audited with provider names only (never key bytes).
 pub const ISSUANCE_METHODS: &[&str] = &[
     "capability.request",
     "capability.grant",
@@ -40,6 +44,11 @@ pub const ISSUANCE_METHODS: &[&str] = &[
     "approval.status",
     "audit.verify",
     "audit.export",
+    "secret.set",
+    "secret.list",
+    "secret.delete",
+    "secret.ref",
+    "secret.test",
 ];
 
 const TOKEN_VERSION: u8 = 1;

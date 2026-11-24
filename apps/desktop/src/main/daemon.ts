@@ -16,7 +16,7 @@ import path from 'node:path';
 import cfg from '../../../../branding.config.json';
 
 const BRIDGE: string = cfg.cliBinary;
-const ALLOWED = new Set(['system.health', 'system.info', 'audit.verify', 'audit.export', 'fs.list', 'fs.read', 'approval.request', 'approval.decide']);
+const ALLOWED = new Set(['system.health', 'system.info', 'audit.verify', 'audit.export', 'fs.list', 'fs.read', 'approval.request', 'approval.decide', 'secret.set', 'secret.list', 'secret.delete', 'secret.ref', 'secret.test']);
 const PING_MS = 5000;
 const BACKOFF_MS = [1000, 2000, 4000];
 const MAX_RESTARTS = 3;

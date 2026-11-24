@@ -7,7 +7,7 @@ import { DaemonManager, type ConnState } from './daemon.js';
 import { createWindow } from './window.js';
 
 const BRIDGE: string = cfg.cliBinary;
-const ALLOWED = new Set(['system.health', 'system.info', 'audit.verify', 'audit.export', 'fs.list', 'fs.read', 'approval.request', 'approval.decide']);
+const ALLOWED = new Set(['system.health', 'system.info', 'audit.verify', 'audit.export', 'fs.list', 'fs.read', 'approval.request', 'approval.decide', 'secret.set', 'secret.list', 'secret.delete', 'secret.ref', 'secret.test']);
 const t0 = Date.now();
 
 let manager: DaemonManager | null = null;

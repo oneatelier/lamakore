@@ -45,11 +45,14 @@ pub const EXPORT_KEYS: &[&str] = &[
 /// Payload keys that may appear in an export. Everything else is dropped.
 /// Free-text fields (`reason` bodies except fixed slugs, `note`), token or
 /// key material, and identity fields are never in this list.
+/// `provider` names the keychain slot (e.g. `openai`) — not secret bytes —
+/// so secret.* audit rows stay meaningful after export without leaking.
 pub const ALLOWED_PAYLOAD_KEYS: &[&str] = &[
     "decision",
     "expires_at",
     "grant_id",
     "method",
+    "provider",
     "reason",
     "request_id",
     "scope",
