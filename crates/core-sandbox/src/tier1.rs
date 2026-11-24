@@ -111,43 +111,71 @@ fn build_command_line(program: &OsStr, args: &[&OsStr]) -> Vec<u16> {
     cmd.encode_utf16().chain(std::iter::once(0)).collect()
 }
 
-/// Resolve (creating when missing) the Tier-1 AppContainer SID.
+/// Resolve the Tier-1 AppContainer SID, creating the profile when missing.
 ///
 /// Zero capabilities are requested: `CreateAppContainerProfile` is called
 /// with a `None` capability list, so the profile cannot use the network or
 /// broad filesystem locations.
+///
+/// Order matters: `DeriveAppContainerSidFromAppContainerName` succeeds even
+/// for profiles that were never created (verified: it returns a computed
+/// SID for arbitrary names), so a derive-first order would never create
+/// anything and every spawn would then fail closed at `CreateProcessW`
+/// with FILE_NOT_FOUND. Create-first guarantees the profile exists:
+/// a fresh host registers it here, a repeat run takes the
+/// already-exists path and derives the SID.
 fn appcontainer_sid() -> Result<PSID, SandboxError> {
     let name_w = str_wide_null(crate::PROFILE_NAME);
-    // Existing profile: derive its SID.
-    let derived = unsafe { DeriveAppContainerSidFromAppContainerName(PCWSTR(name_w.as_ptr())) };
-    match derived {
-        Ok(sid) => Ok(sid),
-        Err(first) => {
-            // Missing profile: create it with zero capabilities.
-            let display_w = str_wide_null(crate::PROFILE_NAME);
-            let desc_w = str_wide_null("Tier-1 tool sandbox (zero capabilities)");
-            let created = unsafe {
-                CreateAppContainerProfile(
-                    PCWSTR(name_w.as_ptr()),
-                    PCWSTR(display_w.as_ptr()),
-                    PCWSTR(desc_w.as_ptr()),
-                    None,
-                )
-            };
-            match created {
-                Ok(sid) => Ok(sid),
-                Err(e) => Err(api_err(
-                    "CreateAppContainerProfile",
-                    format!(
-                        "profile {:?}: first derive failed {first}; create failed {e} (0x{:08X})",
-                        crate::PROFILE_NAME,
-                        e.code().0 as u32
-                    ),
-                )),
+    let display_w = str_wide_null(crate::PROFILE_NAME);
+    let desc_w = str_wide_null("Tier-1 tool sandbox (zero capabilities)");
+    // Create-first with bounded retries: concurrent first-time creates
+    // (parallel test threads, parallel CI jobs) can transiently fail
+    // while a sibling create is in flight. ALREADY_EXISTS means another
+    // creator won — derive the SID instead. Anything still failing after
+    // retries is a real backend failure and fails closed (never fake).
+    let mut last_err = None;
+    for _ in 0..3 {
+        match unsafe {
+            CreateAppContainerProfile(
+                PCWSTR(name_w.as_ptr()),
+                PCWSTR(display_w.as_ptr()),
+                PCWSTR(desc_w.as_ptr()),
+                None,
+            )
+        } {
+            Ok(sid) => return Ok(sid),
+            // Already registered by an earlier run: derive the SID.
+            Err(e) if e.code().0 == WIN32_ALREADY_EXISTS => {
+                return unsafe {
+                    DeriveAppContainerSidFromAppContainerName(PCWSTR(name_w.as_ptr()))
+                }
+                .map_err(|e| {
+                    api_err(
+                        "DeriveAppContainerSidFromAppContainerName",
+                        format!("present profile would not derive: {e}"),
+                    )
+                });
+            }
+            Err(e) => {
+                last_err = Some(e);
+                std::thread::sleep(std::time::Duration::from_millis(250));
             }
         }
     }
+    Err(api_err(
+        "CreateAppContainerProfile",
+        format!(
+            "profile {:?} would not register after retries: {}",
+            crate::PROFILE_NAME,
+            last_err
+                .map(|e| format!("{e} (0x{:08X})", e.code().0 as u32))
+                .unwrap_or_default()
+        ),
+    ))
 }
+
+/// `ERROR_ALREADY_EXISTS` as an HRESULT (profile already registered).
+const WIN32_ALREADY_EXISTS: i32 = 0x800700B7u32 as i32;
 
 unsafe fn free_sid(sid: PSID) {
     if !sid.0.is_null() {

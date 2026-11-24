@@ -87,3 +87,34 @@ A debt is closed only by the fix landing, never by prose.
   three OSes with the disjunction lines in the log. Linux remains the
   Tier-1 POSIX enforcement authority.
 - **Fix:** landed and verified green — this entry is closed.
+
+## D7 — AppContainer profile auto-registration was dead code (fixed 2026-11-24)
+
+- **Risk:** `appcontainer_sid()` derived first and created on failure —
+  but the derive API succeeds even for never-created profiles (verified
+  with a gibberish name: it returns a computed SID), so the create path
+  never ran. On any host without a pre-registered Tier-1 profile, EVERY
+  sandboxed spawn then failed at `CreateProcessW` with FILE_NOT_FOUND:
+  tier1 tests SKIPPED honestly via the AppContainer-unavailable arm, and
+  the daemon's fs tools returned tool-error. Consequence: CI windows
+  "tier1 4 passed" was 4 skips — vacuous enforcement evidence from CI
+  (owner-local runs carried the real gate). The pre-rename profile on
+  this host masked it locally until the token flip changed the profile
+  name.
+- **Mitigation applied:** create-first with ALREADY_EXISTS → derive
+  fallback plus bounded retries for concurrent first-time creates.
+  Verified: missing-profile probe fails closed, real enforcement shows
+  zero SKIP lines with verbatim denials, e2e fs-tools 10/10 green.
+- **Fix:** landed with the GIF #1/#2 re-records; closes D7 once CI is
+  green on the fix (then CI windows tier1 enforces for real).
+
+- **Status (P019-R, closed 2026-11-24):** P014 left macOS Seatbelt red on CI
+  while Linux carried the POSIX gate. The post-lint-fix matrix re-ran all
+  three OSes; macOS still failed on two evidence-form issues (empty child
+  stderr on a proven denial; transient `/bin/true` ENOENT in the speed
+  probe), so the honest disjunction landed: kernel-text OR shell-status
+  evidence for write-deny (hard fail otherwise), retry-then-SKIP for the
+  probe (mid-run failures still panic). Run `45345517434` is green on all
+  three OSes with the disjunction lines in the log. Linux remains the
+  Tier-1 POSIX enforcement authority.
+- **Fix:** landed and verified green — this entry is closed.
