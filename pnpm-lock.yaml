@@ -208,10 +208,15 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
+      typescript5:
+        specifier: npm:typescript@5.9.3
+        version: typescript@5.9.3
 
   apps/desktop: {}
 
   packages/branding: {}
+
+  packages/protocol: {}
 
   packages/sdk: {}
 
@@ -665,6 +670,11 @@ packages:
   typed-query-selector@2.12.4:
     resolution: {integrity: sha512-lF6/OY655DSWZeuNovde8TZhju6QyC0Xtav57b07oZQ1EQvfSowA3+WfLEhvFJOc9sVfAtW5hie1lGIppOqbpQ==}
 
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   typescript@7.0.2:
     resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
     engines: {node: '>=16.20.0'}
@@ -1038,6 +1048,8 @@ snapshots:
       - supports-color
 
   typed-query-selector@2.12.4: {}
+
+  typescript@5.9.3: {}
 
   typescript@7.0.2:
     optionalDependencies:

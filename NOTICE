@@ -49,3 +49,17 @@ Lamakore is licensed under the Apache License, Version 2.0
   reach a keychain: CI runs the in-memory `mock-keyring` suite and
   honestly skips the live-keychain test; owner-local runs carry the real
   evidence (see report-P012).
+
+### typescript5 5.9.3 (P025, dev-only scanner dependency)
+
+- **Version:** typescript 5.9.3, consumed via the `typescript5`
+  alias (`npm:typescript@5.9.3`), pinned exact in devDependencies.
+- **License:** Apache-2.0.
+- **Upstream:** https://github.com/microsoft/TypeScript
+- **Reason (P025):** the explicit-`any` AST detector
+  (`scripts/detect-placeholders.mjs --any-only`, blocking in `ci.yml`)
+  walks the stable TS 5 compiler API (`createSourceFile`,
+  `SyntaxKind.AnyKeyword`). The installed `typescript@7` no longer ships
+  a stable parser entry (only `typescript/unstable/*`), so the scanner
+  cannot build on it without repeating the D1 failure mode. Dev-only:
+  never bundled, never shipped; the build still compiles with TS 7.
