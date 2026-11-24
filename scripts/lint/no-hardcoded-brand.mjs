@@ -71,6 +71,7 @@ function isAllowed(rel) {
   // them here would flag renamed trees that are in fact consistent.
   if (posix === 'package.json' || posix === 'pnpm-lock.yaml') return true;
   if (/^packages\/[^/]+\/package\.json$/.test(posix)) return true;
+  if (/^apps\/[^/]+\/package\.json$/.test(posix)) return true;
   return false;
 }
 
