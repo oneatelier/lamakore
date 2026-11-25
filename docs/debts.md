@@ -118,5 +118,11 @@ A debt is closed only by the fix landing, never by prose.
   whole-sequence respawn on first-spawn FILE_NOT_FOUND).
   Verified: profile auto-registers on a wiped host, real enforcement
   shows zero SKIP lines with verbatim denials, e2e fs-tools 10/10 green.
-- **Fix:** landed with the GIF #1/#2 re-records; closes D7 once CI is
-  green on the fix (then CI windows tier1 enforces for real).
+- **Status (P026, CLOSED 2026-11-25):** CI is green on the fix and
+  Windows tier1 enforces for real — `verify (windows-latest)` green on
+  the merged matrix (run `45579403164`, head `c65eca3`) and on the PR
+  matrix (run `45463003991`, head `3a43187`): `Running tests\tier1.rs`
+  → `test result: ok. 4 passed; 0 failed`, zero SKIP lines in the tier1
+  binary output (the only `skipped` strings in the job log are an
+  unrelated action outcome, a pnpm message, and node `skipped 0`).
+  `device_key_roundtrip_or_honest_skip ... ok`. This entry is closed.
