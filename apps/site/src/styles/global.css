@@ -1,0 +1,150 @@
+/* Site base styles. Colors come from the single source of truth — the
+   Brass & Void token file, inlined into <head> from the layout (no path
+   games, no duplication). The two @font-face rules below come AFTER the
+   inlined token faces, so they win the cascade: the site serves OFL latin
+   subsets only (public/fonts/fonts.json). */
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/fraunces/fraunces-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter/inter-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--surface-void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a { color: var(--brass-hover); }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  z-index: 100;
+}
+.skip-link:focus { left: 0; }
+
+.banner {
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--brass-pressed);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  padding: 0.6rem 1rem;
+  text-align: center;
+}
+.banner strong { color: var(--brass-hover); }
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--surface-overlay);
+}
+.site-header nav { display: flex; gap: 1.25rem; }
+.site-header nav a { color: var(--text-secondary); text-decoration: none; }
+.site-header nav a:hover { color: var(--text-primary); }
+.brand-mark {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+main { flex: 1; }
+
+.hero { position: relative; overflow: hidden; }
+.hero-canvas-wrap {
+  position: relative;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-canvas-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero-copy { position: relative; z-index: 1; text-align: center; padding: 4rem 1.5rem; pointer-events: none; }
+.hero-copy a { pointer-events: auto; }
+.hero-copy h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  margin: 0 0 1rem;
+  font-weight: 600;
+}
+.hero-copy p { color: var(--text-secondary); font-size: 1.1rem; max-width: 44rem; margin: 0 auto 1.5rem; }
+.hero-poster { max-width: 100%; height: auto; }
+
+.content { max-width: 56rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+.content h2 { font-family: var(--font-display); font-size: 1.8rem; margin-top: 2.5rem; }
+.content p, .content li { color: var(--text-secondary); line-height: 1.65; }
+.content code {
+  font-family: var(--font-mono);
+  background: var(--surface-raised);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 0.9em;
+}
+.content pre {
+  background: var(--surface-base);
+  border: 1px solid var(--surface-overlay);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+}
+.content pre code { background: none; padding: 0; }
+
+.link-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+.link-card {
+  border: 1px solid var(--surface-overlay);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  text-decoration: none;
+  background: var(--surface-base);
+}
+.link-card:hover { border-color: var(--brass-pressed); }
+.link-card h3 { margin: 0 0 0.4rem; color: var(--text-primary); font-size: 1.05rem; }
+.link-card p { margin: 0; font-size: 0.9rem; }
+
+.site-footer {
+  border-top: 1px solid var(--surface-overlay);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  justify-content: space-between;
+}
+.site-footer nav { display: flex; gap: 1rem; }

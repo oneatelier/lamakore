@@ -1,0 +1,58 @@
+---
+import cfg from '../../../../branding.config.json';
+import '../styles/global.css';
+
+declare const __SITE_TOKENS__: string;
+
+export interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const org = cfg.orgHandle;
+const repo = cfg.repoName;
+const repoUrl = `https://github.com/${org}/${repo}`;
+const advisoriesUrl = `${repoUrl}/security/advisories`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0B0D10" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" href="/fonts/inter/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/fraunces/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/poster.svg" as="image" type="image/svg+xml" fetchpriority="high" />
+    <style set:html={__SITE_TOKENS__} />
+    <title>{title} — {cfg.productName}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="banner" role="note">
+      <strong>Pre-alpha.</strong> Local-only, no cloud account, no telemetry. Not a finished
+      product — screens say what they cannot do yet.
+    </div>
+    <header class="site-header">
+      <a class="brand-mark" href="/">{cfg.productName}</a>
+      <nav aria-label="Primary">
+        <a href="/security/">Security model</a>
+        <a href="/quickstart/">Quickstart</a>
+        <a href={repoUrl}>Repository</a>
+      </nav>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <span>{cfg.productName} — open source (Apache-2.0). Pre-alpha.</span>
+      <nav aria-label="Footer">
+        <a href={repoUrl}>Repository</a>
+        <a href={advisoriesUrl}>Report a vulnerability</a>
+      </nav>
+    </footer>
+  </body>
+</html>

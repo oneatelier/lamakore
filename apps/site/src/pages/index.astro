@@ -1,0 +1,77 @@
+---
+import Site from '../layouts/Site.astro';
+import cfg from '../../../../branding.config.json';
+
+const org = cfg.orgHandle;
+const repo = cfg.repoName;
+const repoUrl = `https://github.com/${org}/${repo}`;
+const npmUrl = `https://www.npmjs.com/package/${cfg.codeToken}`;
+const cratesUrl = `https://crates.io/crates/${cfg.codeToken}`;
+const pypiUrl = `https://pypi.org/project/${cfg.codeToken}/`;
+const scoreboardUrl = `${repoUrl}/blob/main/artifacts/parity-scoreboard.md`;
+const advisoriesUrl = `${repoUrl}/security/advisories`;
+const socialX = 'https://x.com/one_atelier_';
+---
+
+<Site
+  title="Local-first agent desktop"
+  description="Open-source unified agent desktop. Sandboxed tools, human approvals, hash-chained audit. Pre-alpha."
+>
+  <section class="hero" aria-label="Product introduction">
+    <div class="hero-canvas-wrap" id="hero-wrap">
+      <img class="hero-poster" src="/poster.svg" alt="Guardian mark" width="640" height="360" fetchpriority="high" />
+    </div>
+    <div class="hero-copy">
+      <h1>{cfg.productName}</h1>
+      <p>
+        A real desktop window that treats web content as hostile. A trusted
+        Rust core owns credentials, policy, and tool dispatch. Real
+        read-only workspace tools — sandboxed helpers, capability-checked
+        per call, approval card on first grant.
+      </p>
+    </div>
+  </section>
+
+  <div class="content">
+    <h2>Start here</h2>
+    <div class="link-grid">
+      <a class="link-card" href="/quickstart/">
+        <h3>Quickstart</h3>
+        <p>Install, lint, typecheck, test. The exact commands contributors run.</p>
+      </a>
+      <a class="link-card" href="/security/">
+        <h3>Security model</h3>
+        <p>Sandbox tiers, capability tokens, OS keychain vault, hygiene gates.</p>
+      </a>
+      <a class="link-card" href={scoreboardUrl}>
+        <h3>Parity scoreboard</h3>
+        <p>Machine-generated capability ledger. Regenerated nightly.</p>
+      </a>
+      <a class="link-card" href={repoUrl}>
+        <h3>Repository</h3>
+        <p>Source, reports, and audit ledger. Apache-2.0.</p>
+      </a>
+      <a class="link-card" href={npmUrl}>
+        <h3>npm package</h3>
+        <p>Reserved package home.</p>
+      </a>
+      <a class="link-card" href={cratesUrl}>
+        <h3>crates.io package</h3>
+        <p>Reserved package home.</p>
+      </a>
+      <a class="link-card" href={pypiUrl}>
+        <h3>PyPI package</h3>
+        <p>Reserved package home.</p>
+      </a>
+      <a class="link-card" href={advisoriesUrl}>
+        <h3>Report a vulnerability</h3>
+        <p>Private channel. See the security model first.</p>
+      </a>
+      <a class="link-card" href={socialX}>
+        <h3>Project on X</h3>
+        <p>Announcements only. Support happens in the repository.</p>
+      </a>
+    </div>
+  </div>
+  <script src="../lib/hero-loader.ts"></script>
+</Site>

@@ -46,7 +46,11 @@ function copyTree(dest: string): void {
       if (rel === '') return true;
       const top = rel.split('/')[0];
       // Harness dir embeds the fixture identity on purpose; it is not product source.
+      // Nested workspace node_modules (apps/*/node_modules symlinks) are
+      // excluded like the top-level one: the drill renames product source,
+      // never installed links (P028: apps/site introduced the first nested set).
       if (top === '.git' || top === 'node_modules' || top === 'target' || top === 'tests') return false;
+      if (rel.split('/').includes('node_modules')) return false;
       return true;
     },
   });

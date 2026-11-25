@@ -1,0 +1,64 @@
+---
+import Site from '../layouts/Site.astro';
+import cfg from '../../../../branding.config.json';
+
+const repoUrl = `https://github.com/${cfg.orgHandle}/${cfg.repoName}`;
+const advisoriesUrl = `${repoUrl}/security/advisories`;
+---
+
+<Site
+  title="Security model"
+  description="Threat boundary, sandbox tiers, capability tokens, vault, hygiene gates, and how to report a vulnerability."
+>
+  <div class="content">
+    <h2>Security model</h2>
+    <p>
+      The threat boundary is simple: the renderer is hostile territory.
+      Web content is never trusted; every privileged action crosses a
+      capability-checked gate with a human approval where it matters.
+    </p>
+    <h2>What enforces it</h2>
+    <ul>
+      <li>
+        <strong>Sandboxed execution.</strong> Tier-1 confinement on all
+        three platforms: Windows job objects plus an AppContainer profile
+        with zero capabilities; Linux Landlock filesystem rules plus a
+        seccomp-bpf deny on outbound network; macOS Seatbelt profile.
+      </li>
+      <li>
+        <strong>Capability tokens.</strong> Tool dispatch is minted and
+        verified with HMAC-SHA256 under a device root key. No ambient
+        authority: each call carries exactly the grant it needs.
+      </li>
+      <li>
+        <strong>OS-keychain vault.</strong> Provider keys live only in the
+        platform keychain. The local store holds non-secret operational
+        data under filesystem ACLs.
+      </li>
+      <li>
+        <strong>Local-only wire protocol.</strong> The desktop shell talks
+        to its core over named pipes and Unix sockets. Never TCP. No
+        accounts, no telemetry, no open ports.
+      </li>
+      <li>
+        <strong>Hygiene gates in CI.</strong> Six scanners (author
+        identity, paths, metadata, secrets, names, fixtures) plus lint,
+        typecheck, an explicit-type gate, and signed-commit enforcement
+        run on every change.
+      </li>
+    </ul>
+    <h2>Report a vulnerability</h2>
+    <p>
+      Use the repository's private channel so details stay out of the
+      public tracker until a fix ships:
+    </p>
+    <p>
+      <a href={advisoriesUrl}>Private vulnerability reporting</a>
+    </p>
+    <p>
+      Include the version or commit, the platform, what you expected,
+      and what happened instead. Screenshots of rendered output help;
+      never send real credentials.
+    </p>
+  </div>
+</Site>
