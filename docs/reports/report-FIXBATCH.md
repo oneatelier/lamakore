@@ -9,7 +9,10 @@
   queued or actioned; the instruction to refuse them is noted here and
   needs no further handling.
 - **Head:** PR #18 merged as `c65eca3` (2026-11-25T08:47:34Z); this docs
-  batch on top (branch `docs/fixbatch-index`, PR #TBC-docs-pr).
+  batch on top (branch `docs/fixbatch-index`, PR #19). Docs PR-sync:
+  [ci 45580765813](https://github.com/oneatelier/lamakore/actions/runs/45580765813)
+  + [hygiene 45580765817](https://github.com/oneatelier/lamakore/actions/runs/45580765817)
+  (head `a004e6c`, §9 for the verdict).
 
 ## 1. P025-COMPLETE — merge record (4/4 green, rebase, branch deleted)
 
@@ -162,8 +165,10 @@ the moving `main` ref. Verified at `c65eca3` (P025 merge):
 - Branch protection (API, not raw): 4 bare-name contexts as in §3.
 
 Docs-batch surfaces (INDEX rows, this report, D7 ledger text) are
-quoted at the docs-PR head SHA TBC-docs-head (pinned; tree-equality
-with the merge commit re-verified post-merge before close).
+pinned at docs-PR head `a004e6c` (immutable); the fill delta from
+`a004e6c` to the merged head is exactly the three TBC substitutions
+(PR number, two run IDs, this SHA note) — tree-equality with the merge
+commit is re-verified post-merge before close (see §1 verdict line).
 
 ## 9. Gates and deviations
 
