@@ -108,6 +108,20 @@ async function fontGate(sitePublic) {
   return ok;
 }
 
+async function gotoReady(page, url, label) {
+  // networkidle0 hangs on some CI runners (no in-repo repro; local
+  // SwiftShader-forced runs settle in <1s). domcontentloaded + explicit
+  // readiness is deterministic everywhere: DOM parsed, webfonts applied,
+  // hero section present.
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90000 });
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForSelector('#hero-wrap, main', { timeout: 30000 });
+  const pending = await page.evaluate(() => performance.getEntriesByType('resource')
+    .filter((r) => r.responseEnd === 0 && r.responseStart === 0)
+    .map((r) => r.name).slice(0, 5));
+  if (pending.length > 0) console.log(`warn: ${label} still fetching: ${pending.join(', ')}`);
+}
+
 function serve(dist) {
   const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.json': 'application/json', '.txt': 'text/plain' };
   const server = http.createServer((req, res) => {
@@ -139,6 +153,7 @@ async function browserBudgets(dist) {
   // timeouts) while local runs look fine. Not a measurement cheat:
   // rendering, throttling, and assertions are unchanged.
   const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  console.log(`chrome: ${(await browser.version()).slice(0, 60)}`);
   let ok = true;
   try {
     // axe AA on all three routes (desktop viewport, fonts settled).
@@ -146,8 +161,7 @@ async function browserBudgets(dist) {
       const page = await browser.newPage();
       const errs = [];
       page.on('pageerror', (e) => errs.push(e.message));
-      await page.goto(base + route, { waitUntil: 'networkidle0', timeout: 90000 });
-      await page.evaluate(() => document.fonts.ready);
+      await gotoReady(page, base + route, route);
       await page.evaluate(axeSource);
       const res = await page.evaluate(() => axe.run({ runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }));
       await page.close();
@@ -165,7 +179,7 @@ async function browserBudgets(dist) {
       const cdp = await page.createCDPSession();
       await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
       await page.emulateNetworkConditions(puppeteer.PredefinedNetworkConditions['Fast 3G']);
-      await page.goto(base + '/', { waitUntil: 'domcontentloaded', timeout: 90000 });
+      await gotoReady(page, base + '/', 'lcp');
       const lcp = await page.evaluate(
         () =>
           new Promise((resolve) => {
@@ -192,7 +206,7 @@ async function browserBudgets(dist) {
       await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
       const errs = [];
       page.on('pageerror', (e) => errs.push(e.message));
-      await page.goto(base + '/', { waitUntil: 'networkidle0', timeout: 90000 });
+      await gotoReady(page, base + '/', 'hero');
       try {
         await page.waitForFunction(() => ['a', 'b'].includes(document.documentElement.dataset.heroTier || ''), { timeout: 20000 });
         // FPS median is published after 120 frames; wait for the sample
