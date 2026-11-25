@@ -43,3 +43,4 @@ build/
 
 # Logs and local artifacts
 *.log
+.astro/

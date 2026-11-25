@@ -63,3 +63,31 @@ Lamakore is licensed under the Apache License, Version 2.0
   a stable parser entry (only `typescript/unstable/*`), so the scanner
   cannot build on it without repeating the D1 failure mode. Dev-only:
   never bundled, never shipped; the build still compiles with TS 7.
+
+### astro 7.4.13 + three 0.187.0 (P028, site build + hero)
+
+- **Version:** astro 7.4.13, three 0.187.0, both pinned exact.
+  `three` is a runtime dependency of `@lamakore/site` (lazy 3D chunk);
+  `astro` is the static builder. `@types/three 0.187.0` (MIT,
+  DefinitelyTyped) covers the hero module for `pnpm typecheck`.
+- **License:** MIT (both; upstream https://astro.build and
+  https://threejs.org).
+- **Reason (P028):** cinematic product site on Cloudflare Pages
+  (free tier, static output). No trackers, no server code.
+
+### wrangler 4.168.0 (P028, deploy tool only)
+
+- **Version:** wrangler 4.168.0, pinned exact in devDependencies.
+- **License:** MIT OR Apache-2.0.
+- **Upstream:** https://github.com/cloudflare/workers-sdk
+- **Reason (P028):** `wrangler pages deploy` from `site.yml`
+  (Cloudflare Pages direct upload). Never bundled, never shipped;
+  runs in CI with repo secrets only.
+
+### axe-core 4.14.1 (P028, budget-gate tool only)
+
+- **Version:** axe-core 4.14.1, pinned exact in devDependencies.
+- **License:** MPL-2.0.
+- **Upstream:** https://github.com/dequelabs/axe-core
+- **Reason (P028):** WCAG 2.1 AA gate in `scripts/site-budgets.mjs`
+  (headless, no browser shipped). Dev-only.

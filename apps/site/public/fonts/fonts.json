@@ -1,0 +1,13 @@
+{
+  "generated": "2026-11-25",
+  "tool": "pyftsubset (fonttools 4.68.0) --flavor=woff2 --no-hinting --desubroutinize",
+  "source": "assets/fonts (OFL)",
+  "files": {
+    "fraunces/fraunces-latin.woff2": {
+      "sha256": "00687ec481f54f5e1fa5cea2e5ce8fd429ff3fa455d0ec83f95d020a95c20bc8"
+    },
+    "inter/inter-latin.woff2": {
+      "sha256": "718b70378b6749adf63eecdfa5f4ee009c3f908930d473480e56253c169e9bf4"
+    }
+  }
+}

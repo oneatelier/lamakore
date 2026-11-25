@@ -1,0 +1,15 @@
+{
+  "name": "@lamakore/site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Cinematic product site (Astro static, Cloudflare Pages)",
+  "type": "module",
+  "scripts": {
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "7.4.13",
+    "three": "0.187.0"
+  }
+}

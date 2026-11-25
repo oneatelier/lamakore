@@ -1,0 +1,36 @@
+---
+import Site from '../layouts/Site.astro';
+import cfg from '../../../../branding.config.json';
+
+const repoUrl = `https://github.com/${cfg.orgHandle}/${cfg.repoName}`;
+---
+
+<Site
+  title="Quickstart"
+  description="Install, lint, typecheck, and test. The exact commands contributors run."
+>
+  <div class="content">
+    <h2>Quickstart</h2>
+    <p>
+      The repository builds with pinned toolchains (Node 24 via pnpm,
+      Rust 1.100.0 via rustup). Every command below is also a CI gate,
+      so local green means CI green.
+    </p>
+    <pre><code>pnpm install --frozen-lockfile
+pnpm lint
+pnpm typecheck
+pnpm test
+cargo check --workspace
+cargo clippy --workspace -- -D warnings</code></pre>
+    <h2>Conventions that block merges</h2>
+    <ul>
+      <li>Every commit carries a signed-off-by trailer.</li>
+      <li>Conventional commits with a prompt scope.</li>
+      <li>No secrets in the tree. Ever.</li>
+    </ul>
+    <p>
+      Full contributor rules live in the repository:
+      <a href={repoUrl}>read them there</a>.
+    </p>
+  </div>
+</Site>
