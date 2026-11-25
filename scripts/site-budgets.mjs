@@ -134,7 +134,11 @@ async function browserBudgets(dist) {
   await new Promise((r) => server.listen(0, r));
   const port = server.address().port;
   const base = `http://127.0.0.1:${port}`;
-  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  // --disable-dev-shm-usage: CI runners have a tiny /dev/shm; without
+  // this flag headless Chrome stalls page loads there (navigation
+  // timeouts) while local runs look fine. Not a measurement cheat:
+  // rendering, throttling, and assertions are unchanged.
+  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   let ok = true;
   try {
     // axe AA on all three routes (desktop viewport, fonts settled).
