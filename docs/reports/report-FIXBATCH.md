@@ -10,9 +10,9 @@
   needs no further handling.
 - **Head:** PR #18 merged as `c65eca3` (2026-11-25T08:47:34Z); this docs
   batch on top (branch `docs/fixbatch-index`, PR #19). Docs PR-sync:
-  [ci 45580765813](https://github.com/oneatelier/lamakore/actions/runs/45580765813)
-  + [hygiene 45580765817](https://github.com/oneatelier/lamakore/actions/runs/45580765817)
-  (head `a004e6c`, §9 for the verdict).
+  [ci 45580900059](https://github.com/oneatelier/lamakore/actions/runs/45580900059)
+  + [hygiene 45580899643](https://github.com/oneatelier/lamakore/actions/runs/45580899643)
+  (head `64efad8`, §9 for the verdict).
 
 ## 1. P025-COMPLETE — merge record (4/4 green, rebase, branch deleted)
 
@@ -165,10 +165,11 @@ the moving `main` ref. Verified at `c65eca3` (P025 merge):
 - Branch protection (API, not raw): 4 bare-name contexts as in §3.
 
 Docs-batch surfaces (INDEX rows, this report, D7 ledger text) are
-pinned at docs-PR head `a004e6c` (immutable); the fill delta from
-`a004e6c` to the merged head is exactly the three TBC substitutions
-(PR number, two run IDs, this SHA note) — tree-equality with the merge
-commit is re-verified post-merge before close (see §1 verdict line).
+pinned at docs-PR head `64efad8` (immutable). Revision trail:
+`a004e6c` (initial docs) → `64efad8` (TBC fill: PR number, run IDs,
+SHA-note — 9 insertions, 4 deletions, no other delta); the merge
+commit's tree-equality with `64efad8` is re-verified post-merge before
+close (see §1 verdict line).
 
 ## 9. Gates and deviations
 
