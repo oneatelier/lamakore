@@ -24,6 +24,11 @@ has no report; the vault work lives out-of-series in `report-vault.md`
 | P017 | Code search across the workspace | — no report (not started) | — |
 | P018 | Diff review before apply | — no report (not started) | — |
 | P019 | Hostile page fetch (fetch as markdown) | — no report (not started) | — |
+| P022 | Sandboxed downloads | `report-P022.md` — org voice flip to Lamakore Maintainers (seed diverged: no browser tooling yet, voice work landed instead) | PR #14 post-merge main: [hygiene 45354287318](https://github.com/oneatelier/lamakore/actions/runs/45354287318) + [ci 45354287237](https://github.com/oneatelier/lamakore/actions/runs/45354287237) (3 OSes, 17 steps, success) |
+| P023 | Search engine adapters | — no report (not started) | — |
+| P024 | Per-session cookie jar | — no report (not started) | — |
+| P025 | Readability extraction | `report-P025.md` — D1 real AST any-detector + D5 server-side DCO gate (seed diverged: debt closure landed instead) | PR #18: [ci 45463003991](https://github.com/oneatelier/lamakore/actions/runs/45463003991) (head `3a43187`, 4/4 incl. macOS) + [hygiene 45463003821](https://github.com/oneatelier/lamakore/actions/runs/45463003821); post-merge main [ci 45579403164](https://github.com/oneatelier/lamakore/actions/runs/45579403164) + [hygiene 45579403398](https://github.com/oneatelier/lamakore/actions/runs/45579403398) (head `c65eca3`, all success) |
+| P026 | Blocked-domain policy | `report-FIXBATCH.md` — P025-COMPLETE + P026 gate: macOS infra fix-forward, merge, full matrix at HEAD (seed diverged: policy not implemented; the P026 label here is the landing sequence) | docs PR #TBC-docs-pr — run URLs in `report-FIXBATCH.md` §§1,4 |
 
 Out-of-series evidence (no P-number; listed so the P-series stays clean):
 `report-fs-readonly.md`, `report-approval-deck.md`, `report-audit-ledger.md`,
