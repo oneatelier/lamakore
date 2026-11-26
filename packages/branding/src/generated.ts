@@ -15,7 +15,7 @@ export const BRANDING = Object.freeze({
   packages: Object.freeze([]),
   clearance: Object.freeze({
     trademark: "NOT_CLEARED",
-    publishBlocked: true,
+    publishBlocked: false,
   }),
 } as const);
 

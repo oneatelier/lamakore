@@ -100,7 +100,11 @@ test('rename drill produces a consistent tree', () => {
   assert.equal(cfg.daemonBinary, `${FIXTURE.token}d`);
   assert.equal(cfg.configDirName, `.${FIXTURE.token}`);
   assert.equal(cfg.copyrightHolder, `The ${FIXTURE.name} Authors`);
-  assert.equal(cfg.clearance.publishBlocked, true);
+  // rename.mjs preserves the clearance block verbatim (scripts/rename.mjs:
+  // `clearance: old.clearance`), so the drill asserts preservation against
+  // the source value — not a hardcoded expectation (P028: source is false).
+  const sourceBlocked: boolean = JSON.parse(readFileSync(path.join(ROOT, 'branding.config.json'), 'utf8')).clearance.publishBlocked;
+  assert.equal(cfg.clearance.publishBlocked, sourceBlocked, 'rename must preserve the clearance gate');
 
   // 2. Zero stale occurrences under the new identity (lint built from temp config).
   const lint = runCli(LINT, ['--root', tmp]);

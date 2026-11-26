@@ -160,6 +160,38 @@ would itself create the conflict the sweep exists to prevent.
 No txids exist. Claim flow stopped at authentication/payment — all three
 stops are owner-action, none is a sweep collision.
 
+### P028 verification + publishBlocked flip (2026-11-26, UTC)
+
+Owner claimed all three registries + `lamakore.dev` + mail forwarding
+on 2026-11-25. Re-verified same-day (not taken on trust):
+
+| Item | Status 2026-11-26 | Evidence |
+|---|---|---|
+| npm `lamakore` | **CLAIMED, owner-held.** Package page 200; registry metadata: maintainer `oneatelier`, created 2026-11-24, version 0.0.0, "Reserved name for Lamakore…". | registry API 2026-11-25 |
+| crates.io `lamakore` | **CLAIMED.** Crate page 200, created 2026-11-24, same reservation description. | API with UA header 2026-11-25 |
+| PyPI `lamakore` | **CLAIMED.** Project page 200, created 2026-11-24. | JSON API 2026-11-25 |
+| `lamakore.dev` | **DARK.** NXDOMAIN on host resolver AND Google 8.8.8.8 (2026-11-25 and 2026-11-26). No receipt/txid was ever provided, so nothing to record. | `nslookup` both resolvers |
+| `hello@` / `security@` forwarding | **NOT verified — treated as not live.** Mailbox receipt cannot be demonstrated from here; owner claim alone is not evidence. Consequence: no `security@` address is published anywhere (the P028 site omits it by rule); private channel stays GitHub PVR only. | claim only, no mailbox proof |
+
+No squat on any name (triad dates + descriptions agree; npm authorship
+is owner-held). The 2026-11-24 STOP is lifted **for registries only**;
+the domain/email half stays STOPped.
+
+**Flip (this section is the record):** `clearance.publishBlocked`
+`true` → **`false`** (`branding.config.json` + regenerated
+`packages/branding/src/generated.ts` + `crates/core-protocol/src/brand.rs`,
+P028 docs commit). Gate, all four inputs evidenced: (1) registries
+claimed — table above; (2) Pages live —
+`https://lamakore.pages.dev` 200 with authored headers (report-P028
+§4); (3) P026 CI green — main head `f68e96f`, ci `45579403164` +
+hygiene `45579403398`, all success; (4) owner sign-off LAMAKORE
+2026-11-24 (top of this file). Formal trademark search still pending
+(TM only, never (R) — §5 stands).
+**Known follow-ups (claims flow, not this batch):** README "What this
+is not" still says claims are pending (half-stale: registries done,
+domain dark); `security@` mailbox end-to-end proof; registrar receipt
+for `lamakore.dev`.
+
 ### publishBlocked gate (Lamakore)
 
 `clearance.publishBlocked` stays **`true`**. Flip requires ALL of: B
