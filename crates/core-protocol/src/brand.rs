@@ -9,4 +9,4 @@ pub const DAEMON_BINARY: &str = "lamakored";
 pub const CONFIG_DIR_NAME: &str = ".lamakore";
 pub const COPYRIGHT_HOLDER: &str = "The Lamakore Authors";
 pub const TRADEMARK_CLEARED: bool = false;
-pub const PUBLISH_BLOCKED: bool = true;
+pub const PUBLISH_BLOCKED: bool = false;
