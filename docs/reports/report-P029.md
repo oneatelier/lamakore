@@ -10,10 +10,13 @@
   section superseded (history retained verbatim); p0-coverage count
   line corrected to the machine recount; repo homepage set to the live
   Pages URL; grep proofs; rendered README screenshot.
-- **Head:** PR #TBC-pr (branch `docs/p029-honesty`) → merged as
+- **Head:** PR #22 (`docs/p029-honesty → main`), merged as
   TBC-merge (TBC-time). PR-sync runs: ci TBC-ci + hygiene TBC-hyg
-  (all green, incl. macOS — the pool yielded; no infra note needed
-  this batch).
+  (all green, incl. macOS). Note on run-ID currency (P028 precedent):
+  the report freezes IDs from the last green pre-fill runs; the merge
+  gate itself always enforces the final head (see PR checks tab); any
+  ID/head drift between the frozen citation and the merged head is
+  listed here before merge: none beyond this note unless stated.
 
 ## 1. What changed and why (file-by-file)
 
