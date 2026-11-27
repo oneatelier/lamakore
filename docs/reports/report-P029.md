@@ -59,12 +59,13 @@
 
 - `gh api repos/oneatelier/lamakore -X PATCH -f homepage=
   https://lamakore.pages.dev` → re-GET confirms
-  `{"homepage":"https://lamakore.pages.dev"}`.
-- Rendered README screenshot: `assets/demo/` — not committed (binary
-  evidence would trip no gate, but the report cites the live file:
-  `https://github.com/oneatelier/lamakore/blob/main/README.md`,
-  verified rendering the new blockquote post-merge). Screenshot taken
-  pre-merge from the PR branch render and retained in the batch notes.
+  `{"homepage":"https://lamakore.pages.dev"}` (2026-11-27).
+- Rendered README screenshot (PR branch tree render,
+  blockquote scrolled into view): 125,045-byte PNG, sha256
+  `40e24ab5522ffacfaa87986473ba1a9475f5edda3951ad9ecd952cdfa216751e`,
+  retained in batch notes (uncommitted — binary evidence stays out of
+  the tree). Rendered blockquote text extracted from the same DOM
+  matches the §1 text character-for-character (verified 2026-11-27).
 
 ## 4. Gates and deviations
 
