@@ -11,12 +11,11 @@
   line corrected to the machine recount; repo homepage set to the live
   Pages URL; grep proofs; rendered README screenshot.
 - **Head:** PR #22 (`docs/p029-honesty → main`), merged as
-  TBC-merge (TBC-time). PR-sync runs: ci TBC-ci + hygiene TBC-hyg
-  (all green, incl. macOS). Note on run-ID currency (P028 precedent):
-  the report freezes IDs from the last green pre-fill runs; the merge
-  gate itself always enforces the final head (see PR checks tab); any
-  ID/head drift between the frozen citation and the merged head is
-  listed here before merge: none beyond this note unless stated.
+  `85c8c6d` (2026-11-27). PR-sync runs: ci `45948381962` + hygiene
+  `45948381769` (head `218c3a2`, all green, incl. macos 1m43s/1m30s).
+  Post-merge main runs: ci `45949062409` + hygiene `45949062260`.
+  (P028 precedent: the report freezes the green pre-fill IDs; the merge
+  gate enforces the final head — see PR checks tab.)
 
 ## 1. What changed and why (file-by-file)
 
@@ -86,14 +85,16 @@
 - **STOP conditions (none fired):** no secret/PII in any touched file
   (secret scan clean; homepage URL is public metadata); fix-forward
   count 0 (no reds).
-- **Post-merge main:** ci + hygiene + site workflows green at HEAD
-  (runs TBC-post; verified live before close-out).
+- **Post-merge main:** ci `45949062409` + hygiene `45949062260`,
+  green at HEAD `85c8c6d` (macos 48s on the post-merge run; verified
+  live before close-out). Site workflow correctly did not re-run
+  (path filter: no site inputs changed).
 
 ## 5. Standing rule (SHA-pinned living surfaces)
 
-Verified at the merge SHA TBC-sha via
-`raw.githubusercontent.com/oneatelier/lamakore/TBC-sha/…`: README
+Verified at the merge SHA `85c8c6d` via
+`raw.githubusercontent.com/oneatelier/lamakore/85c8c6d…`: README
 blockquote (exact §1 text), distribution bullet (exact §1 text),
 `branding.config.json` (`"publishBlocked": false`), clearance P028
 correction note, debts D8, coverage count line. Post-merge main green
-confirmed before close-out (runs TBC-post).
+confirmed before close-out (runs above).
