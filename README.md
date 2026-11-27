@@ -5,8 +5,10 @@ An open-source unified agent desktop: a real window driven by a trusted local co
 > **Status: pre-alpha. Not cleared for distribution. Lamakore is the confirmed
 > product name (owner-confirmed 2026-11-24; self-clearance sweep in
 > docs/clearance.md; formal trademark search pending). Nothing here is finished,
-> nothing phones home, no binary release exists yet. Registry claims and the
-> product domain are pending; clearance.publishBlocked is true.**
+> nothing phones home, no binary release exists yet. The name is claimed on npm,
+> crates.io and PyPI (0.0.0 reservations); the project home is live at
+> https://lamakore.pages.dev. clearance.publishBlocked is false; formal trademark
+> search is pending and the marks are unregistered (™).
 
 [![CI](https://github.com/oneatelier/lamakore/actions/workflows/ci.yml/badge.svg)](https://github.com/oneatelier/lamakore/actions/workflows/ci.yml)
 [![Hygiene](https://github.com/oneatelier/lamakore/actions/workflows/hygiene.yml/badge.svg)](https://github.com/oneatelier/lamakore/actions/workflows/hygiene.yml)
@@ -42,9 +44,9 @@ An open-source unified agent desktop: a real window driven by a trusted local co
 
 - Not a finished product. Screens say what they cannot do yet.
 - Not a cloud service. No accounts, no telemetry, no open ports.
-- Not cleared for distribution: registry claims and the product domain
-  are pending, the marks are unregistered, and `clearance.publishBlocked`
-  is `true`.
+- Not a finished product: no binary release exists yet, the marks are
+  unregistered (™), and formal trademark clearance is pending. Registry
+  names are reserved; the project home is live.
 
 ```
 ┌──────────────┐   contextBridge (allowlisted)   ┌─────────────────────┐

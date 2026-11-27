@@ -53,7 +53,7 @@ ruling in §3. No silent scope cuts — all 23 rows appear below.
 | F-PLA-06 | Spec registry with validators | T4 | delivered | report-P006; `validate-artifacts.mjs` green in Batch 2 matrix |
 | F-PLA-08 | RAM gate for the shell and models | T4 | partial | report-P008 (cold start 532 ms wall vs 2500 ms); model-side gate unmeasured — no model tier exists |
 
-Count check: 23 rows, 4 delivered + 1 partial + 1 delivered* in T3/T4, 17 gap. Matches the `P0=23` recount.
+Count check: 23 rows, 7 delivered + 1 delivered* + 1 partial + 14 gap = 23. Matches the `P0=23` recount. (Ruling: recount pulled forward from Batch 3 into this honesty sweep — no P0 changes status.)
 
 ## Threshold verdicts (STOP: every uncovered threshold needs a ruling)
 

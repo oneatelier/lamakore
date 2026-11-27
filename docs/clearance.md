@@ -1,4 +1,4 @@
-# Clearance record — "Shedu" (ABANDONED) and "Lamakore" (owner-confirmed; claims pending)
+# Clearance record — "Shedu" (ABANDONED) and "Lamakore" (owner-confirmed; registries claimed, domain deferred)
 
 - **Owner confirmation on record:** LAMAKORE (2026-11-24). Publisher stays
   One Atelier. Publisher mark (bull) unchanged; product mark separate.
@@ -162,8 +162,15 @@ stops are owner-action, none is a sweep collision.
 
 ### P028 verification + publishBlocked flip (2026-11-26, UTC)
 
-Owner claimed all three registries + `lamakore.dev` + mail forwarding
-on 2026-11-25. Re-verified same-day (not taken on trust):
+Owner claimed all three registries on 2026-11-25 (verified below). The
+paid domain lamakore.dev and mail forwarding were NOT claimed — owner
+ruling 2026-11-24: no-spend, Cloudflare Pages home, paid domain
+deferred (D8).
+
+*Correction 2026-11-27: the original opening sentence overstated the
+owner claim (it listed the paid domain and mail forwarding as claimed).
+Only the three registries were claimed and verified; domain and mail
+were and remain unclaimed — recorded as such in the table below.*
 
 | Item | Status 2026-11-26 | Evidence |
 |---|---|---|
@@ -183,14 +190,15 @@ the domain/email half stays STOPped.
 P028 docs commit). Gate, all four inputs evidenced: (1) registries
 claimed — table above; (2) Pages live —
 `https://lamakore.pages.dev` 200 with authored headers (report-P028
-§4); (3) P026 CI green — main head `f68e96f`, ci `45579403164` +
-hygiene `45579403398`, all success; (4) owner sign-off LAMAKORE
+§4); (3) P026 CI green — the P025 merge: main head `c65eca3`, ci
+`45579403164` + hygiene `45579403398`, all success (report-FIXBATCH
+§4; P026 gate evidence); (4) owner sign-off LAMAKORE
 2026-11-24 (top of this file). Formal trademark search still pending
 (TM only, never (R) — §5 stands).
 **Known follow-ups (claims flow, not this batch):** README "What this
-is not" still says claims are pending (half-stale: registries done,
-domain dark); `security@` mailbox end-to-end proof; registrar receipt
-for `lamakore.dev`.
+is not" corrected in P029 (registry/domain half rewritten to the flip
+state); remaining: `security@` mailbox end-to-end proof; registrar
+receipt for `lamakore.dev`.
 
 ### publishBlocked gate (Lamakore)
 
@@ -206,3 +214,7 @@ registration.
   `oneatelier/lamakore` (redirect verified); Lamakore live on all living
   surfaces. Claims + domain still pending owner credentials/payment;
   `publishBlocked` stays `true`. Sweep tables above unchanged.
+- **Superseded 2026-11-26:** gate amended by owner ruling 2026-11-24
+  (Cloudflare Pages home + GitHub PVR replace the paid domain as the
+  publish path); flip executed 2026-11-26, see the P028 verification
+  section above. Historical text above retained verbatim.
