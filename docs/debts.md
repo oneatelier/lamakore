@@ -130,11 +130,12 @@ A debt is closed only by the fix landing, never by prose.
 ## D8 — Paid domain + mail deferred (owner ruling 2026-11-24)
 
 - **Status (P029, OPEN — owner decision, not a defect):** no-spend;
-  Cloudflare Pages (`lamakore.pages.dev`, live) is the project home and
-  GitHub PVR is the private security channel. The paid apex
-  `lamakore.dev` and `hello@`/`security@` forwarding were never claimed
-  (NXDOMAIN on two resolvers 2026-11-25/26; no receipt/txid; mailbox
-  unverifiable) — recorded in `docs/clearance.md` P028 section.
+  Cloudflare Pages (live project home URL recorded in
+  `docs/clearance.md` P028 section) is the project home and GitHub PVR
+  is the private security channel. The paid apex and forwarding
+  addresses were never claimed (NXDOMAIN on two resolvers 2026-11-25/26;
+  no receipt/txid; mailbox unverifiable) — recorded in
+  `docs/clearance.md` P028 section.
 - **Revisit triggers:** owner funds a registrar purchase (then sweep +
   claim + verify per ADR-003 step 4), or a customer/auditor mandates a
   custom domain. Until then no action; the site omits `security@` by
